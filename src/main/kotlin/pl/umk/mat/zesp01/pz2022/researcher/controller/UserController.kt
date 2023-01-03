@@ -12,8 +12,9 @@ import org.mindrot.jbcrypt.BCrypt
 @RestController
 class UserController(@Autowired val userService: UserService) {
 
-    @PostMapping("/add")
+    @PostMapping("/addUser")
     fun addUser(@RequestBody user: User): ResponseEntity<String> {
+        //tutaj trzeba zrobić sprawdzanie zeby loginy sie nie powtarzaly
         user.password = BCrypt.hashpw(user.password, BCrypt.gensalt())
         user.id = randomUUID().toString()
         userService.addUser(user)
@@ -23,7 +24,13 @@ class UserController(@Autowired val userService: UserService) {
     @GetMapping("/getAll")
     fun getAll(): ResponseEntity<List<User>> = ResponseEntity.status(HttpStatus.OK).body(userService.getAll())
 
-    @DeleteMapping("/delete/{id}")
+    @GetMapping("/getUserByName/{firstName}")
+    fun getUserByName(@PathVariable firstName:String) : ResponseEntity<User>
+            = ResponseEntity.status(HttpStatus.OK).body(userService.getUserByName(firstName))
+    @GetMapping("/getUserById/{id}")
+    fun getUserById(@PathVariable id:String) : ResponseEntity<User>
+            = ResponseEntity.status(HttpStatus.OK).body(userService.getUserById(id))
+    @DeleteMapping("/deleteById/{id}")
     fun deleteById(@PathVariable id: String): ResponseEntity<String> {
         userService.deleteById(id)
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
