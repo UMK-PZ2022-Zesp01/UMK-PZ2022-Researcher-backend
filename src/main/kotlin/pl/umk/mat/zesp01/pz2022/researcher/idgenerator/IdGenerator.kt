@@ -1,7 +1,5 @@
 package pl.umk.mat.zesp01.pz2022.researcher.idgenerator
 
-import java.util.stream.IntStream
-
 class IdGenerator() {
     fun generateUserId(): String {
         var userId = ""
