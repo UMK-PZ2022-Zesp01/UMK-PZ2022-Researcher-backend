@@ -13,8 +13,8 @@ class UserService(@Autowired val userRepository: UserRepository) {
     fun getAll(): List<User> = userRepository.findAll()
     fun deleteById(id: String) = userRepository.deleteById(id)
     fun getUserByName(name: String): User = userRepository.findUserByFirstName(name)
-        .orElseThrow { throw RuntimeException("Cannot find User by First name") }
+            .orElseThrow { throw RuntimeException("Cannot find User by First name") }
 
-    fun getUserById(id: String): User = userRepository.findUserById(id)
-        .orElseThrow { throw RuntimeException("Cannot find User by Id") }
+    fun getUserById(id: String): User = userRepository.findById(id)
+            .orElseThrow { throw RuntimeException("Cannot find User by Id") }
 }

@@ -7,14 +7,16 @@ import java.net.URL
 import java.util.Date
 
 @Document("Users")
-class User{
-    @Id var id: String = ""
-    @Field var login: String=""
-    @Field var password: String=""
-    @Field var firstName: String=""
-    @Field var lastName: String=""
-    @Field var email: String=""
-    @Field var birthDate: String=""
-    @Field var gender: String=""
-    @Field var avatarImage: String=""
+class User {
+    @Id
+    var id: String = ""
+    var login: String = ""
+    var password: String = ""
+    var firstName: String = ""
+    var lastName: String = ""
+    var email: String = ""
+    var phone: String = ""
+    var birthDate: String = ""
+    var gender: String = ""
+    var avatarImage: String = ""
 }

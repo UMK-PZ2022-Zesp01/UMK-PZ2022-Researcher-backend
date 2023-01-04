@@ -31,7 +31,7 @@ class UserController(@Autowired val userService: UserService) {
 
     @GetMapping("/getUserById/{id}")
     fun getUserById(@PathVariable id: String): ResponseEntity<User> =
-        ResponseEntity.status(HttpStatus.OK).body(userService.getUserById(id))
+            ResponseEntity.status(HttpStatus.OK).body(userService.getUserById(id))
 
     @DeleteMapping("/deleteById/{id}")
     fun deleteById(@PathVariable id: String): ResponseEntity<String> {
