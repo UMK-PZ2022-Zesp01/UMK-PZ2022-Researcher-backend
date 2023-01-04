@@ -8,6 +8,7 @@ import pl.umk.mat.zesp01.pz2022.researcher.model.User
 import pl.umk.mat.zesp01.pz2022.researcher.service.UserService
 import java.util.UUID.randomUUID
 import org.mindrot.jbcrypt.BCrypt
+import pl.umk.mat.zesp01.pz2022.researcher.idgenerator.IdGenerator
 
 @RestController
 class UserController(@Autowired val userService: UserService) {
@@ -16,7 +17,8 @@ class UserController(@Autowired val userService: UserService) {
     fun addUser(@RequestBody user: User): ResponseEntity<String> {
         //tutaj trzeba zrobić sprawdzanie zeby loginy sie nie powtarzaly
         user.password = BCrypt.hashpw(user.password, BCrypt.gensalt())
-        user.id = randomUUID().toString()
+        //user.id = randomUUID().toString()
+        user.id = IdGenerator().generateUserId()
         userService.addUser(user)
         return ResponseEntity.status(HttpStatus.CREATED).build()
     }
