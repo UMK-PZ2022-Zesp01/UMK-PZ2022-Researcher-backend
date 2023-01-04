@@ -16,16 +16,18 @@ class UserUpdateController(@Autowired val userRepository: UserRepository) {
 
     @PutMapping("/updateUser/{id}")
     fun updateUser(@PathVariable id: String, @RequestBody user: User): ResponseEntity<User> {
-        var oldUser = userRepository.findById(id).orElse(null)
-        user.id=oldUser.id
-        if(user.login.isEmpty()){user.login=oldUser.login}
-        if(user.password.isEmpty()){user.password=oldUser.password}else{user.password= BCrypt.hashpw(user.password, BCrypt.gensalt())}
-        if(user.firstName.isEmpty()){user.firstName=oldUser.firstName}
-        if(user.lastName.isEmpty()){user.lastName=oldUser.lastName}
-        if(user.email.isEmpty()){user.email=oldUser.email}
-        if(user.birthDate.isEmpty()){user.birthDate=oldUser.birthDate}
-        if(user.gender.isEmpty()){user.gender=oldUser.gender}
-        if(user.avatarImage.isEmpty()){user.avatarImage=oldUser.avatarImage}
+        val oldUser = userRepository.findById(id).orElse(null)
+        user.id = oldUser.id
+        if (user.login.isEmpty()) user.login = oldUser.login
+        if (user.password.isEmpty()) user.password = oldUser.password
+            else user.password = BCrypt.hashpw(user.password, BCrypt.gensalt())
+        if (user.firstName.isEmpty()) user.firstName = oldUser.firstName
+        if (user.lastName.isEmpty()) user.lastName = oldUser.lastName
+        if (user.email.isEmpty()) user.email = oldUser.email
+        if (user.birthDate.isEmpty()) user.birthDate = oldUser.birthDate
+        if (user.gender.isEmpty()) user.gender = oldUser.gender
+        if (user.avatarImage.isEmpty()) user.avatarImage = oldUser.avatarImage
+
         return ResponseEntity.status(HttpStatus.OK).body(userRepository.save(user))
     }
 }

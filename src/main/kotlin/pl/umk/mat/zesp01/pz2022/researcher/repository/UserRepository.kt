@@ -7,11 +7,13 @@ import pl.umk.mat.zesp01.pz2022.researcher.model.User
 import java.util.*
 
 @Repository
-interface UserRepository : MongoRepository<User, String>{
+interface UserRepository : MongoRepository<User, String> {
     @Query("{'firstName':?0}")
-    fun findUserByFirstName(name:String): Optional<User>
+    fun findUserByFirstName(firstName: String): Optional<User>
+
     @Query("{'lastName':?0}")
-    fun findUserByLastName(name:String): Optional<User>
+    fun findUserByLastName(lastName: String): Optional<User>
+
     @Query("{'id':?0}")
-    fun findUserById(id:String): Optional<User>
+    fun findUserById(id: String): Optional<User>
 }

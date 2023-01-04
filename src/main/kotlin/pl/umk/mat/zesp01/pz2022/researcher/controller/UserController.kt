@@ -22,14 +22,17 @@ class UserController(@Autowired val userService: UserService) {
     }
 
     @GetMapping("/getAll")
-    fun getAll(): ResponseEntity<List<User>> = ResponseEntity.status(HttpStatus.OK).body(userService.getAll())
+    fun getAll(): ResponseEntity<List<User>> =
+        ResponseEntity.status(HttpStatus.OK).body(userService.getAll())
 
     @GetMapping("/getUserByName/{firstName}")
-    fun getUserByName(@PathVariable firstName:String) : ResponseEntity<User>
-            = ResponseEntity.status(HttpStatus.OK).body(userService.getUserByName(firstName))
+    fun getUserByName(@PathVariable firstName: String): ResponseEntity<User> =
+        ResponseEntity.status(HttpStatus.OK).body(userService.getUserByName(firstName))
+
     @GetMapping("/getUserById/{id}")
-    fun getUserById(@PathVariable id:String) : ResponseEntity<User>
-            = ResponseEntity.status(HttpStatus.OK).body(userService.getUserById(id))
+    fun getUserById(@PathVariable id: String): ResponseEntity<User> =
+        ResponseEntity.status(HttpStatus.OK).body(userService.getUserById(id))
+
     @DeleteMapping("/deleteById/{id}")
     fun deleteById(@PathVariable id: String): ResponseEntity<String> {
         userService.deleteById(id)
