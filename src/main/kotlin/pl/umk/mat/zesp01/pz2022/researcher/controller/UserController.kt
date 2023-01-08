@@ -14,7 +14,12 @@ class UserController(@Autowired val userService: UserService) {
     /* ___________________________________POST MAPPINGS___________________________________*/
     @PostMapping("/addUser")
     fun addUser(@RequestBody user: User): ResponseEntity<String> {
-        //tutaj trzeba zrobić sprawdzanie zeby loginy sie nie powtarzaly
+        if(userService.getUserByEmail(user.email).id !== ""){
+            return ResponseEntity.status(299).build()
+        }
+        if(userService.getUserByLogin(user.login).id !== ""){
+            return ResponseEntity.status(298).build()
+        }
         user.password = BCrypt.hashpw(user.password, BCrypt.gensalt())
         user.id = IdGenerator().generateUserId()
         userService.addUser(user)
@@ -23,7 +28,7 @@ class UserController(@Autowired val userService: UserService) {
 
     /* ___________________________________GET MAPPINGS___________________________________*/
     @GetMapping("/getUsers")
-    fun getAll(): ResponseEntity<List<User>> =
+    fun getAllUsers(): ResponseEntity<List<User>> =
         ResponseEntity.status(HttpStatus.OK).body(userService.getAllUsers())
 
     @GetMapping("/getUserById/{id}")
@@ -38,7 +43,7 @@ class UserController(@Autowired val userService: UserService) {
     fun getUserByFirstName(@PathVariable firstName: String): ResponseEntity<List<User>> =
         ResponseEntity.status(HttpStatus.OK).body(userService.getUserByFirstName(firstName))
 
-    @GetMapping("/getUserByLastName/{firstName}")
+    @GetMapping("/getUserByLastName/{lastName}")
     fun getUserByLastName(@PathVariable lastName: String): ResponseEntity<List<User>> =
         ResponseEntity.status(HttpStatus.OK).body(userService.getUserByLastName(lastName))
 

@@ -8,12 +8,16 @@ import java.util.*
 
 @Repository
 interface UserRepository : MongoRepository<User, String> {
+    @Query("{'email': ?0}")
+    fun findUserByEmail(email: String): Optional<User>
+
+    @Query("{'login': ?0}")
+    fun findUserByLogin(firstName: String): Optional<User>
+
     @Query("{'firstName':?0}")
     fun findUserByFirstName(firstName: String): Optional<List<User>>
 
     @Query("{'lastName':?0}")
     fun findUserByLastName(lastName: String): Optional<List<User>>
 
-    @Query("{'email':?0}")
-    fun findUserByEmail(email: String): Optional<User>
 }
