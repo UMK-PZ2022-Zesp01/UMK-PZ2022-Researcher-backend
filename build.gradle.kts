@@ -22,6 +22,7 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("org.mindrot:jbcrypt:0.4")
+	implementation("com.auth0:java-jwt:4.2.1")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 }

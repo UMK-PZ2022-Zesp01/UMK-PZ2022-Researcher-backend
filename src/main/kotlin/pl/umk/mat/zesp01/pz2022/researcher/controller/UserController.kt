@@ -1,5 +1,6 @@
 package pl.umk.mat.zesp01.pz2022.researcher.controller
 
+import com.auth0.jwt.JWT
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -8,6 +9,7 @@ import pl.umk.mat.zesp01.pz2022.researcher.model.User
 import pl.umk.mat.zesp01.pz2022.researcher.service.UserService
 import org.mindrot.jbcrypt.BCrypt
 import pl.umk.mat.zesp01.pz2022.researcher.idgenerator.IdGenerator
+
 
 @RestController
 class UserController(@Autowired val userService: UserService) {
