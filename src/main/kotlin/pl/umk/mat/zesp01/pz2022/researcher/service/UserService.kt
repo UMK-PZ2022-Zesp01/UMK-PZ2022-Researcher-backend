@@ -1,9 +1,11 @@
 package pl.umk.mat.zesp01.pz2022.researcher.service
 
+import org.bson.json.JsonObject
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import pl.umk.mat.zesp01.pz2022.researcher.model.User
 import pl.umk.mat.zesp01.pz2022.researcher.repository.UserRepository
+import java.util.*
 
 @Service
 class UserService(@Autowired val userRepository: UserRepository) {
@@ -20,11 +22,12 @@ class UserService(@Autowired val userRepository: UserRepository) {
     fun getUserById(id: String): User = userRepository.findById(id)
         .orElseThrow { throw RuntimeException("Cannot find User by Id") }
 
-    fun getUserByEmail(email: String):User =
+    fun getUserByEmail(email: String): User =
         userRepository.findUserByEmail(email)
             .orElse(User())
-//            .orElseThrow { throw RuntimeException("Cannot find User by Email") }
-    fun getUserByLogin(login: String):User =
+
+    //            .orElseThrow { throw RuntimeException("Cannot find User by Email") }
+    fun getUserByLogin(login: String): User =
         userRepository.findUserByLogin(login)
             .orElse(User())
 //        .orElseThrow { throw RuntimeException("Cannot find User by Login") }
