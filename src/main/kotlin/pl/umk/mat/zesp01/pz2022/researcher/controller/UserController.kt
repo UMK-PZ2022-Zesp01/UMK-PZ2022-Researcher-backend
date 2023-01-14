@@ -1,6 +1,5 @@
 package pl.umk.mat.zesp01.pz2022.researcher.controller
 
-import com.auth0.jwt.JWT
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -16,10 +15,10 @@ class UserController(@Autowired val userService: UserService) {
     /* ___________________________________POST MAPPINGS___________________________________*/
     @PostMapping("/addUser")
     fun addUser(@RequestBody user: User): ResponseEntity<String> {
-        if(userService.getUserByEmail(user.email).id !== ""){
+        if(userService.getUserByEmail(user.email).id != ""){
             return ResponseEntity.status(299).build()
         }
-        if(userService.getUserByLogin(user.login).id !== ""){
+        if(userService.getUserByLogin(user.login).id != ""){
             return ResponseEntity.status(298).build()
         }
         user.password = BCrypt.hashpw(user.password, BCrypt.gensalt())

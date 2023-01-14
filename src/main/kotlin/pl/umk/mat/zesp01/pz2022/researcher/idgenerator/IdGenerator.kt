@@ -15,6 +15,15 @@ class IdGenerator() {
         return researchId
     }
 
+    fun generateTokenId(): String {
+        var tokenId = ""
+        for (i in 1..6)
+            tokenId += listOf(('A'..'Z'), ('a'..'z'), ('0'..'9')).flatten().random()
+        return tokenId
+    }
+
+
+
     // Function checks if 'id' is unique in list of all used ids (given as 'idList')
     // and returns true if 'id' is NOT in 'idList'
     fun checkIfUnique(id: String, idList: List<String>): Boolean =
