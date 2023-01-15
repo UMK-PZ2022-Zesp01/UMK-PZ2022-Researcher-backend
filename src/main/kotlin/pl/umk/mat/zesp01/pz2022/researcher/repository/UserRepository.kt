@@ -10,9 +10,9 @@ import java.util.*
 interface UserRepository : MongoRepository<User, String> {
 
     /*
-    Query zwracające tylko numer telefonu dla próby.
-    @Query(value = "{'login': ?0}", fields = "{'phone': 1,'_id': 0 }")
-    fun findByLogin(login:String): Optional<String>
+        Query zwracające tylko numer telefonu dla próby.
+        @Query(value = "{'login': ?0}", fields = "{'phone': 1,'_id': 0 }")
+        fun findByLogin(login:String): Optional<String>
     */
     @Query("{'email': ?0}")
     fun findUserByEmail(email: String): Optional<User>

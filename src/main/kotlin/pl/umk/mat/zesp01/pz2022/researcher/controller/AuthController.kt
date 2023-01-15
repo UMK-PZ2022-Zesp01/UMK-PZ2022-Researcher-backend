@@ -21,34 +21,31 @@ import pl.umk.mat.zesp01.pz2022.researcher.service.UserService
 import java.util.Date
 import java.util.concurrent.TimeUnit
 
-val ACCESS_TOKEN_SECRET : String = System.getenv("ACCESS_TOKEN_SECRET")
-val REFRESH_TOKEN_SECRET : String = System.getenv("REFRESH_TOKEN_SECRET")
+val ACCESS_TOKEN_SECRET: String = System.getenv("ACCESS_TOKEN_SECRET")
+val REFRESH_TOKEN_SECRET: String = System.getenv("REFRESH_TOKEN_SECRET")
 
 @RestController
-class AuthController(@Autowired val userService: UserService, @Autowired val tokenService: TokenService) {
-
+class AuthController(
+    @Autowired val userService: UserService,
+    @Autowired val tokenService: TokenService
+) {
     val gson = Gson()
 
     @PostMapping("/refreshToken")
-    fun checkRefreshToken(
-        @CookieValue(name = "jwt") token: String,
-        @RequestBody login : String
-    ):ResponseEntity<String>{
-
+    fun checkRefreshToken(@CookieValue(name = "jwt") token: String, @RequestBody login: String)
+            : ResponseEntity<String> {
         val userTokens = tokenService.getTokensByLogin(login)
-
-        userTokens.filter{item: Token -> (item.jwt==token)}
-
-
+        userTokens.filter { item: Token -> (item.jwt == token) }
         return ResponseEntity.status(HttpStatus.OK).build()
     }
 
     @PostMapping("/auth")
     fun checkUserDetails(@RequestBody loginData: LoginData): ResponseEntity<String> {
-            val user = userService.getUserByLogin(loginData.login)
-            if (user != User() ){
-                if(BCrypt.checkpw(loginData.password,user.password)) try {
-                    val payload = mapOf(Pair("username",user.login))
+        val user = userService.getUserByLogin(loginData.login)
+        if (user != User()) {
+            if (BCrypt.checkpw(loginData.password, user.password))
+                try {
+                    val payload = mapOf(Pair("username", user.login))
                     val refreshExpires = TimeUnit.DAYS.toSeconds(1)
                     val accessExpires = TimeUnit.MINUTES.toSeconds(10)
 
@@ -56,17 +53,17 @@ class AuthController(@Autowired val userService: UserService, @Autowired val tok
                     val accessToken = JWT
                         .create()
                         .withPayload(payload)
-                        .withExpiresAt(Date(System.currentTimeMillis() + accessExpires*1000))
+                        .withExpiresAt(Date(System.currentTimeMillis() + accessExpires * 1000))
                         .sign(Algorithm.HMAC256(ACCESS_TOKEN_SECRET))
 
                     val refreshToken = JWT
                         .create()
                         .withPayload(payload)
-                        .withExpiresAt(Date(System.currentTimeMillis() + refreshExpires*1000))
+                        .withExpiresAt(Date(System.currentTimeMillis() + refreshExpires * 1000))
                         .sign(Algorithm.HMAC256(REFRESH_TOKEN_SECRET))
 
                     val cookie = ResponseCookie
-                        .from("jwt",refreshToken)
+                        .from("jwt", refreshToken)
                         .httpOnly(true)
                         .maxAge(refreshExpires)
                         .path("/")
@@ -76,7 +73,7 @@ class AuthController(@Autowired val userService: UserService, @Autowired val tok
                     val refreshTokenDB = Token()
 
                     refreshTokenDB.login = user.login
-                    refreshTokenDB.expires = Date(System.currentTimeMillis() + refreshExpires*1000).toString()
+                    refreshTokenDB.expires = Date(System.currentTimeMillis() + refreshExpires * 1000).toString()
                     refreshTokenDB.jwt = refreshToken
 
                     //ADD TOKEN DOCUMENT TO DATABASE
@@ -84,14 +81,14 @@ class AuthController(@Autowired val userService: UserService, @Autowired val tok
 
                     return ResponseEntity
                         .status(HttpStatus.OK)
-                        .header(HttpHeaders.SET_COOKIE,cookie.toString())
+                        .header(HttpHeaders.SET_COOKIE, cookie.toString())
                         .body(accessToken)
 
-                }catch (error:Error){
+                } catch (error: Error) {
                     return ResponseEntity.status(HttpStatus.OK).body(gson.toJson("Failed creating a token."))
                 }
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(gson.toJson("Login failed: wrong password."))
-            }
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(gson.toJson("Login failed: user does not exist."))
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(gson.toJson("Login failed: wrong password."))
         }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(gson.toJson("Login failed: user does not exist."))
+    }
 }

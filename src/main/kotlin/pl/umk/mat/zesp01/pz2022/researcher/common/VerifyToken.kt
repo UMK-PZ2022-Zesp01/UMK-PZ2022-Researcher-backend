@@ -6,19 +6,18 @@ import com.auth0.jwt.exceptions.JWTVerificationException
 import org.springframework.http.HttpHeaders
 import java.util.*
 
-fun verifyJWT(httpHeaders: HttpHeaders, key: String, username:String,): Boolean {
-    val authHeader = httpHeaders["authorization"]
-    if(authHeader===null) return false;
+fun verifyJWT(httpHeaders: HttpHeaders, key: String, username: String): Boolean {
+    val authHeader = httpHeaders["authorization"] ?: return false
 
     return try {
         val algorithm = Algorithm.HMAC256(key)
-
-        val decoded = JWT.require(algorithm)
+        val decoded = JWT
+            .require(algorithm)
             .withClaim("username", username)
             .build()
             .verify(authHeader[0])
-        true;
-    }catch (error : JWTVerificationException){
+        true
+    } catch (error: JWTVerificationException) {
         println("Authorization failed.")
         false
     }

@@ -1,6 +1,6 @@
 package pl.umk.mat.zesp01.pz2022.researcher.idgenerator
 
-class IdGenerator() {
+class IdGenerator {
     fun generateUserId(): String {
         var userId = ""
         for (i in 1..8)
@@ -21,8 +21,6 @@ class IdGenerator() {
             tokenId += listOf(('A'..'Z'), ('a'..'z'), ('0'..'9')).flatten().random()
         return tokenId
     }
-
-
 
     // Function checks if 'id' is unique in list of all used ids (given as 'idList')
     // and returns true if 'id' is NOT in 'idList'

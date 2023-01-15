@@ -21,5 +21,5 @@ class User {
 
 class LoginData{
     var login: String = ""
-    var password: String =""
+    var password: String = ""
 }

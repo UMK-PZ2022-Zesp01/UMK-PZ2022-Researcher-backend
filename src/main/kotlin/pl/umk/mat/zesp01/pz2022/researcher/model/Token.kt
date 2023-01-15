@@ -6,8 +6,8 @@ import org.springframework.data.mongodb.core.mapping.Field
 
 @Document ("Tokens")
 class Token {
-    @Id var id: String=""
-    @Field var login: String=""
-    @Field var expires: String=""
-    @Field var jwt: String=""
+    @Id var id: String = ""
+    @Field var login: String = ""
+    @Field var expires: String = ""
+    @Field var jwt: String = ""
 }

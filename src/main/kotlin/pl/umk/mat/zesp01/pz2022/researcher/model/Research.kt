@@ -23,5 +23,4 @@ class Research {
     @Field var participantLimit: Int = 0
     @Field var genderRequirement: String = ""
     @Field var reward = listOf<String>()
-
 }

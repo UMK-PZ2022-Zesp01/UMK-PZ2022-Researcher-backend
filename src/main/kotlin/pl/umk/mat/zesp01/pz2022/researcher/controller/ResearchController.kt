@@ -14,7 +14,8 @@ class ResearchController(
     @Autowired val researchService: ResearchService,
     @Autowired val researchRepository: ResearchRepository
 ) {
-    /* ___________________________________POST MAPPINGS___________________________________*/
+    /*** POST MAPPINGS ***/
+
     @PostMapping("/addResearch")
     fun addResearch(@RequestBody research: Research): ResponseEntity<String> {
         research.id = IdGenerator().generateResearchId()
@@ -22,7 +23,8 @@ class ResearchController(
         return ResponseEntity.status(HttpStatus.CREATED).build()
     }
 
-    /* ___________________________________PUT MAPPINGS___________________________________*/
+    /*** PUT MAPPINGS ***/
+
     @PutMapping("/updateResearch/{id}")
     fun updateResearch(@PathVariable id: String, @RequestBody research: Research): ResponseEntity<Research> {
         val oldResearch = researchRepository.findById(id).orElse(null)
@@ -31,8 +33,8 @@ class ResearchController(
         if (research.participants.isEmpty()) research.participants = oldResearch.participants
         if (research.title.isEmpty()) research.title = oldResearch.title
         if (research.description.isEmpty()) research.description = oldResearch.description
-        if (research.durationTimeInMinutes.toString().isEmpty()) research.durationTimeInMinutes =
-            oldResearch.durationTimeInMinutes
+        if (research.durationTimeInMinutes.toString().isEmpty())
+            research.durationTimeInMinutes = oldResearch.durationTimeInMinutes
         if (research.begDate.isEmpty()) research.begDate = oldResearch.begDate
         if (research.endDate.isEmpty()) research.endDate = oldResearch.endDate
         if (research.isActive.toString().isEmpty()) research.isActive = oldResearch.isActive
@@ -49,7 +51,8 @@ class ResearchController(
 
     }
 
-    /* ___________________________________GET MAPPINGS___________________________________*/
+    /*** GET MAPPINGS ***/
+
     @GetMapping("/getAllResearches")
     fun getAllResearches(): ResponseEntity<List<Research>> =
         ResponseEntity.status(HttpStatus.OK).body(researchService.getAllResearches())
@@ -62,7 +65,8 @@ class ResearchController(
     fun getResearchByUserId(@PathVariable userId: String): ResponseEntity<List<Research>> =
         ResponseEntity.status(HttpStatus.OK).body(researchService.getResearchesByUserId(userId))
 
-    /* ___________________________________DELETE MAPPINGS___________________________________*/
+    /*** DELETE MAPPINGS ***/
+
     @DeleteMapping("/deleteResearchById/{id}")
     fun deleteResearchById(@PathVariable id: String): ResponseEntity<String> {
         researchService.deleteResearchById(id)

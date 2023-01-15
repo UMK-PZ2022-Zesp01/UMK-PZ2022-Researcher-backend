@@ -7,17 +7,24 @@ import pl.umk.mat.zesp01.pz2022.researcher.repository.ResearchRepository
 
 @Service
 class ResearchService(@Autowired val researchRepository: ResearchRepository) {
-    /* ___________________________________ADD METHODS___________________________________*/
+
+    /*** ADD METHODS ***/
+
     fun addResearch(research: Research): Research = researchRepository.insert(research)
 
-    /* ___________________________________DELETE METHODS___________________________________*/
+    /*** DELETE METHODS ***/
+
     fun deleteResearchById(id: String) = researchRepository.deleteById(id)
 
-    /* ___________________________________GET METHODS___________________________________*/
+    /*** GET METHODS ***/
+
     fun getAllResearches(): List<Research> = researchRepository.findAll()
+
     fun getResearchById(id: String): Research =
-        researchRepository.findById(id).orElseThrow { throw RuntimeException("Cannot find User by Id") }
+        researchRepository.findById(id)
+            .orElseThrow { throw RuntimeException("Cannot find User by Id") }
 
     fun getResearchesByUserId(userId: String): List<Research> =
-        researchRepository.findResearchesById(userId).orElseThrow { throw RuntimeException("Cannot find User by Id") }
+        researchRepository.findResearchesById(userId)
+            .orElseThrow { throw RuntimeException("Cannot find User by Id") }
 }
