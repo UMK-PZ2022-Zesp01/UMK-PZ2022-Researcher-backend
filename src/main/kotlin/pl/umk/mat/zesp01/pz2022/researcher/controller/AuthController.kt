@@ -49,26 +49,26 @@ class AuthController(@Autowired val userService: UserService, @Autowired val tok
             if (user != User() ){
                 if(BCrypt.checkpw(loginData.password,user.password)) try {
                     val payload = mapOf(Pair("username",user.login))
-                    val refreshExpires = TimeUnit.DAYS.toMillis(1)
-                    val accessExpires = TimeUnit.MINUTES.toMillis(10)
+                    val refreshExpires = TimeUnit.DAYS.toSeconds(1)
+                    val accessExpires = TimeUnit.MINUTES.toSeconds(10)
 
                     //CREATE JWTs
                     val accessToken = JWT
                         .create()
                         .withPayload(payload)
-                        .withExpiresAt(Date(System.currentTimeMillis() + accessExpires))
+                        .withExpiresAt(Date(System.currentTimeMillis() + accessExpires*1000))
                         .sign(Algorithm.HMAC256(ACCESS_TOKEN_SECRET))
 
                     val refreshToken = JWT
                         .create()
                         .withPayload(payload)
-                        .withExpiresAt(Date(System.currentTimeMillis() + refreshExpires))
+                        .withExpiresAt(Date(System.currentTimeMillis() + refreshExpires*1000))
                         .sign(Algorithm.HMAC256(REFRESH_TOKEN_SECRET))
 
                     val cookie = ResponseCookie
                         .from("jwt",refreshToken)
                         .httpOnly(true)
-                        .maxAge(TimeUnit.DAYS.toSeconds(1))
+                        .maxAge(refreshExpires)
                         .path("/")
                         .build()
 
@@ -76,7 +76,7 @@ class AuthController(@Autowired val userService: UserService, @Autowired val tok
                     val refreshTokenDB = Token()
 
                     refreshTokenDB.login = user.login
-                    refreshTokenDB.expires = Date(System.currentTimeMillis() + refreshExpires).toString()
+                    refreshTokenDB.expires = Date(System.currentTimeMillis() + refreshExpires*1000).toString()
                     refreshTokenDB.jwt = refreshToken
 
                     //ADD TOKEN DOCUMENT TO DATABASE

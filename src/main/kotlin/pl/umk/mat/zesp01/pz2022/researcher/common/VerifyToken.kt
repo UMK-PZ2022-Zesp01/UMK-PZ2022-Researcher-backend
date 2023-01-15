@@ -19,7 +19,7 @@ fun verifyJWT(httpHeaders: HttpHeaders, key: String, username:String,): Boolean 
             .verify(authHeader[0])
         true;
     }catch (error : JWTVerificationException){
-        println("No i chuj")
+        println("Authorization failed.")
         false
     }
 }
