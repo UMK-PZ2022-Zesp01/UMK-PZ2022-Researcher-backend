@@ -14,30 +14,23 @@ class UserService(@Autowired val userRepository: UserRepository) {
 
     fun addUser(user: User): User = userRepository.insert(user)
 
-
     /*** DELETE METHODS ***/
-
     fun deleteUserById(id: String) = userRepository.deleteById(id)
 
-
     /*** GET METHODS ***/
-
     fun getAllUsers(): List<User> = userRepository.findAll()
 
-    fun getUserById(id: String): User = userRepository.findById(id)
-        .orElseThrow { throw RuntimeException("Cannot find User by Id") }
+    fun getUserById(id: String): Optional<User> = userRepository.findById(id)
 
-    fun getUserByEmail(email: String): User = userRepository.findUserByEmail(email)
-        .orElse(User())
-    // .orElseThrow { throw RuntimeException("Cannot find User by Email") }
+    fun getUserByEmail(email: String): Optional<User> = userRepository.findUserByEmail(email)
+    //        .orElseThrow { throw RuntimeException("Cannot find User by Email") }
 
-    fun getUserByLogin(login: String): User = userRepository.findUserByLogin(login)
-        .orElse(User())
-    // .orElseThrow { throw RuntimeException("Cannot find User by Login") }
+    fun getUserByLogin(login: String): Optional<User> = userRepository.findUserByLogin(login)
+    //        .orElseThrow { throw RuntimeException("Cannot find User by Login") }
 
-    fun getUserByFirstName(firstName: String): List<User> = userRepository.findUserByFirstName(firstName)
+    fun getUsersByFirstName(firstName: String): List<User> = userRepository.findUserByFirstName(firstName)
         .orElseThrow { throw RuntimeException("Cannot find User by First name") }
 
-    fun getUserByLastName(lastName: String): List<User> = userRepository.findUserByLastName(lastName)
+    fun getUsersByLastName(lastName: String): List<User> = userRepository.findUserByLastName(lastName)
         .orElseThrow { throw RuntimeException("Cannot find User by Last name") }
 }
