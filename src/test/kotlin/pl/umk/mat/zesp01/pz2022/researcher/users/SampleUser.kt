@@ -3,7 +3,7 @@ package pl.umk.mat.zesp01.pz2022.researcher.users
 import pl.umk.mat.zesp01.pz2022.researcher.model.User
 
 
-public class SampleUser {
+class SampleUser {
 
     companion object {
         val userTestObject: User = User("_testID",
