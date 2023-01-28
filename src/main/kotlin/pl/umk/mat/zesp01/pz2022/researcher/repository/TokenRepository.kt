@@ -13,10 +13,10 @@ interface TokenRepository : MongoRepository<Token, String> {
 
     @Query("{'login':?0}")
 
-    fun findTokensByLogin(userId: String):Optional<List<Token>>
+    fun findTokensByLogin(userId: String): Optional<List<Token>>
 
     @Query("{'expires':?0}")
-    fun findTokensByExpires(userId: String):Optional<List<Token>>
+    fun findTokensByExpires(userId: String): Optional<List<Token>>
 
     @Query("{'jwt':?0}")
     fun findTokenByJwt(userId: String): Optional<Token>

@@ -11,7 +11,7 @@ import java.util.*
 
 
 @Service
-class TokenService (@Autowired val tokenRepository: TokenRepository){
+class TokenService(@Autowired val tokenRepository: TokenRepository) {
 
     /*** ADD METHODS ***/
 
@@ -26,14 +26,14 @@ class TokenService (@Autowired val tokenRepository: TokenRepository){
 
     /*** ADD METHODS ***/
 
-    fun getAllTokens() : List<Token> = tokenRepository.findAll()
+    fun getAllTokens(): List<Token> = tokenRepository.findAll()
 
-    fun getTokenById(id: String) : Optional<Token> = tokenRepository.findTokenById(id)
+    fun getTokenById(id: String): Optional<Token> = tokenRepository.findTokenById(id)
 
-    fun getTokensByLogin(login: String) : Optional<List<Token>> = tokenRepository.findTokensByLogin(login)
+    fun getTokensByLogin(login: String): Optional<List<Token>> = tokenRepository.findTokensByLogin(login)
 
-    fun getTokenByExpires(date: String) : Optional<List<Token>> = tokenRepository.findTokensByExpires(date)
+    fun getTokenByExpires(date: String): Optional<List<Token>> = tokenRepository.findTokensByExpires(date)
 
-    fun getTokenByJwt(jwt: String) : Optional<Token> = tokenRepository.findTokenByJwt(jwt)
+    fun getTokenByJwt(jwt: String): Optional<Token> = tokenRepository.findTokenByJwt(jwt)
 
 }

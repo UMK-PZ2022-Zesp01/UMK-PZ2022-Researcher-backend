@@ -17,83 +17,77 @@ import pl.umk.mat.zesp01.pz2022.researcher.users.SampleUser.*
 @SpringBootTest
 class UserRepositoryTests {
 
-	@Autowired
-	private lateinit var userService: UserService
+    @Autowired lateinit var userService: UserService
+    @Autowired lateinit var userRepository: UserRepository
+    var testUserID = Companion.userTestObject.id
 
-	@Autowired
-	private lateinit var userRepository: UserRepository
+    @Test
+    fun shouldAddReadAndDeleteUser() {
+        // GIVEN (SampleUser.userTestObject)
 
-	private var testUserID = Companion.userTestObject.id
+        // WHEN
+        userService.addUser(Companion.userTestObject)
+        // or maybe "userRepository.save(SampleUser.userTestObject)"
 
+        // THEN
+        assertTrue(
+            compareUsers(Companion.userTestObject, userService.getUserById(testUserID).get()),
+            "Users are not the same (addUser failed)."
+        )
 
-	@Test
-	fun shouldAddReadAndDeleteUser() {
-		// GIVEN (SampleUser.userTestObject)
+        // WHEN
+        userService.deleteUserById(testUserID)
+        // or maybe userRepository.deleteById(testUserID)
 
-		// WHEN
-		userService.addUser(Companion.userTestObject)
-		// or maybe "userRepository.save(SampleUser.userTestObject)"
+        // THEN
+        assertTrue(userService.getUserById(testUserID).isEmpty, "User has not been deleted (deleteUser failed).")
+    }
 
-		// THEN
-		assertTrue(compareUsers(Companion.userTestObject, userService.getUserById(testUserID).get()), "Users are not the same (addUser failed).")
+    @Test
+    fun userDataUpdateTest() {
+        // GIVEN
+        val newUserPhoneNumber: String = "987654321"
+        val newUserGender: String = "Female"
 
-		// WHEN
-		userService.deleteUserById(testUserID)
-		// or maybe userRepository.deleteById(testUserID)
+        // WHEN
+        userService.addUser(Companion.updatedUserTestObject)
 
-		// THEN
-		assertTrue(userService.getUserById(testUserID).isEmpty, "User has not been deleted (deleteUser failed).")
+        Companion.updatedUserTestObject.phone = newUserPhoneNumber
+        Companion.updatedUserTestObject.gender = newUserGender
 
-	}
+        userRepository.save(Companion.updatedUserTestObject)
+        // THEN
+        assertTrue(
+            compareUsers(Companion.updatedUserTestObject, userService.getUserById(testUserID).get()),
+            "User has not been changed (update failed)."
+        )
+    }
 
-	@Test
-	fun userDataUpdateTest(){
-		// GIVEN
-		val newUserPhoneNumber : String = "987654321"
-		val newUserGender : String  = "Female"
+    @Test
+    fun userLoginTest() { // TODO
+        // GIVEN
+        var users: List<User> = userRepository.findAll()
+        println("users defined")
+        // WHEN
 
-		// WHEN
-		userService.addUser(Companion.updatedUserTestObject)
+        // THEN
+    }
 
-		Companion.updatedUserTestObject.phone = newUserPhoneNumber
-		Companion.updatedUserTestObject.gender = newUserGender
+    @BeforeEach
+    fun beforeEach() {
+        userService.deleteUserById(testUserID)
+    }
 
-		userRepository.save(Companion.updatedUserTestObject)
-		// THEN
-		assertTrue(compareUsers(Companion.updatedUserTestObject, userService.getUserById(testUserID).get()), "User has not been changed (update failed).")
-	}
-
-	@Test
-	fun userLoginTest() { // TODO
-		// GIVEN
-		var users : List<User> = userRepository.findAll()
-		println("users defined")
-		// WHEN
-
-		// THEN
-	}
-
-
-
-
-
-	@BeforeEach
-	fun beforeEach(){
-		userService.deleteUserById(testUserID)
-	}
-
-
-	fun compareUsers(user1 : User, user2: User): Boolean{
-		return (user1.id == user2.id &&
-				user1.login == user2.login &&
-				user1.password == user2.password &&
-				user1.firstName == user2.firstName &&
-				user1.lastName == user2.lastName &&
-				user1.email == user2.email &&
-				user1.phone == user2.phone &&
-				user1.birthDate == user2.birthDate &&
-				user1.gender == user2.gender &&
-				user1.avatarImage == user2.avatarImage)
-	}
-
+    fun compareUsers(user1: User, user2: User): Boolean {
+        return (user1.id == user2.id &&
+                user1.login == user2.login &&
+                user1.password == user2.password &&
+                user1.firstName == user2.firstName &&
+                user1.lastName == user2.lastName &&
+                user1.email == user2.email &&
+                user1.phone == user2.phone &&
+                user1.birthDate == user2.birthDate &&
+                user1.gender == user2.gender &&
+                user1.avatarImage == user2.avatarImage)
+    }
 }

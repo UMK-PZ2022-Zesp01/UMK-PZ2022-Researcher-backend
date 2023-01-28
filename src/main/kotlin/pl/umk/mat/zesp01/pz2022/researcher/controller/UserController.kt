@@ -10,23 +10,32 @@ import org.springframework.web.bind.annotation.*
 import pl.umk.mat.zesp01.pz2022.researcher.model.User
 import pl.umk.mat.zesp01.pz2022.researcher.service.UserService
 import org.mindrot.jbcrypt.BCrypt
+import org.springframework.boot.autoconfigure.security.SecurityProperties
+import org.springframework.data.mongodb.core.MongoOperations
+import org.springframework.data.mongodb.core.find
+import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query
 import org.springframework.http.HttpHeaders
 import pl.umk.mat.zesp01.pz2022.researcher.idgenerator.IdGenerator
 import pl.umk.mat.zesp01.pz2022.researcher.repository.UserRepository
 
 @RestController
-class UserController(@Autowired val userService: UserService, @Autowired val userRepository: UserRepository) {
+class UserController(
+    @Autowired val userService: UserService,
+    @Autowired val userRepository: UserRepository
+) {
 
     val gson = Gson()
 
     /*** POST MAPPINGS ***/
+
     @PostMapping("/addUser")
     fun addUser(@RequestBody user: User): ResponseEntity<String> {
 
-        if(userService.getUserByEmail(user.email).isEmpty){
+        if (userService.getUserByEmail(user.email).isEmpty) {
             return ResponseEntity.status(299).build()
         }
-        if(userService.getUserByLogin(user.login).isEmpty){
+        if (userService.getUserByLogin(user.login).isEmpty) {
             return ResponseEntity.status(298).build()
         }
         user.password = BCrypt.hashpw(user.password, BCrypt.gensalt())
@@ -61,9 +70,9 @@ class UserController(@Autowired val userService: UserService, @Autowired val use
     fun getUserProfile(
         @RequestHeader httpHeaders: HttpHeaders,
         @RequestBody profileUsername: String
-    ):ResponseEntity<String>{
+    ): ResponseEntity<String> {
         val jwt = httpHeaders["Authorization"]
-        jwt?:return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        jwt ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
         try {
             val decoded = JWT.require(Algorithm.HMAC256(ACCESS_TOKEN_SECRET))
@@ -79,7 +88,7 @@ class UserController(@Autowired val userService: UserService, @Autowired val use
 
             //If claimed user does not exist in db there is something wrong with the token
             val user = userService.getUserByLogin(username)
-            if(user.isEmpty) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+            if (user.isEmpty) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
             //
             val profile = userService
@@ -89,7 +98,7 @@ class UserController(@Autowired val userService: UserService, @Autowired val use
 
 
             return ResponseEntity.status(HttpStatus.OK).body(gson.toJson(profile))
-        }catch (e:java.lang.Exception){
+        } catch (e: java.lang.Exception) {
             println(e)
         }
 
@@ -100,13 +109,11 @@ class UserController(@Autowired val userService: UserService, @Autowired val use
     fun getPhoneByUserLogin(@PathVariable login: String): ResponseEntity<String> {
         val user = userService.getUserByLogin(login)
 
-        if(user.isEmpty){
+        if (user.isEmpty) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
         }
         val phoneNumber: String = user.get().phone
         return ResponseEntity.status(HttpStatus.OK).body(phoneNumber)
-
-
     }
 
     @GetMapping("/getUsers")
@@ -116,7 +123,7 @@ class UserController(@Autowired val userService: UserService, @Autowired val use
     @GetMapping("/getUserById/{id}")
     fun getUserById(@PathVariable id: String): ResponseEntity<User> {
         val user = userService.getUserById(id)
-        if(user.isEmpty){
+        if (user.isEmpty) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
         }
         return ResponseEntity.status(HttpStatus.OK).body(user.get())
@@ -125,7 +132,7 @@ class UserController(@Autowired val userService: UserService, @Autowired val use
     @GetMapping("/getUserByEmail/{email}")
     fun getUserByEmail(@PathVariable email: String): ResponseEntity<User> {
         val user = userService.getUserByEmail(email)
-        if (user.isEmpty){
+        if (user.isEmpty) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
         }
         return ResponseEntity.status(HttpStatus.OK).body(user.get())
@@ -138,6 +145,10 @@ class UserController(@Autowired val userService: UserService, @Autowired val use
     @GetMapping("/getUserByLastName/{lastName}")
     fun getUserByLastName(@PathVariable lastName: String): ResponseEntity<List<User>> =
         ResponseEntity.status(HttpStatus.OK).body(userService.getUsersByLastName(lastName))
+
+    @GetMapping("/getUsersByGender/{gender}")
+    fun findUsersByGender(@PathVariable gender: String): ResponseEntity<List<User>> =
+        ResponseEntity.status(HttpStatus.OK).body(userService.findUsersByGender(gender))
 
     /*** DELETE MAPPINGS ***/
 

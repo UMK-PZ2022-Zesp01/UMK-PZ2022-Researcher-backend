@@ -18,7 +18,6 @@ class User(
     @Field var avatarImage: String = ""
 ) {
 
-
     fun toUserProfileDTO(): UserProfileDTO {
         val userProfileDTO = UserProfileDTO()
 
@@ -35,22 +34,20 @@ class User(
     }
 }
 
-class UserProfileDTO{
-    var login : String = ""
-    var firstName : String = ""
-    var lastName : String = ""
-    var email : String = ""
-    var phone : String = ""
-    var birthDate : String = ""
-    var gender : String = ""
-    var avatarImage : String = ""
-}
+class UserProfileDTO(
+    var login: String = "",
+    var firstName: String = "",
+    var lastName: String = "",
+    var email: String = "",
+    var phone: String = "",
+    var birthDate: String = "",
+    var gender: String = "",
+    var avatarImage: String = ""
+)
 
-
-
-class LoginData{
-    var login: String = ""
+class LoginData(
+    var login: String = "",
     var password: String = ""
-}
+)
 
 

@@ -65,6 +65,10 @@ class ResearchController(
     fun getResearchByUserId(@PathVariable userId: String): ResponseEntity<List<Research>> =
         ResponseEntity.status(HttpStatus.OK).body(researchService.getResearchesByUserId(userId))
 
+    @GetMapping("/getSortedResearches")
+    fun getSortedResearches(): ResponseEntity<List<Research>> =
+        ResponseEntity.status(HttpStatus.OK).body(researchService.sortResearchesByTitle())
+
     /*** DELETE MAPPINGS ***/
 
     @DeleteMapping("/deleteResearchById/{id}")
