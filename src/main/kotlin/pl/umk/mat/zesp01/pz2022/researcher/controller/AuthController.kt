@@ -2,6 +2,7 @@ package pl.umk.mat.zesp01.pz2022.researcher.controller
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
+import com.google.gson.Gson
 import org.mindrot.jbcrypt.BCrypt
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
@@ -14,6 +15,7 @@ import pl.umk.mat.zesp01.pz2022.researcher.model.Token
 import pl.umk.mat.zesp01.pz2022.researcher.service.TokenService
 import pl.umk.mat.zesp01.pz2022.researcher.service.UserService
 import java.util.Date
+import java.util.StringJoiner
 
 val ACCESS_TOKEN_SECRET: String = System.getenv("ACCESS_TOKEN_SECRET")
 val REFRESH_TOKEN_SECRET: String = System.getenv("REFRESH_TOKEN_SECRET")
@@ -22,6 +24,8 @@ const val REFRESH_EXPIRES_SEC: Long = 86400
 
 @RestController
 class AuthController(@Autowired val userService: UserService, @Autowired val tokenService: TokenService) {
+
+    val gson = Gson()
 
     /*** POST MAPPINGS ***/
 
@@ -66,11 +70,17 @@ class AuthController(@Autowired val userService: UserService, @Autowired val tok
                         .secure(true)
                         .build()
 
+                    //CREATE RESPONSE BODY
+
+                    val responseBody = HashMap<String, String>()
+                    responseBody["username"] = user.get().login
+                    responseBody["accessToken"] = accessToken
+
                     //SEND THE REFRESH TOKEN COOKIE AND THE ACCESS TOKEN
                     return ResponseEntity
                         .status(HttpStatus.OK)
                         .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                        .body(accessToken)
+                        .body(gson.toJson(responseBody))
 
                 } catch (error: Exception) {
                     return ResponseEntity.status(HttpStatus.OK).body("Failed creating a token.")
@@ -82,7 +92,7 @@ class AuthController(@Autowired val userService: UserService, @Autowired val tok
 
     /*** GET MAPPINGS ***/
 
-    @GetMapping("/refreshToken")
+    @GetMapping("/refreshAccess")
     fun handleRefreshToken(
         @CookieValue(name = "jwt") jwt: String
     ): ResponseEntity<String> {
@@ -104,7 +114,11 @@ class AuthController(@Autowired val userService: UserService, @Autowired val tok
                 .withExpiresAt(Date(System.currentTimeMillis() + ACCESS_EXPIRES_SEC * 1000))
                 .sign(Algorithm.HMAC256(ACCESS_TOKEN_SECRET))
 
-            ResponseEntity.status(HttpStatus.OK).body(accessToken)
+            val responseBody = HashMap<String, String>()
+            responseBody["username"] = token.get().login
+            responseBody["accessToken"] = accessToken
+
+            ResponseEntity.status(HttpStatus.OK).body(gson.toJson(responseBody))
         } catch (error: Exception) {
             ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }

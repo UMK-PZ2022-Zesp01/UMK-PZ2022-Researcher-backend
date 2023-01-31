@@ -32,10 +32,10 @@ class UserController(
     @PostMapping("/addUser")
     fun addUser(@RequestBody user: User): ResponseEntity<String> {
 
-        if (userService.getUserByEmail(user.email).isEmpty) {
+        if (userService.getUserByEmail(user.email).isPresent) {
             return ResponseEntity.status(299).build()
         }
-        if (userService.getUserByLogin(user.login).isEmpty) {
+        if (userService.getUserByLogin(user.login).isPresent) {
             return ResponseEntity.status(298).build()
         }
         user.password = BCrypt.hashpw(user.password, BCrypt.gensalt())
