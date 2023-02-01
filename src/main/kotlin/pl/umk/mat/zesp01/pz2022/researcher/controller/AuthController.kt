@@ -83,9 +83,9 @@ class AuthController(@Autowired val userService: UserService, @Autowired val tok
                         .body(gson.toJson(responseBody))
 
                 } catch (error: Exception) {
-                    return ResponseEntity.status(HttpStatus.OK).body("Failed creating a token.")
+                    return ResponseEntity.status(HttpStatus.OK).body("Something went wrong, please try again")
                 }
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login failed: wrong password.")
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login failed: user does not exist.")
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login failed: user does not exist.")
     }
