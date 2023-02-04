@@ -3,6 +3,7 @@ package pl.umk.mat.zesp01.pz2022.researcher.service
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.MongoOperations
+import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Service
 import pl.umk.mat.zesp01.pz2022.researcher.model.Research
@@ -39,4 +40,12 @@ class ResearchService(
             Query().with(Sort.by(Sort.Direction.ASC, "title")),
             Research::class.java
         )
+
+    fun getAllResearchIds(): List<String> =
+        mongoOperations.aggregate(
+            Aggregation.newAggregation(
+                Aggregation.project("_id")
+            ),
+            "Researches", String::class.java
+        ).mappedResults
 }

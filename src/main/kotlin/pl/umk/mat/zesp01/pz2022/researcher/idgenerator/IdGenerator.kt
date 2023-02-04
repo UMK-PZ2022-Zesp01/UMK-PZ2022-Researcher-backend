@@ -1,17 +1,32 @@
 package pl.umk.mat.zesp01.pz2022.researcher.idgenerator
 
 class IdGenerator {
-    fun generateUserId(): String {
-        var userId = ""
-        for (i in 1..8)
-            userId += listOf(('A'..'Z'), ('a'..'z'), ('0'..'9')).flatten().random()
+    fun generateUserId(userIdList: List<String>): String {
+        var userId: String
+        // userIdList contains strings like: "{"id": "ABCDEFGH"}", so we need to extract the 'ABCDEFGH' part
+        val userIdListSubstr = userIdList.map { id -> id.substring(9, 9+8) }
+
+        do {
+            userId = ""
+            for (i in 1..8) {
+                userId += listOf(('A'..'Z'), ('a'..'z'), ('0'..'9')).flatten().random()
+            }
+        } while (userIdListSubstr.contains(userId))
+
         return userId
     }
 
-    fun generateResearchId(): String {
+    fun generateResearchId(researchIdList: List<String>): String {
         var researchId = ""
-        for (i in 1..6)
-            researchId += listOf(('A'..'Z'), ('a'..'z'), ('0'..'9')).flatten().random()
+        val researchIdListSubstr = researchIdList.map { id -> id.substring(9, 9+6) }
+
+        do {
+            researchId = ""
+            for (i in 1..6) {
+                researchId += listOf(('A'..'Z'), ('a'..'z'), ('0'..'9')).flatten().random()
+            }
+        } while (researchIdListSubstr.contains(researchId))
+
         return researchId
     }
 
@@ -21,16 +36,4 @@ class IdGenerator {
             tokenId += listOf(('A'..'Z'), ('a'..'z'), ('0'..'9')).flatten().random()
         return tokenId
     }
-
-    // Function checks if 'id' is unique in list of all used ids (given as 'idList')
-    // and returns true if 'id' is NOT in 'idList'
-    fun isIdUnique(id: String, idList: List<String>): Boolean =
-        idList.stream().noneMatch { i -> i.equals(id) }
-
-//    fun generateUniqueId(){
-//        var idList =
-//        while(!isIdUnique){
-//
-//        }
-//    }
 }

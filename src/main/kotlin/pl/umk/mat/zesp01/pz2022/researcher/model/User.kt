@@ -51,4 +51,3 @@ class LoginData(
     var password: String = ""
 )
 
-

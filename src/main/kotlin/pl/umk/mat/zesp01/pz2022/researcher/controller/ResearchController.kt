@@ -18,7 +18,7 @@ class ResearchController(
 
     @PostMapping("/research/add")
     fun addResearch(@RequestBody research: Research): ResponseEntity<String> {
-        research.id = IdGenerator().generateResearchId()
+        research.id = IdGenerator().generateResearchId(researchService.getAllResearchIds())
         researchService.addResearch(research)
         return ResponseEntity.status(HttpStatus.CREATED).build()
     }
@@ -68,6 +68,10 @@ class ResearchController(
     @GetMapping("/researches/sorted")
     fun getSortedResearches(): ResponseEntity<List<Research>> =
         ResponseEntity.status(HttpStatus.OK).body(researchService.sortResearchesByTitle())
+
+    @GetMapping("/researches/idList")
+    fun getAllResearchIds(): ResponseEntity<List<String>> =
+        ResponseEntity.status(HttpStatus.OK).body(researchService.getAllResearchIds())
 
     /*** DELETE MAPPINGS ***/
 

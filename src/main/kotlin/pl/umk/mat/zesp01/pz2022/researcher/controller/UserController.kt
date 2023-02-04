@@ -10,11 +10,6 @@ import org.springframework.web.bind.annotation.*
 import pl.umk.mat.zesp01.pz2022.researcher.model.User
 import pl.umk.mat.zesp01.pz2022.researcher.service.UserService
 import org.mindrot.jbcrypt.BCrypt
-import org.springframework.boot.autoconfigure.security.SecurityProperties
-import org.springframework.data.mongodb.core.MongoOperations
-import org.springframework.data.mongodb.core.find
-import org.springframework.data.mongodb.core.query.Criteria
-import org.springframework.data.mongodb.core.query.Query
 import org.springframework.http.HttpHeaders
 import pl.umk.mat.zesp01.pz2022.researcher.idgenerator.IdGenerator
 import pl.umk.mat.zesp01.pz2022.researcher.repository.UserRepository
@@ -39,7 +34,7 @@ class UserController(
             return ResponseEntity.status(298).build()
         }
         user.password = BCrypt.hashpw(user.password, BCrypt.gensalt())
-        user.id = IdGenerator().generateUserId()
+        user.id = IdGenerator().generateUserId(userService.getAllUserIds())
         userService.addUser(user)
         return ResponseEntity.status(HttpStatus.CREATED).build()
     }
@@ -150,9 +145,10 @@ class UserController(
     fun findUsersByGender(@PathVariable gender: String): ResponseEntity<List<User>> =
         ResponseEntity.status(HttpStatus.OK).body(userService.findUsersByGender(gender))
 
-//    @GetMapping("/users/idList")
-//    fun getAllUserIds(): ResponseEntity<List<String>> =
-//        ResponseEntity.status(HttpStatus.OK).body(userService.getAllUserIds())
+    @GetMapping("/users/idList")
+    fun getAllUserIds(): ResponseEntity<List<String>> {
+        return ResponseEntity.status(HttpStatus.OK).body(userService.getAllUserIds())
+    }
 
     /*** DELETE MAPPINGS ***/
 
