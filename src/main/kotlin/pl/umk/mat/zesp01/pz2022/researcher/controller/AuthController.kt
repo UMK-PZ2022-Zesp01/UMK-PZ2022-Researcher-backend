@@ -92,7 +92,7 @@ class AuthController(@Autowired val userService: UserService, @Autowired val tok
 
     /*** GET MAPPINGS ***/
 
-    @GetMapping("/refreshAccess")
+    @GetMapping("/auth/refresh")
     fun handleRefreshToken(
         @CookieValue(name = "jwt") jwt: String
     ): ResponseEntity<String> {

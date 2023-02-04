@@ -24,6 +24,13 @@ class IdGenerator {
 
     // Function checks if 'id' is unique in list of all used ids (given as 'idList')
     // and returns true if 'id' is NOT in 'idList'
-    fun checkIfUnique(id: String, idList: List<String>): Boolean =
+    fun isIdUnique(id: String, idList: List<String>): Boolean =
         idList.stream().noneMatch { i -> i.equals(id) }
+
+//    fun generateUniqueId(){
+//        var idList =
+//        while(!isIdUnique){
+//
+//        }
+//    }
 }

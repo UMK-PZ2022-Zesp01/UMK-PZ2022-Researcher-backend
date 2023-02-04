@@ -14,6 +14,10 @@ interface UserRepository : MongoRepository<User, String> {
         @Query(value = "{'login': ?0}", fields = "{'phone': 1,'_id': 0 }")
         fun findByLogin(login:String): Optional<String>
     */
+
+//    @Query(fields = "{'_id': 1}")
+//    fun findIds(): Optional<List<String>>
+
     @Query("{'email': ?0}")
     fun findUserByEmail(email: String): Optional<User>
 

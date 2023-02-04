@@ -29,7 +29,7 @@ class UserController(
 
     /*** POST MAPPINGS ***/
 
-    @PostMapping("/addUser")
+    @PostMapping("/user/add")
     fun addUser(@RequestBody user: User): ResponseEntity<String> {
 
         if (userService.getUserByEmail(user.email).isPresent) {
@@ -46,7 +46,7 @@ class UserController(
 
     /*** PUT MAPPINGS ***/
 
-    @PutMapping("/updateUser/{id}")
+    @PutMapping("/user/{id}/update")
     fun updateUser(@PathVariable id: String, @RequestBody user: User): ResponseEntity<User> {
         val oldUser = userRepository.findById(id).orElse(null)
         user.id = oldUser.id
@@ -116,11 +116,11 @@ class UserController(
         return ResponseEntity.status(HttpStatus.OK).body(phoneNumber)
     }
 
-    @GetMapping("/getUsers")
+    @GetMapping("/users")
     fun getAllUsers(): ResponseEntity<List<User>> =
         ResponseEntity.status(HttpStatus.OK).body(userService.getAllUsers())
 
-    @GetMapping("/getUserById/{id}")
+    @GetMapping("/user/{id}")
     fun getUserById(@PathVariable id: String): ResponseEntity<User> {
         val user = userService.getUserById(id)
         if (user.isEmpty) {
@@ -129,7 +129,7 @@ class UserController(
         return ResponseEntity.status(HttpStatus.OK).body(user.get())
     }
 
-    @GetMapping("/getUserByEmail/{email}")
+    @GetMapping("/user/email/{email}")
     fun getUserByEmail(@PathVariable email: String): ResponseEntity<User> {
         val user = userService.getUserByEmail(email)
         if (user.isEmpty) {
@@ -138,21 +138,25 @@ class UserController(
         return ResponseEntity.status(HttpStatus.OK).body(user.get())
     }
 
-    @GetMapping("/getUserByFirstName/{firstName}")
+    @GetMapping("/users/firstName/{firstName}")
     fun getUserByFirstName(@PathVariable firstName: String): ResponseEntity<List<User>> =
         ResponseEntity.status(HttpStatus.OK).body(userService.getUsersByFirstName(firstName))
 
-    @GetMapping("/getUserByLastName/{lastName}")
+    @GetMapping("/users/lastName/{lastName}")
     fun getUserByLastName(@PathVariable lastName: String): ResponseEntity<List<User>> =
         ResponseEntity.status(HttpStatus.OK).body(userService.getUsersByLastName(lastName))
 
-    @GetMapping("/getUsersByGender/{gender}")
+    @GetMapping("/users/gender/{gender}")
     fun findUsersByGender(@PathVariable gender: String): ResponseEntity<List<User>> =
         ResponseEntity.status(HttpStatus.OK).body(userService.findUsersByGender(gender))
 
+//    @GetMapping("/users/idList")
+//    fun getAllUserIds(): ResponseEntity<List<String>> =
+//        ResponseEntity.status(HttpStatus.OK).body(userService.getAllUserIds())
+
     /*** DELETE MAPPINGS ***/
 
-    @DeleteMapping("/deleteUserById/{id}")
+    @DeleteMapping("/user/{id}/delete")
     fun deleteUserById(@PathVariable id: String): ResponseEntity<String> {
         userService.deleteUserById(id)
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build()

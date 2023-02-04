@@ -15,7 +15,8 @@ class User(
     @Field var phone: String = "",
     @Field var birthDate: String = "",
     @Field var gender: String = "",
-    @Field var avatarImage: String = ""
+    @Field var avatarImage: String = "",
+    @Field var isConfirmed: Boolean = false
 ) {
 
     fun toUserProfileDTO(): UserProfileDTO {

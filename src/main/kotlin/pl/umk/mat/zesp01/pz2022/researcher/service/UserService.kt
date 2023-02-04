@@ -2,7 +2,9 @@ package pl.umk.mat.zesp01.pz2022.researcher.service
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.MongoOperations
+import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.find
+import org.springframework.data.mongodb.core.findAll
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Service
@@ -25,6 +27,11 @@ class UserService(
 
     /*** GET METHODS ***/
     fun getAllUsers(): List<User> = userRepository.findAll()
+
+//    fun getAllUserIds(): List<String> =
+//        mongoOperations.find(
+//            Query.query(Criteria.where("_id").`is`("MBhsy7Ig"))
+//        )
 
     fun getUserById(id: String): Optional<User> = userRepository.findById(id)
 

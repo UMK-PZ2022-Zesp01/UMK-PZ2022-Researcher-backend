@@ -30,9 +30,9 @@ class ResearchService(
         researchRepository.findById(id)
             .orElseThrow { throw RuntimeException("Cannot find User by Id") }
 
-    fun getResearchesByUserId(userId: String): List<Research> =
-        researchRepository.findResearchesById(userId)
-            .orElseThrow { throw RuntimeException("Cannot find User by Id") }
+    fun getResearchesByCreatorId(creatorId: String): List<Research> =
+        researchRepository.findResearchesById(creatorId)
+            .orElseThrow { throw RuntimeException("Cannot find Creator by Id") }
 
     fun sortResearchesByTitle(): List<Research> =
         mongoOperations.find(

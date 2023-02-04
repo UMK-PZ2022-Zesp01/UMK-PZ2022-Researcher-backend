@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Field
 @Document("Researches")
 class Research {
     @Id var id: String = ""
-    @Field var userId: String = ""
+    @Field var creatorId: String = ""
     @Field var participants = listOf<User>()
     @Field var title: String = ""
     @Field var description: String = ""
@@ -21,6 +21,18 @@ class Research {
     @Field var minAgeRequirement: Int = 0
     @Field var maxAgeRequirement: Int = 0
     @Field var participantLimit: Int = 0
-    @Field var genderRequirement: String = ""
+    @Field var genderRequirement = listOf<String>()
     @Field var reward = listOf<String>()
 }
+
+class ResearchRequest(
+    var id: String,
+    var researchCreatorId: String
+    // TODO
+)
+
+class ResearchResponse(
+    var id: String,
+    var researchCreatorId: String
+    // TODO
+)
