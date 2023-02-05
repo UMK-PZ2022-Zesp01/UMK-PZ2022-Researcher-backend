@@ -61,10 +61,9 @@ class UserController(
 
     /*** GET MAPPINGS ***/
 
-    @GetMapping("/getUserProfile")
+    @GetMapping("/user/current")
     fun getUserProfile(
-        @RequestHeader httpHeaders: HttpHeaders,
-        @RequestBody profileUsername: String
+        @RequestHeader httpHeaders: HttpHeaders
     ): ResponseEntity<String> {
         val jwt = httpHeaders["Authorization"]
         jwt ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
@@ -76,23 +75,24 @@ class UserController(
                 .verify(jwt[0])
 
             //get the username claimed in the access token
-            val username = decoded
+            var username = decoded
                 .claims
                 .getValue("username")
                 .toString()
+            username = username.substring(1,username.length-1)
 
             //If claimed user does not exist in db there is something wrong with the token
             val user = userService.getUserByLogin(username)
             if (user.isEmpty) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
             //
-            val profile = userService
-                .getUserByLogin(profileUsername)
+            val data= userService
+                .getUserByLogin(username)
                 .get()
                 .toUserProfileDTO()
 
 
-            return ResponseEntity.status(HttpStatus.OK).body(gson.toJson(profile))
+            return ResponseEntity.status(HttpStatus.OK).body(gson.toJson(data))
         } catch (e: java.lang.Exception) {
             println(e)
         }
