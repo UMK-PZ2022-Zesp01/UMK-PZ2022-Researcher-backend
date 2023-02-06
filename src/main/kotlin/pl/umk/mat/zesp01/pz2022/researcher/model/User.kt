@@ -5,7 +5,7 @@ import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
 
 @Document("Users")
-class User(
+data class User(
     @Id var id: String = "",
     @Field var login: String = "",
     @Field var password: String = "",

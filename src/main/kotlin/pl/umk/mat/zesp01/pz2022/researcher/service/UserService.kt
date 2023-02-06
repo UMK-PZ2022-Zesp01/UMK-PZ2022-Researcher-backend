@@ -13,8 +13,8 @@ import java.util.*
 
 @Service
 class UserService(
-    @Autowired val userRepository: UserRepository,
-    @Autowired val mongoOperations: MongoOperations
+        @Autowired val userRepository: UserRepository,
+        @Autowired val mongoOperations: MongoOperations
 ) {
 
     /*** ADD METHODS ***/
@@ -28,12 +28,12 @@ class UserService(
     fun getAllUsers(): List<User> = userRepository.findAll()
 
     fun getAllUserIds(): List<String> =
-        mongoOperations.aggregate(
-            Aggregation.newAggregation(
-                Aggregation.project("_id")
-            ),
-            "Users", String::class.java
-        ).mappedResults
+            mongoOperations.aggregate(
+                    Aggregation.newAggregation(
+                            Aggregation.project("_id")
+                    ),
+                    "Users", String::class.java
+            ).mappedResults
 
     fun getUserById(id: String): Optional<User> = userRepository.findById(id)
 
@@ -44,15 +44,19 @@ class UserService(
     //        .orElseThrow { throw RuntimeException("Cannot find User by Login") }
 
     fun getUsersByFirstName(firstName: String): List<User> = userRepository.findUserByFirstName(firstName)
-        .orElseThrow { throw RuntimeException("Cannot find User by First name") }
+            .orElseThrow { throw RuntimeException("Cannot find User by First name") }
 
     fun getUsersByLastName(lastName: String): List<User> = userRepository.findUserByLastName(lastName)
-        .orElseThrow { throw RuntimeException("Cannot find User by Last name") }
+            .orElseThrow { throw RuntimeException("Cannot find User by Last name") }
 
     // Made with MongoOperations
     fun findUsersByGender(gender: String): List<User> =
-        mongoOperations.find(
-            Query.query(Criteria.where("gender").`is`(gender)),
-            "Users"
-        )
+            mongoOperations.find(
+                    Query.query(Criteria.where("gender").`is`(gender)),
+                    "Users"
+            )
+
+    fun updateUser(user: User) {
+        mongoOperations.findAndReplace(Query.query(Criteria.where("_id").`is`(user.id)), user)
+    }
 }

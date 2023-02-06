@@ -1,6 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
+	id("groovy")
 	id("org.springframework.boot") version "3.0.1"
 	id("io.spring.dependency-management") version "1.1.0"
 	kotlin("jvm") version "1.7.22"
@@ -25,8 +26,10 @@ dependencies {
 	implementation("com.auth0:java-jwt:4.2.1")
 	implementation("com.google.code.gson:gson:2.10.1")
 
-
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("org.testcontainers:mongodb:1.17.6")
+	testImplementation("org.spockframework:spock-core:2.3-groovy-3.0")
+	testImplementation("org.spockframework:spock-spring:2.3-groovy-3.0")
 }
 
 tasks.withType<KotlinCompile> {
