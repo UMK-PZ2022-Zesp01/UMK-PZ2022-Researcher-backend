@@ -32,62 +32,67 @@ class AuthController(@Autowired val userService: UserService, @Autowired val tok
     @PostMapping("/login")
     fun handleLogin(@RequestBody loginData: LoginData): ResponseEntity<String> {
         val user = userService.getUserByLogin(loginData.login)
-        if (user.isPresent) {
-            if (BCrypt.checkpw(loginData.password, user.get().password))
-                try {
-                    val payload = mapOf(Pair("username", user.get().login))
 
-                    //CREATE JWTs
-                    val accessToken = JWT
-                        .create()
-                        .withPayload(payload)
-                        .withExpiresAt(Date(System.currentTimeMillis() + ACCESS_EXPIRES_SEC * 1000))
-                        .sign(Algorithm.HMAC256(ACCESS_TOKEN_SECRET))
-
-                    val refreshToken = JWT
-                        .create()
-                        .withPayload(payload)
-                        .withExpiresAt(Date(System.currentTimeMillis() + REFRESH_EXPIRES_SEC * 1000))
-                        .sign(Algorithm.HMAC256(REFRESH_TOKEN_SECRET))
-
-                    //CREATE TOKEN DOCUMENT
-                    val refreshTokenDB = Token()
-
-                    refreshTokenDB.login = user.get().login
-                    refreshTokenDB.expires = Date(System.currentTimeMillis() + REFRESH_EXPIRES_SEC * 1000).toString()
-                    refreshTokenDB.jwt = refreshToken
-
-                    //ADD TOKEN DOCUMENT TO DATABASE
-                    tokenService.addToken(refreshTokenDB)
-
-                    //CREATE REFRESH TOKEN COOKIE
-                    val cookie = ResponseCookie
-                        .from("jwt", refreshToken)
-                        .httpOnly(true)
-                        .maxAge(REFRESH_EXPIRES_SEC)
-                        .path("/")
-                        .sameSite("none") //Chrome, you bastard
-                        .secure(true)
-                        .build()
-
-                    //CREATE RESPONSE BODY
-
-                    val responseBody = HashMap<String, String>()
-                    responseBody["username"] = user.get().login
-                    responseBody["accessToken"] = accessToken
-
-                    //SEND THE REFRESH TOKEN COOKIE AND THE ACCESS TOKEN
-                    return ResponseEntity
-                        .status(HttpStatus.OK)
-                        .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                        .body(gson.toJson(responseBody))
-
-                } catch (error: Exception) {
-                    return ResponseEntity.status(HttpStatus.OK).body("Something went wrong, please try again")
-                }
+        if ( user.isEmpty){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login failed: user does not exist.")
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login failed: user does not exist.")
+
+        if (!BCrypt.checkpw(loginData.password, user.get().password)){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login failed: user does not exist.")
+        }
+
+        try {
+            val payload = mapOf(Pair("username", user.get().login))
+
+            //CREATE JWTs
+            val accessToken = JWT
+                .create()
+                .withPayload(payload)
+                .withExpiresAt(Date(System.currentTimeMillis() + ACCESS_EXPIRES_SEC * 1000))
+                .sign(Algorithm.HMAC256(ACCESS_TOKEN_SECRET))
+
+            val refreshToken = JWT
+                .create()
+                .withPayload(payload)
+                .withExpiresAt(Date(System.currentTimeMillis() + REFRESH_EXPIRES_SEC * 1000))
+                .sign(Algorithm.HMAC256(REFRESH_TOKEN_SECRET))
+
+            //CREATE TOKEN DOCUMENT
+            val refreshTokenDB = Token()
+
+            refreshTokenDB.login = user.get().login
+            refreshTokenDB.expires = Date(System.currentTimeMillis() + REFRESH_EXPIRES_SEC * 1000).toString()
+            refreshTokenDB.jwt = refreshToken
+
+            //ADD TOKEN DOCUMENT TO DATABASE
+            tokenService.addToken(refreshTokenDB)
+
+            //CREATE REFRESH TOKEN COOKIE
+            val cookie = ResponseCookie
+                .from("jwt", refreshToken)
+                .httpOnly(true)
+                .maxAge(REFRESH_EXPIRES_SEC)
+                .path("/")
+                .sameSite("none") //Chrome, you bastard
+                .secure(true)
+                .build()
+
+            //CREATE RESPONSE BODY
+
+            val responseBody = HashMap<String, String>()
+            responseBody["username"] = user.get().login
+            responseBody["accessToken"] = accessToken
+
+            //SEND THE REFRESH TOKEN COOKIE AND THE ACCESS TOKEN
+            return ResponseEntity
+                .status(HttpStatus.OK)
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(gson.toJson(responseBody))
+
+        } catch (error: Exception) {
+            return ResponseEntity.status(HttpStatus.OK).body("Something went wrong, please try again")
+        }
+
     }
 
     /*** GET MAPPINGS ***/
@@ -97,7 +102,9 @@ class AuthController(@Autowired val userService: UserService, @Autowired val tok
         @CookieValue(name = "jwt") jwt: String
     ): ResponseEntity<String> {
         val token = tokenService.getTokenByJwt(jwt)
-        if (token.isEmpty) return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        if (token.isEmpty) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        }
         return try {
             //Verify if refresh token is valid. If it's not, it will throw an exception
             JWT.require(Algorithm.HMAC256(REFRESH_TOKEN_SECRET))
