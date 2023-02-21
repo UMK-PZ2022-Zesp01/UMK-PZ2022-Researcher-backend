@@ -51,3 +51,29 @@ class LoginData(
     var password: String = ""
 )
 
+class UserRegisterData(
+    var firstName: String = "",
+    var lastName: String = "",
+    var login: String = "",
+    var email: String = "",
+    var password: String="",
+    var gender: String = "",
+    var birthDate: String = ""
+){
+    fun toUser(): User{
+        val user = User()
+
+        user.firstName=firstName
+        user.lastName=lastName
+        user.login=login
+        user.email=email
+        user.password=password
+        user.gender=gender
+        user.birthDate=birthDate
+
+        return user;
+    }
+}
+
+
+

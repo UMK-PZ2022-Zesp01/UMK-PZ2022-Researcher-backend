@@ -4,8 +4,8 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
 
-@Document ("Tokens")
-class Token {
+@Document ("RefreshTokens")
+class RefreshToken {
     @Id var id: String = ""
     @Field var login: String = ""
     @Field var expires: String = ""

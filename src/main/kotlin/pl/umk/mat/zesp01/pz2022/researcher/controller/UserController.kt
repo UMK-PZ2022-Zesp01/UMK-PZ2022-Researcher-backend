@@ -10,32 +10,47 @@ import org.springframework.web.bind.annotation.*
 import pl.umk.mat.zesp01.pz2022.researcher.model.User
 import pl.umk.mat.zesp01.pz2022.researcher.service.UserService
 import org.mindrot.jbcrypt.BCrypt
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.http.HttpHeaders
 import pl.umk.mat.zesp01.pz2022.researcher.idgenerator.IdGenerator
+import pl.umk.mat.zesp01.pz2022.researcher.model.UserRegisterData
 import pl.umk.mat.zesp01.pz2022.researcher.repository.UserRepository
+import pl.umk.mat.zesp01.pz2022.researcher.service.ACCESS_TOKEN_SECRET
+import pl.umk.mat.zesp01.pz2022.researcher.service.RefreshTokenService
 
 @RestController
 class UserController(
     @Autowired val userService: UserService,
-    @Autowired val userRepository: UserRepository
+    @Autowired val userRepository: UserRepository,
+    @Autowired val refreshTokenService: RefreshTokenService,
+    @Autowired val eventPublisher: ApplicationEventPublisher
 ) {
-
     val gson = Gson()
 
     /*** POST MAPPINGS ***/
 
-    @PostMapping("/user/add")
-    fun addUser(@RequestBody user: User): ResponseEntity<String> {
+    @PostMapping("/user/register")
+    fun addUser(@RequestBody uRD: UserRegisterData): ResponseEntity<String> {
 
-        if (userService.getUserByEmail(user.email).isPresent) {
+        if (userService.getUserByEmail(uRD.email).isPresent) {
             return ResponseEntity.status(299).build()
         }
-        if (userService.getUserByLogin(user.login).isPresent) {
+        if (userService.getUserByLogin(uRD.login).isPresent) {
             return ResponseEntity.status(298).build()
         }
-        user.password = BCrypt.hashpw(user.password, BCrypt.gensalt())
-        user.id = IdGenerator().generateUserId(userService.getAllUserIds())
-        userService.addUser(user)
+
+        val newUser = uRD.toUser()
+
+        //blok poniżej chyba należy to przenieść do UserService
+        newUser.password = BCrypt.hashpw(newUser.password, BCrypt.gensalt())
+        newUser.id = IdGenerator().generateUserId(userService.getAllUserIds())
+        userService.addUser(newUser)
+
+
+
+
+
+
         return ResponseEntity.status(HttpStatus.CREATED).build()
     }
 

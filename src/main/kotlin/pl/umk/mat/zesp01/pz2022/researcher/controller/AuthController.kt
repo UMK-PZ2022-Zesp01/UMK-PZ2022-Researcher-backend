@@ -1,7 +1,5 @@
 package pl.umk.mat.zesp01.pz2022.researcher.controller
 
-import com.auth0.jwt.JWT
-import com.auth0.jwt.algorithms.Algorithm
 import com.google.gson.Gson
 import org.mindrot.jbcrypt.BCrypt
 import org.springframework.beans.factory.annotation.Autowired
@@ -11,19 +9,13 @@ import org.springframework.http.ResponseCookie
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import pl.umk.mat.zesp01.pz2022.researcher.model.LoginData
-import pl.umk.mat.zesp01.pz2022.researcher.model.Token
-import pl.umk.mat.zesp01.pz2022.researcher.service.TokenService
+import pl.umk.mat.zesp01.pz2022.researcher.service.REFRESH_EXPIRES_SEC
+import pl.umk.mat.zesp01.pz2022.researcher.service.RefreshTokenService
 import pl.umk.mat.zesp01.pz2022.researcher.service.UserService
-import java.util.Date
-import java.util.StringJoiner
 
-val ACCESS_TOKEN_SECRET: String = System.getenv("ACCESS_TOKEN_SECRET")
-val REFRESH_TOKEN_SECRET: String = System.getenv("REFRESH_TOKEN_SECRET")
-const val ACCESS_EXPIRES_SEC: Long = 600
-const val REFRESH_EXPIRES_SEC: Long = 86400
 
 @RestController
-class AuthController(@Autowired val userService: UserService, @Autowired val tokenService: TokenService) {
+class AuthController(@Autowired val userService: UserService, @Autowired val refreshTokenService: RefreshTokenService) {
 
     val gson = Gson()
 
@@ -42,30 +34,14 @@ class AuthController(@Autowired val userService: UserService, @Autowired val tok
         }
 
         try {
-            val payload = mapOf(Pair("username", user.get().login))
+            val username= user.get().login
 
             //CREATE JWTs
-            val accessToken = JWT
-                .create()
-                .withPayload(payload)
-                .withExpiresAt(Date(System.currentTimeMillis() + ACCESS_EXPIRES_SEC * 1000))
-                .sign(Algorithm.HMAC256(ACCESS_TOKEN_SECRET))
+            val accessToken = refreshTokenService
+                .createAccessToken(username)
 
-            val refreshToken = JWT
-                .create()
-                .withPayload(payload)
-                .withExpiresAt(Date(System.currentTimeMillis() + REFRESH_EXPIRES_SEC * 1000))
-                .sign(Algorithm.HMAC256(REFRESH_TOKEN_SECRET))
-
-            //CREATE TOKEN DOCUMENT
-            val refreshTokenDB = Token()
-
-            refreshTokenDB.login = user.get().login
-            refreshTokenDB.expires = Date(System.currentTimeMillis() + REFRESH_EXPIRES_SEC * 1000).toString()
-            refreshTokenDB.jwt = refreshToken
-
-            //ADD TOKEN DOCUMENT TO DATABASE
-            tokenService.addToken(refreshTokenDB)
+            val refreshToken = refreshTokenService
+                .createRefreshToken(username)
 
             //CREATE REFRESH TOKEN COOKIE
             val cookie = ResponseCookie
@@ -101,34 +77,25 @@ class AuthController(@Autowired val userService: UserService, @Autowired val tok
     fun handleRefreshToken(
         @CookieValue(name = "jwt") jwt: String
     ): ResponseEntity<String> {
-        val token = tokenService.getTokenByJwt(jwt)
+        val token = refreshTokenService.getTokenByJwt(jwt)
+
         if (token.isEmpty) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
-        return try {
-            //Verify if refresh token is valid. If it's not, it will throw an exception
-            JWT.require(Algorithm.HMAC256(REFRESH_TOKEN_SECRET))
-                .withClaim("username", token.get().login)
-                .build()
-                .verify(jwt)
 
-            //If refresh token is valid, create a new access token
-            val payload = mapOf(Pair("username", token.get().login))
+        val username= token.get().login
+        if(!refreshTokenService.verifyRefreshToken(jwt,username)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        }
 
-            val accessToken = JWT
-                .create()
-                .withPayload(payload)
-                .withExpiresAt(Date(System.currentTimeMillis() + ACCESS_EXPIRES_SEC * 1000))
-                .sign(Algorithm.HMAC256(ACCESS_TOKEN_SECRET))
+        val accessToken = refreshTokenService
+            .createAccessToken(username)
 
-            val responseBody = HashMap<String, String>()
+        val responseBody = HashMap<String, String>()
             responseBody["username"] = token.get().login
             responseBody["accessToken"] = accessToken
 
-            ResponseEntity.status(HttpStatus.OK).body(gson.toJson(responseBody))
-        } catch (error: Exception) {
-            ResponseEntity.status(HttpStatus.FORBIDDEN).build()
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(gson.toJson(responseBody))
     }
 
     /*** DELETE MAPPINGS ***/
@@ -137,9 +104,9 @@ class AuthController(@Autowired val userService: UserService, @Autowired val tok
     fun handleLogout(
         @CookieValue(name = "jwt") jwt: String
     ): ResponseEntity<String> {
-        val token = tokenService.getTokenByJwt(jwt)
+        val token = refreshTokenService.getTokenByJwt(jwt)
         if (token.isPresent) {//The token is in the db. Delete it
-            tokenService.deleteToken(token.get().id)
+            refreshTokenService.deleteToken(token.get().id)
         }
         //Delete the cookie
         val deleteCookie = ResponseCookie
