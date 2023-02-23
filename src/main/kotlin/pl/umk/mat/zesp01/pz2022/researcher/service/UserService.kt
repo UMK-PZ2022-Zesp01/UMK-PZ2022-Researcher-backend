@@ -55,4 +55,5 @@ class UserService(
             Query.query(Criteria.where("gender").`is`(gender)),
             "Users"
         )
+
 }

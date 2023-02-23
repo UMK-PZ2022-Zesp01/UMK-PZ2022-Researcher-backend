@@ -8,21 +8,21 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import pl.umk.mat.zesp01.pz2022.researcher.model.User
-import pl.umk.mat.zesp01.pz2022.researcher.service.UserService
 import org.mindrot.jbcrypt.BCrypt
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.http.HttpHeaders
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 import pl.umk.mat.zesp01.pz2022.researcher.idgenerator.IdGenerator
 import pl.umk.mat.zesp01.pz2022.researcher.model.UserRegisterData
 import pl.umk.mat.zesp01.pz2022.researcher.repository.UserRepository
-import pl.umk.mat.zesp01.pz2022.researcher.service.ACCESS_TOKEN_SECRET
-import pl.umk.mat.zesp01.pz2022.researcher.service.RefreshTokenService
+import pl.umk.mat.zesp01.pz2022.researcher.service.*
 
 @RestController
 class UserController(
     @Autowired val userService: UserService,
     @Autowired val userRepository: UserRepository,
     @Autowired val refreshTokenService: RefreshTokenService,
+    @Autowired val verificationTokenService: VerificationTokenService,
     @Autowired val eventPublisher: ApplicationEventPublisher
 ) {
     val gson = Gson()
@@ -41,18 +41,48 @@ class UserController(
 
         val newUser = uRD.toUser()
 
-        //blok poniżej chyba należy to przenieść do UserService
+        //blok poniżej chyba należy przenieść do UserService
         newUser.password = BCrypt.hashpw(newUser.password, BCrypt.gensalt())
         newUser.id = IdGenerator().generateUserId(userService.getAllUserIds())
         userService.addUser(newUser)
 
-
+        try {
+            val appUrl=ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString()
+            eventPublisher.publishEvent(OnRegistrationCompleteEvent(appUrl,newUser))
+        }catch (e:Exception){
+            println(e)
+        }
 
 
 
 
         return ResponseEntity.status(HttpStatus.CREATED).build()
     }
+
+    @GetMapping("/user/confirm")
+    fun confirmAccount(
+        @RequestParam("token") token:String
+    ){
+        val verificationToken = verificationTokenService.getTokenByJwt(token)
+        if (verificationToken.isEmpty){
+            TODO("error: Nieprawidłowy token")
+        }
+
+        val user = userService.getUserByLogin(verificationToken.get().login)
+        if(user.isEmpty){
+            TODO("error: nawet nie wiem w jaki sposób ma ta sytuacja zaistnieć")
+            println()
+        }
+
+        verificationTokenService.verifyVerificationToken(
+            verificationToken.get().jwt,
+            user.get().login)
+
+        user.get().isConfirmed=true
+
+        userService.userRepository.save(user.get())
+    }
+
 
     /*** PUT MAPPINGS ***/
 
