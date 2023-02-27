@@ -5,7 +5,7 @@ import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
 
 @Document("Users")
-class User(
+data class User(
     @Id var id: String = "",
     @Field var login: String = "",
     @Field var password: String = "",
@@ -73,6 +73,26 @@ class UserRegisterData(
 
         return user;
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as UserRegisterData
+
+        if (firstName != other.firstName) return false
+        if (lastName != other.lastName) return false
+        if (login != other.login) return false
+        if (email != other.email) return false
+        if (password != other.password) return false
+        if (gender != other.gender) return false
+        if (birthDate != other.birthDate) return false
+
+        return true
+    }
+
+
+
 }
 
 

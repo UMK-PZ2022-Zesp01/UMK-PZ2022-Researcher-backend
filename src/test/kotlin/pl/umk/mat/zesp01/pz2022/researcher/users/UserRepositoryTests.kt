@@ -1,39 +1,69 @@
 package pl.umk.mat.zesp01.pz2022.researcher.users
 
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mindrot.jbcrypt.BCrypt
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
+import org.springframework.test.context.ActiveProfiles
 import pl.umk.mat.zesp01.pz2022.researcher.model.User
 import pl.umk.mat.zesp01.pz2022.researcher.repository.UserRepository
 import pl.umk.mat.zesp01.pz2022.researcher.service.UserService
-import pl.umk.mat.zesp01.pz2022.researcher.users.SampleUser.*
 
 @SpringBootTest
+@ActiveProfiles("integration")
 class UserRepositoryTests {
 
     @Autowired lateinit var userService: UserService
     @Autowired lateinit var userRepository: UserRepository
-    var testUserID = Companion.userTestObject.id
+
 
     @Test
-    fun shouldAddReadAndDeleteUser() {
+    fun `add new User`() {
         // GIVEN (SampleUser.userTestObject)
+        val userTestObject = User(
+            "_testID",
+            "_testLOGIN",
+            "testPASSWORD",
+            "testFIRSTNAME",
+            "testLASTNAME",
+            "testEMAIL@test.com",
+            "123456789",
+            "01-01-1970",
+            "Male",
+            "testAVATARIMAGE.IMG",
+            true
+        )
+        val testUserID = userTestObject.id
+
 
         // WHEN
-        userService.addUser(Companion.userTestObject)
-        // or maybe "userRepository.save(SampleUser.userTestObject)"
+        userRepository.save(userTestObject)
 
         // THEN
         assertTrue(
-            compareUsers(Companion.userTestObject, userService.getUserById(testUserID).get()),
+            userTestObject == userService.getUserById(testUserID).get(),
             "Users are not the same (addUser failed)."
         )
+    }
+
+    @Test
+    fun `delete existing user`() {
+        // GIVEN (SampleUser.userTestObject)
+        val userTestObject = User(
+            "_testID",
+            "_testLOGIN",
+            "testPASSWORD",
+            "testFIRSTNAME",
+            "testLASTNAME",
+            "testEMAIL@test.com",
+            "123456789",
+            "01-01-1970",
+            "Male",
+            "testAVATARIMAGE.IMG",
+            true
+        )
+        val testUserID = userTestObject.id
 
         // WHEN
         userService.deleteUserById(testUserID)
@@ -44,50 +74,45 @@ class UserRepositoryTests {
     }
 
     @Test
-    fun userDataUpdateTest() {
+    fun `update user data by userRepository`() {
+        val userTestObject = User(
+            "_testID",
+            "_testLOGIN",
+            "testPASSWORD",
+            "testFIRSTNAME",
+            "testLASTNAME",
+            "testEMAIL@test.com",
+            "123456789",
+            "01-01-1970",
+            "Male",
+            "testAVATARIMAGE.IMG",
+            true)
+
         // GIVEN
         val newUserPhoneNumber: String = "987654321"
         val newUserGender: String = "Female"
 
         // WHEN
-        userService.addUser(Companion.updatedUserTestObject)
+        userRepository.save(userTestObject)
 
-        Companion.updatedUserTestObject.phone = newUserPhoneNumber
-        Companion.updatedUserTestObject.gender = newUserGender
+        userTestObject.phone = newUserPhoneNumber
+        userTestObject.gender = newUserGender
 
-        userRepository.save(Companion.updatedUserTestObject)
+        userRepository.save(userTestObject)
         // THEN
         assertTrue(
-            compareUsers(Companion.updatedUserTestObject, userService.getUserById(testUserID).get()),
+            userTestObject == userRepository.findUserByEmail(userTestObject.email).get(),
             "User has not been changed (update failed)."
         )
     }
 
-    @Test
-    fun userLoginTest() { // TODO
-        // GIVEN
-        var users: List<User> = userRepository.findAll()
-        println("users defined")
-        // WHEN
-
-        // THEN
-    }
 
     @BeforeEach
     fun beforeEach() {
+        val testUserID = "_testID"
         userService.deleteUserById(testUserID)
     }
 
-    fun compareUsers(user1: User, user2: User): Boolean {
-        return (user1.id == user2.id &&
-                user1.login == user2.login &&
-                user1.password == user2.password &&
-                user1.firstName == user2.firstName &&
-                user1.lastName == user2.lastName &&
-                user1.email == user2.email &&
-                user1.phone == user2.phone &&
-                user1.birthDate == user2.birthDate &&
-                user1.gender == user2.gender &&
-                user1.avatarImage == user2.avatarImage)
-    }
+
 }
+
