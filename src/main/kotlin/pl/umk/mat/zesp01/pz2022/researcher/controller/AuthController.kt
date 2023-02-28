@@ -33,6 +33,10 @@ class AuthController(@Autowired val userService: UserService, @Autowired val ref
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login failed: user does not exist.")
         }
 
+        if(!user.get().isConfirmed){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Login failed: account has not been activated.")
+        }
+
         try {
             val username= user.get().login
 
@@ -61,12 +65,12 @@ class AuthController(@Autowired val userService: UserService, @Autowired val ref
 
             //SEND THE REFRESH TOKEN COOKIE AND THE ACCESS TOKEN
             return ResponseEntity
-                .status(HttpStatus.OK)
+                .status(HttpStatus.CREATED)
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .body(gson.toJson(responseBody))
 
         } catch (error: Exception) {
-            return ResponseEntity.status(HttpStatus.OK).body("Something went wrong, please try again")
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Something went wrong, please try again")
         }
 
     }

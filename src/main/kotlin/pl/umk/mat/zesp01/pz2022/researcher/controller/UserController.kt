@@ -11,7 +11,6 @@ import pl.umk.mat.zesp01.pz2022.researcher.model.User
 import org.mindrot.jbcrypt.BCrypt
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.http.HttpHeaders
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 import pl.umk.mat.zesp01.pz2022.researcher.idgenerator.IdGenerator
 import pl.umk.mat.zesp01.pz2022.researcher.model.UserRegisterData
 import pl.umk.mat.zesp01.pz2022.researcher.repository.UserRepository
@@ -41,46 +40,63 @@ class UserController(
 
         val newUser = uRD.toUser()
 
-        //blok poniżej chyba należy przenieść do UserService
         newUser.password = BCrypt.hashpw(newUser.password, BCrypt.gensalt())
         newUser.id = IdGenerator().generateUserId(userService.getAllUserIds())
         userService.addUser(newUser)
 
         try {
-            val appUrl=ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString()
-            eventPublisher.publishEvent(OnRegistrationCompleteEvent(appUrl,newUser))
+            eventPublisher.publishEvent(OnRegistrationCompleteEvent(newUser))
         }catch (e:Exception){
             println(e)
         }
-
-
-
-
         return ResponseEntity.status(HttpStatus.CREATED).build()
+
+    }
+
+    @PostMapping("/user/resendVerificationMail")
+    fun resendVerificationEmail(
+        @RequestParam("username") username:String
+    ):ResponseEntity<String>{
+        val user = userService.getUserByLogin(username).orElse(null)
+
+        user?:return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+
+        try {
+            eventPublisher.publishEvent(OnRegistrationCompleteEvent(user))
+        }catch (e:Exception){
+            println(e)
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).build()
+
     }
 
     @GetMapping("/user/confirm")
     fun confirmAccount(
         @RequestParam("token") token:String
-    ){
-        val verificationToken = verificationTokenService.getTokenByJwt(token)
-        if (verificationToken.isEmpty){
-            TODO("error: Nieprawidłowy token")
+    ):ResponseEntity<String>{
+        try {
+            val verificationToken = verificationTokenService
+                .getTokenByJwt(token)
+                .orElseThrow()
+//                TODO("error: Nieprawidłowy token")
+
+            val user = userService
+                .getUserByLogin(verificationToken.login)
+                .orElseThrow()
+//                TODO("error: nawet nie wiem w jaki sposób ma ta sytuacja zaistnieć")
+
+            verificationTokenService.verifyVerificationToken(
+                verificationToken.jwt,
+                user)
+
+            user.isConfirmed=true
+            userService.userRepository.save(user)
+            return ResponseEntity.status(HttpStatus.CREATED).build()
+        }catch (_:Exception){
+
         }
-
-        val user = userService.getUserByLogin(verificationToken.get().login)
-        if(user.isEmpty){
-            TODO("error: nawet nie wiem w jaki sposób ma ta sytuacja zaistnieć")
-            println()
-        }
-
-        verificationTokenService.verifyVerificationToken(
-            verificationToken.get().jwt,
-            user.get().login)
-
-        user.get().isConfirmed=true
-
-        userService.userRepository.save(user.get())
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
     }
 
 

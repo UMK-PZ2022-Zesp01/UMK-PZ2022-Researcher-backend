@@ -3,9 +3,9 @@ package pl.umk.mat.zesp01.pz2022.researcher.service
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.autoconfigure.security.SecurityProperties.User
 import org.springframework.stereotype.Service
 import pl.umk.mat.zesp01.pz2022.researcher.idgenerator.IdGenerator
+import pl.umk.mat.zesp01.pz2022.researcher.model.User
 import pl.umk.mat.zesp01.pz2022.researcher.model.VerificationToken
 import pl.umk.mat.zesp01.pz2022.researcher.repository.VerificationTokenRepository
 import java.util.*
@@ -40,11 +40,11 @@ class VerificationTokenService(@Autowired val verificationTokenRepository: Verif
         return verificationToken
     }
 
-    fun verifyVerificationToken(jwt: String, username: String):Boolean{
+    fun verifyVerificationToken(jwt: String, user:User):Boolean{
         try {
             JWT
                 .require(Algorithm.HMAC256(VERIFICATION_TOKEN_SECRET))
-                .withClaim("username",username)
+                .withClaim("username",user.login)
                 .build()
                 .verify(jwt)
 
