@@ -44,31 +44,27 @@ class UserController(
         newUser.id = IdGenerator().generateUserId(userService.getAllUserIds())
         userService.addUser(newUser)
 
-        try {
-            eventPublisher.publishEvent(OnRegistrationCompleteEvent(newUser))
-        }catch (e:Exception){
-            println(e)
-        }
+//        try {
+//            eventPublisher.publishEvent(OnRegistrationCompleteEvent(newUser))
+//        }catch (e:Exception){
+//            println(e)
+//        }
         return ResponseEntity.status(HttpStatus.CREATED).build()
 
     }
 
-    @PostMapping("/user/resendVerificationMail")
-    fun resendVerificationEmail(
+    @GetMapping("/user/sendVerificationMail")
+    fun sendVerificationEmail(
         @RequestParam("username") username:String
     ):ResponseEntity<String>{
-        val user = userService.getUserByLogin(username).orElse(null)
-
-        user?:return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
-
         try {
+            val user = userService.getUserByLogin(username).orElseThrow()
+            if (user.isConfirmed)throw(Exception())
             eventPublisher.publishEvent(OnRegistrationCompleteEvent(user))
+            return ResponseEntity.status(HttpStatus.CREATED).body(gson.toJson(user.email))
         }catch (e:Exception){
-            println(e)
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
         }
-        return ResponseEntity.status(HttpStatus.CREATED).build()
-
     }
 
     @GetMapping("/user/confirm")
@@ -86,6 +82,8 @@ class UserController(
                 .orElseThrow()
 //                TODO("error: nawet nie wiem w jaki sposób ma ta sytuacja zaistnieć")
 
+            if (user.isConfirmed)return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+
             verificationTokenService.verifyVerificationToken(
                 verificationToken.jwt,
                 user)
@@ -94,9 +92,8 @@ class UserController(
             userService.userRepository.save(user)
             return ResponseEntity.status(HttpStatus.CREATED).build()
         }catch (_:Exception){
-
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
     }
 
 
