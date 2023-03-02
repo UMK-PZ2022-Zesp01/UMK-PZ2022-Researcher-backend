@@ -21,6 +21,11 @@ class UserService(
 
     fun addUser(user: User): User = userRepository.insert(user)
 
+    /*** UPDATE METHODS ***/
+
+    fun updateUserById(id: String, user: User) =
+        mongoOperations.findAndReplace(Query.query(Criteria.where("_id").`is`(id)), user)
+
     /*** DELETE METHODS ***/
     fun deleteUserById(id: String) = userRepository.deleteById(id)
 
