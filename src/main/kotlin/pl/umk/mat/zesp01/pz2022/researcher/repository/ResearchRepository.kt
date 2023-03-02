@@ -1,0 +1,13 @@
+package pl.umk.mat.zesp01.pz2022.researcher.repository
+
+import org.springframework.data.mongodb.repository.MongoRepository
+import org.springframework.data.mongodb.repository.Query
+import org.springframework.stereotype.Repository
+import pl.umk.mat.zesp01.pz2022.researcher.model.Research
+import java.util.*
+
+@Repository
+interface ResearchRepository : MongoRepository<Research, String> {
+    @Query("{'userId':?0}")
+    fun findResearchesById(userId: String): Optional<List<Research>>
+}

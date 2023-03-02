@@ -21,6 +21,10 @@ dependencies {
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+	implementation("org.mindrot:jbcrypt:0.4")
+	implementation("com.auth0:java-jwt:4.2.1")
+	implementation("com.google.code.gson:gson:2.10.1")
+
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
