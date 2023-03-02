@@ -20,7 +20,6 @@ import pl.umk.mat.zesp01.pz2022.researcher.service.*
 class UserController(
     @Autowired val userService: UserService,
     @Autowired val userRepository: UserRepository,
-    @Autowired val refreshTokenService: RefreshTokenService,
     @Autowired val verificationTokenService: VerificationTokenService,
     @Autowired val eventPublisher: ApplicationEventPublisher
 ) {
@@ -44,11 +43,6 @@ class UserController(
         newUser.id = IdGenerator().generateUserId(userService.getAllUserIds())
         userService.addUser(newUser)
 
-//        try {
-//            eventPublisher.publishEvent(OnRegistrationCompleteEvent(newUser))
-//        }catch (e:Exception){
-//            println(e)
-//        }
         return ResponseEntity.status(HttpStatus.CREATED).build()
 
     }
@@ -60,6 +54,9 @@ class UserController(
         try {
             val user = userService.getUserByLogin(username).orElseThrow()
             if (user.isConfirmed)throw(Exception())
+
+            verificationTokenService.deleteUserTokens(user)
+
             eventPublisher.publishEvent(OnRegistrationCompleteEvent(user))
             return ResponseEntity.status(HttpStatus.CREATED).body(gson.toJson(user.email))
         }catch (e:Exception){
@@ -90,6 +87,8 @@ class UserController(
 
             user.isConfirmed=true
             userService.userRepository.save(user)
+
+            verificationTokenService.deleteUserTokens(user)
             return ResponseEntity.status(HttpStatus.CREATED).build()
         }catch (_:Exception){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()

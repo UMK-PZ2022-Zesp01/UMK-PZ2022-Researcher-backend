@@ -61,6 +61,14 @@ class VerificationTokenService(@Autowired val verificationTokenRepository: Verif
 
     /*** DELETE METHODS ***/
 
+    fun deleteUserTokens(user:User){
+        val tokens = getTokensByLogin(user.login).orElse(null)
+
+        tokens?:return
+
+        tokens.forEach{ verificationToken -> deleteToken(verificationToken.id) }
+    }
+
     fun deleteToken(id: String) = verificationTokenRepository.deleteById(id)
 
     //    fun deleteExpiredTokens(){
