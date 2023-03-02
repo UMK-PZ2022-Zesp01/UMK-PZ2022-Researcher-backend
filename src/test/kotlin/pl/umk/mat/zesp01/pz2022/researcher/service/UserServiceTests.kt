@@ -1,4 +1,4 @@
-package pl.umk.mat.zesp01.pz2022.researcher.users
+package pl.umk.mat.zesp01.pz2022.researcher.service
 
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -8,19 +8,18 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import pl.umk.mat.zesp01.pz2022.researcher.model.User
 import pl.umk.mat.zesp01.pz2022.researcher.repository.UserRepository
-import pl.umk.mat.zesp01.pz2022.researcher.service.UserService
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("integration")
-class UserRepositoryTests {
+class UserServiceTests {
 
     @Autowired lateinit var userService: UserService
     @Autowired lateinit var userRepository: UserRepository
 
 
     @Test
-    fun `add new User`() {
-        // GIVEN (SampleUser.userTestObject)
+    fun `add new User by UserService`() {
+        // GIVEN
         val userTestObject = User(
             "_testID",
             "_testLOGIN",
@@ -38,18 +37,18 @@ class UserRepositoryTests {
 
 
         // WHEN
-        userRepository.save(userTestObject)
+        userService.addUser(userTestObject)
 
         // THEN
         assertTrue(
-            userTestObject == userService.getUserById(testUserID).get(),
+            userTestObject == userRepository.findById(testUserID).get(),
             "Users are not the same (addUser failed)."
         )
     }
 
     @Test
-    fun `delete existing user`() {
-        // GIVEN (SampleUser.userTestObject)
+    fun `delete existing user by UserService`() {
+        // GIVEN
         val userTestObject = User(
             "_testID",
             "_testLOGIN",
@@ -64,17 +63,20 @@ class UserRepositoryTests {
             true
         )
         val testUserID = userTestObject.id
+        userRepository.save(userTestObject)
 
         // WHEN
         userService.deleteUserById(testUserID)
-        // or maybe userRepository.deleteById(testUserID)
 
         // THEN
-        assertTrue(userService.getUserById(testUserID).isEmpty, "User has not been deleted (deleteUser failed).")
+        assertTrue(userRepository.findById(testUserID).isEmpty, "User has not been deleted (deleteUser failed).")
     }
 
+
     @Test
-    fun `update user data by userRepository`() {
+    fun `update existing User data by userService`() {
+        // GIVEN
+
         val userTestObject = User(
             "_testID",
             "_testLOGIN",
@@ -88,20 +90,23 @@ class UserRepositoryTests {
             "testAVATARIMAGE.IMG",
             true)
 
-        // GIVEN
+        val testUserID = userTestObject.id
+
         val newUserPhoneNumber: String = "987654321"
         val newUserGender: String = "Female"
 
-        // WHEN
         userRepository.save(userTestObject)
+
+        // WHEN
 
         userTestObject.phone = newUserPhoneNumber
         userTestObject.gender = newUserGender
 
-        userRepository.save(userTestObject)
+        userService.updateUserById(testUserID, userTestObject)
+
         // THEN
         assertTrue(
-            userTestObject == userRepository.findUserByEmail(userTestObject.email).get(),
+            userTestObject == userRepository.findById(testUserID).get(),
             "User has not been changed (update failed)."
         )
     }
@@ -109,8 +114,7 @@ class UserRepositoryTests {
 
     @BeforeEach
     fun beforeEach() {
-        val testUserID = "_testID"
-        userService.deleteUserById(testUserID)
+        userRepository.deleteAll()
     }
 
 
