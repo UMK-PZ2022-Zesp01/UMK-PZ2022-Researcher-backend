@@ -6,7 +6,10 @@ import org.springframework.data.mongodb.core.MongoOperations
 import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Service
+import pl.umk.mat.zesp01.pz2022.researcher.idgenerator.IdGenerator
 import pl.umk.mat.zesp01.pz2022.researcher.model.Research
+import pl.umk.mat.zesp01.pz2022.researcher.model.ResearchRequest
+import pl.umk.mat.zesp01.pz2022.researcher.model.ResearchResponse
 import pl.umk.mat.zesp01.pz2022.researcher.repository.ResearchRepository
 
 @Service
@@ -17,7 +20,10 @@ class ResearchService(
 
     /*** ADD METHODS ***/
 
-    fun addResearch(research: Research): Research = researchRepository.insert(research)
+    fun addResearch(research: Research): Research {
+        research.id = IdGenerator().generateResearchId(getAllResearchIds())
+        return researchRepository.insert(research)
+    }
 
     /*** DELETE METHODS ***/
 

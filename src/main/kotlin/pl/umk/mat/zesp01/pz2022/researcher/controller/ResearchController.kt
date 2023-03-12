@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import pl.umk.mat.zesp01.pz2022.researcher.idgenerator.IdGenerator
 import pl.umk.mat.zesp01.pz2022.researcher.model.Research
+import pl.umk.mat.zesp01.pz2022.researcher.model.ResearchRequest
 import pl.umk.mat.zesp01.pz2022.researcher.repository.ResearchRepository
 import pl.umk.mat.zesp01.pz2022.researcher.service.ResearchService
 
@@ -17,8 +17,8 @@ class ResearchController(
     /*** POST MAPPINGS ***/
 
     @PostMapping("/research/add")
-    fun addResearch(@RequestBody research: Research): ResponseEntity<String> {
-        research.id = IdGenerator().generateResearchId(researchService.getAllResearchIds())
+    fun addResearch(@RequestBody researchRequest: ResearchRequest): ResponseEntity<String> {
+        val research = researchRequest.toResearch()
         researchService.addResearch(research)
         return ResponseEntity.status(HttpStatus.CREATED).build()
     }

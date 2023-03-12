@@ -4,7 +4,7 @@ class IdGenerator {
     fun generateUserId(userIdList: List<String>): String {
         var userId: String
         // userIdList contains strings like: "{"id": "ABCDEFGH"}", so we need to extract the 'ABCDEFGH' part
-        val userIdListSubstr = userIdList.map { id -> id.substring(9, 9+8) }
+        val userIdListSubstr = userIdList.map { id -> id.substring(9, 9 + 8) }
 
         do {
             userId = ""
@@ -17,8 +17,8 @@ class IdGenerator {
     }
 
     fun generateResearchId(researchIdList: List<String>): String {
-        var researchId = ""
-        val researchIdListSubstr = researchIdList.map { id -> id.substring(9, 9+6) }
+        var researchId: String
+        val researchIdListSubstr = researchIdList.map { id -> id.substring(9, 9 + 6) }
 
         do {
             researchId = ""
@@ -35,5 +35,19 @@ class IdGenerator {
         for (i in 1..6)
             tokenId += listOf(('A'..'Z'), ('a'..'z'), ('0'..'9')).flatten().random()
         return tokenId
+    }
+
+    fun generatePhotoId(photoIdList: List<String>): String {
+        var photoId: String
+        val photoIdListSubstr = photoIdList.map { id -> id.substring(9, 9 + 6) }
+
+        do {
+            photoId = ""
+            for (i in 1..6) {
+                photoId += listOf(('A'..'Z'), ('a'..'z'), ('0'..'9')).flatten().random()
+            }
+        } while (photoIdListSubstr.contains(photoId))
+
+        return photoId
     }
 }

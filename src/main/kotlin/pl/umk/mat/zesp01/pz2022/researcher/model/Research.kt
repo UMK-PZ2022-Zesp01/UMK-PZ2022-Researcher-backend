@@ -7,32 +7,63 @@ import org.springframework.data.mongodb.core.mapping.Field
 @Document("Researches")
 class Research {
     @Id var id: String = ""
-    @Field var creatorId: String = ""
-    @Field var participants = listOf<User>()
+//    @Field var creatorId: String = ""
     @Field var title: String = ""
     @Field var description: String = ""
-    @Field var durationTimeInMinutes: Int = 0
+    @Field var posterId: String = ""
+    @Field var participantLimit: Int = 0
+    @Field var participants = listOf<User>()
     @Field var begDate: String = ""
     @Field var endDate: String = ""
     @Field var isActive: Boolean = false
-    @Field var locationForm: String = ""
-    @Field var researchPlace: String = ""
-    @Field var researchImage: String = ""
-    @Field var minAgeRequirement: Int = 0
-    @Field var maxAgeRequirement: Int = 0
-    @Field var participantLimit: Int = 0
-    @Field var genderRequirement = listOf<String>()
-    @Field var reward = listOf<String>()
+    @Field var location: ResearchLocation? = null
+//    @Field var rewards: List<ResearchReward> = listOf()
+//    @Field var requirement = listOf<ResearchRequirement>()
 }
-
-class ResearchRequest(
-    var id: String,
-    var researchCreatorId: String
-    // TODO
-)
 
 class ResearchResponse(
     var id: String,
     var researchCreatorId: String
     // TODO
+)
+
+class ResearchRequest(
+    val title: String,
+    val description: String,
+    val posterId: String,
+    val begDate: String,
+    val endDate: String,
+    val location: ResearchLocation
+) {
+    fun toResearch(): Research {
+        val research = Research()
+
+        research.title = this.title
+        research.description = this.description
+        research.posterId = this.posterId
+        research.begDate = this.begDate
+        research.endDate = this.endDate
+        research.location = this.location
+
+        return research
+    }
+}
+
+class ResearchLocation(
+    var form: String = "",
+    var place: String = ""
+)
+
+class ResearchReward(
+    var type: String = "",
+    var cashValue: Int = 0,
+    var itemName: String = ""
+)
+
+class ResearchRequirement(
+    var type: String = "",
+    var ageMin: Int = -1,
+    var ageMax: Int = -1,
+    var genderNames: String = "",
+    var custom: String = ""
 )
