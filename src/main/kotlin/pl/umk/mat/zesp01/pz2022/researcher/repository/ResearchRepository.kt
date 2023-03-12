@@ -8,6 +8,4 @@ import java.util.*
 
 @Repository
 interface ResearchRepository : MongoRepository<Research, String> {
-    @Query("{'userId':?0}")
-    fun findResearchesById(userId: String): Optional<List<Research>>
 }

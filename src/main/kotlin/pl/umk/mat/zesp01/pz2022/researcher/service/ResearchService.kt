@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.MongoOperations
 import org.springframework.data.mongodb.core.aggregation.Aggregation
+import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Service
 import pl.umk.mat.zesp01.pz2022.researcher.model.Research
@@ -31,9 +32,9 @@ class ResearchService(
         researchRepository.findById(id)
             .orElseThrow { throw RuntimeException("Cannot find User by Id") }
 
-    fun getResearchesByCreatorId(creatorId: String): List<Research> =
-        researchRepository.findResearchesById(creatorId)
-            .orElseThrow { throw RuntimeException("Cannot find Creator by Id") }
+    fun getResearchesByCreatorId(creatorId: String): List<Research> =mongoOperations.find(
+            Query().addCriteria(Criteria.where("creatorId").`is`(creatorId)),Research::class.java
+    )
 
     fun sortResearchesByTitle(): List<Research> =
         mongoOperations.find(
