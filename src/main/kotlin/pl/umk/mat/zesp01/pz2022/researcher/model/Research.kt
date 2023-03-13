@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Field
 class Research {
     @Id var id: String = ""
     @Field var creatorId: String = ""
+    @Field var creatorLogin: String = ""
     @Field var participants = listOf<User>()
     @Field var title: String = ""
     @Field var description: String = ""
@@ -27,12 +28,14 @@ class Research {
 
 class ResearchRequest(
     var id: String,
-    var researchCreatorId: String
+    var researchCreatorId: String,
+    var researchCreatorLogin: String
     // TODO
 )
 
 class ResearchResponse(
     var id: String,
-    var researchCreatorId: String
+    var researchCreatorId: String,
+    var researchCreatorLogin: String
     // TODO
 )

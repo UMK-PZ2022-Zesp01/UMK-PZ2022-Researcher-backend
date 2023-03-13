@@ -65,6 +65,10 @@ class ResearchController(
     fun getResearchByUserId(@PathVariable creatorId: String): ResponseEntity<List<Research>> =
         ResponseEntity.status(HttpStatus.OK).body(researchService.getResearchesByCreatorId(creatorId))
 
+    @GetMapping("/research/creatorLogin/{creatorLogin}")
+    fun getResearchByUserLogin(@PathVariable creatorLogin: String): ResponseEntity<List<Research>> =
+            ResponseEntity.status(HttpStatus.OK).body(researchService.getResearchesByCreatorLogin(creatorLogin))
+
     @GetMapping("/researches/sorted")
     fun getSortedResearches(): ResponseEntity<List<Research>> =
         ResponseEntity.status(HttpStatus.OK).body(researchService.sortResearchesByTitle())

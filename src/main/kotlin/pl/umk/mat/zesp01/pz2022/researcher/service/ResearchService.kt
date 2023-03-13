@@ -36,6 +36,10 @@ class ResearchService(
             Query().addCriteria(Criteria.where("creatorId").`is`(creatorId)),Research::class.java
     )
 
+    fun getResearchesByCreatorLogin(creatorLogin: String): List<Research> =mongoOperations.find(
+            Query().addCriteria(Criteria.where("creatorLogin").`is`(creatorLogin)),Research::class.java
+    )
+
     fun sortResearchesByTitle(): List<Research> =
         mongoOperations.find(
             Query().with(Sort.by(Sort.Direction.ASC, "title")),
