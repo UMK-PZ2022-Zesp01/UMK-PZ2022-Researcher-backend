@@ -10,9 +10,9 @@ import pl.umk.mat.zesp01.pz2022.researcher.model.VerificationToken
 import pl.umk.mat.zesp01.pz2022.researcher.repository.VerificationTokenRepository
 import java.util.*
 
-val VERIFICATION_TOKEN_SECRET: String = System.getenv("VERIFICATION_TOKEN_SECRET")
-const val VERIFICATION_EXPIRES_SEC = 86400
 
+val VERIFICATION_TOKEN_SECRET: String = verificationTokenSecretInitialize()
+const val VERIFICATION_EXPIRES_SEC = 86400
 
 @Service
 class VerificationTokenService(@Autowired val verificationTokenRepository: VerificationTokenRepository) {
@@ -86,6 +86,14 @@ class VerificationTokenService(@Autowired val verificationTokenRepository: Verif
 
     fun getTokenByJwt(jwt: String): Optional<VerificationToken> = verificationTokenRepository.findTokenByJwt(jwt)
 
+}
 
+/*** Token initialize method ***/
 
+private fun verificationTokenSecretInitialize(): String{
+    if (System.getenv("VERIFICATION_TOKEN_SECRET")!=null)
+        return System.getenv("VERIFICATION_TOKEN_SECRET")
+
+    // if environment variable is not specified return Token_SECRET_for_Tests
+    return "beed319b8d87854c699a7ee5b7682dda42f5e85bf373d86774eb3ece227099eb87ad77e72e7a1facc2f2ebad4bef340d188fa01c2cfefd7380857e9aeff268b2"
 }
