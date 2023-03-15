@@ -22,6 +22,7 @@ data class User(
     fun toUserProfileDTO(): UserProfileDTO {
         val userProfileDTO = UserProfileDTO()
 
+        userProfileDTO.id = this.id
         userProfileDTO.login = this.login
         userProfileDTO.firstName = this.firstName
         userProfileDTO.lastName = this.lastName
@@ -36,6 +37,7 @@ data class User(
 }
 
 class UserProfileDTO(
+    var id: String = "",
     var login: String = "",
     var firstName: String = "",
     var lastName: String = "",

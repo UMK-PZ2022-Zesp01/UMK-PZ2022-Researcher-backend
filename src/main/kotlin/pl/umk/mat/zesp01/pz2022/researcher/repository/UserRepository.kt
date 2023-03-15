@@ -29,5 +29,4 @@ interface UserRepository : MongoRepository<User, String> {
 
     @Query("{'lastName':?0}")
     fun findUserByLastName(lastName: String): Optional<List<User>>
-
 }

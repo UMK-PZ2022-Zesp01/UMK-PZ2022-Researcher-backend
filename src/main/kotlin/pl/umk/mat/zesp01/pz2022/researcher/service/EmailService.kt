@@ -13,14 +13,14 @@ import org.springframework.scheduling.annotation.Async
 import org.springframework.scheduling.annotation.EnableAsync
 import pl.umk.mat.zesp01.pz2022.researcher.model.User
 
-val MAIL : String = System.getenv("MAIL")
-val MAIL_PWD : String = System.getenv("MAIL_PASSWORD")
+val MAIL: String = System.getenv("MAIL")
+val MAIL_PWD: String = System.getenv("MAIL_PASSWORD")
 val FRONT_URL: String = System.getenv("FRONT_URL")
 
 @Bean
 fun getJavaMailSender(): JavaMailSender {
     val mailSender = JavaMailSenderImpl()
-    mailSender.host ="smtp.gmail.com"
+    mailSender.host = "smtp.gmail.com"
     mailSender.port = 587
 
     mailSender.username = MAIL
@@ -35,25 +35,9 @@ fun getJavaMailSender(): JavaMailSender {
     return mailSender
 }
 
-//@Service
-//class EmailService(@Autowired val emailSender: JavaMailSender){
-//    fun sendVerificationEmail(to:String){
-//
-//        val uri = VEFIFICATION_URI_PREFIX
-//        val message = SimpleMailMessage()
-//        message.setTo(to)
-//        message.subject = "Confirm your email address"
-//        message.text =
-//            "Click the link below to activate your account\n $uri"
-//
-//        emailSender.send(message)
-//    }
-//}
-
 class OnRegistrationCompleteEvent(
     val user: User
 ) : ApplicationEvent(user)
-
 
 @Configuration
 @EnableAsync
@@ -66,7 +50,7 @@ class RegistrationListener(
         this.sendConfirmationEmail(event)
     }
 
-    fun sendConfirmationEmail(event:OnRegistrationCompleteEvent){
+    fun sendConfirmationEmail(event: OnRegistrationCompleteEvent) {
         val user = event.user
         val recipientAddress = user.email
         val subject = "Researcher | Potwierdzenie rejestracji"
@@ -78,8 +62,8 @@ class RegistrationListener(
         val mail = SimpleMailMessage()
         mail.setTo(recipientAddress)
 //        mail.from = "noreply@researcher.pz2022.gmail.com"
-        mail.subject=subject
-        mail.text=message
+        mail.subject = subject
+        mail.text = message
         javaMailSender.send(mail)
     }
 }

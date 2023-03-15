@@ -13,7 +13,7 @@ class ImageService(
     @Autowired val imageRepository: ImageRepository,
     @Autowired val mongoOperations: MongoOperations
 ) {
-    fun addImage(image: Image): Image{
+    fun addImage(image: Image): Image {
         image.id = IdGenerator().generatePhotoId(getAllPhotoIds())
         return imageRepository.insert(image)
     }

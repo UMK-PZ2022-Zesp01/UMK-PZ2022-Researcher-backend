@@ -12,7 +12,6 @@ interface VerificationTokenRepository : MongoRepository<VerificationToken, Strin
     fun findTokenById(id: String): Optional<VerificationToken>
 
     @Query("{'login':?0}")
-
     fun findTokensByLogin(userId: String): Optional<List<VerificationToken>>
 
     @Query("{'expires':?0}")

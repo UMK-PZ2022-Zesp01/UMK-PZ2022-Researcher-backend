@@ -15,11 +15,13 @@ const val VERIFICATION_EXPIRES_SEC = 86400
 
 
 @Service
-class VerificationTokenService(@Autowired val verificationTokenRepository: VerificationTokenRepository) {
+class VerificationTokenService(
+    @Autowired val verificationTokenRepository: VerificationTokenRepository
+) {
 
     /*** ADD METHODS ***/
 
-    fun createToken(username:String):String{
+    fun createToken(username: String): String {
         val payload = mapOf(Pair("username", username))
 
         val verificationToken = JWT
@@ -30,29 +32,28 @@ class VerificationTokenService(@Autowired val verificationTokenRepository: Verif
 
         val verificationTokenDB = VerificationToken()
 
-        verificationTokenDB.id=IdGenerator().generateTokenId()
-        verificationTokenDB.login=username
-        verificationTokenDB.expires=Date(System.currentTimeMillis() + VERIFICATION_EXPIRES_SEC * 1000).toString()
-        verificationTokenDB.jwt=verificationToken
+        verificationTokenDB.id = IdGenerator().generateTokenId()
+        verificationTokenDB.login = username
+        verificationTokenDB.expires = Date(System.currentTimeMillis() + VERIFICATION_EXPIRES_SEC * 1000).toString()
+        verificationTokenDB.jwt = verificationToken
 
         verificationTokenRepository.insert(verificationTokenDB)
 
         return verificationToken
     }
 
-    fun verifyVerificationToken(jwt: String, user:User):Boolean{
+    fun verifyVerificationToken(jwt: String, user: User): Boolean =
         try {
             JWT
                 .require(Algorithm.HMAC256(VERIFICATION_TOKEN_SECRET))
-                .withClaim("username",user.login)
+                .withClaim("username", user.login)
                 .build()
                 .verify(jwt)
 
-            return true
-        }catch (e:Exception){
-            return false
+            true
+        } catch (e: Exception) {
+            false
         }
-    }
 
     fun addToken(token: VerificationToken): VerificationToken {
         token.id = IdGenerator().generateTokenId()
@@ -61,31 +62,34 @@ class VerificationTokenService(@Autowired val verificationTokenRepository: Verif
 
     /*** DELETE METHODS ***/
 
-    fun deleteUserTokens(user:User){
+    fun deleteUserTokens(user: User) {
         val tokens = getTokensByLogin(user.login).orElse(null)
-
-        tokens?:return
-
-        tokens.forEach{ verificationToken -> deleteToken(verificationToken.id) }
+        tokens ?: return
+        tokens.forEach { verificationToken -> deleteToken(verificationToken.id) }
     }
 
-    fun deleteToken(id: String) = verificationTokenRepository.deleteById(id)
+    fun deleteToken(id: String) =
+        verificationTokenRepository.deleteById(id)
 
     //    fun deleteExpiredTokens(){
 //    }
 
     /*** ADD METHODS ***/
 
-    fun getAllTokens(): List<VerificationToken> = verificationTokenRepository.findAll()
+    fun getAllTokens(): List<VerificationToken> =
+        verificationTokenRepository.findAll()
 
-    fun getTokenById(id: String): Optional<VerificationToken> = verificationTokenRepository.findTokenById(id)
+    fun getTokenById(id: String): Optional<VerificationToken> =
+        verificationTokenRepository.findTokenById(id)
 
-    fun getTokensByLogin(login: String): Optional<List<VerificationToken>> = verificationTokenRepository.findTokensByLogin(login)
+    fun getTokensByLogin(login: String): Optional<List<VerificationToken>> =
+        verificationTokenRepository.findTokensByLogin(login)
 
-    fun getTokenByExpires(date: String): Optional<List<VerificationToken>> = verificationTokenRepository.findTokensByExpires(date)
+    fun getTokenByExpires(date: String): Optional<List<VerificationToken>> =
+        verificationTokenRepository.findTokensByExpires(date)
 
-    fun getTokenByJwt(jwt: String): Optional<VerificationToken> = verificationTokenRepository.findTokenByJwt(jwt)
-
+    fun getTokenByJwt(jwt: String): Optional<VerificationToken> =
+        verificationTokenRepository.findTokenByJwt(jwt)
 
 
 }

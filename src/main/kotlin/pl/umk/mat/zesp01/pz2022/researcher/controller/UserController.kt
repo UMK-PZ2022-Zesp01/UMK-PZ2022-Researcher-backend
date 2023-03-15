@@ -47,27 +47,24 @@ class UserController(
 
     }
 
+    // 'return' lifted out of 'try', check whether it causes any errors
     @GetMapping("/user/sendVerificationMail")
-    fun sendVerificationEmail(
-        @RequestParam("username") username:String
-    ):ResponseEntity<String>{
-        try {
+    fun sendVerificationEmail(@RequestParam("username") username: String): ResponseEntity<String> {
+        return try {
             val user = userService.getUserByLogin(username).orElseThrow()
-            if (user.isConfirmed)throw(Exception())
+            if (user.isConfirmed) throw (Exception())
 
             verificationTokenService.deleteUserTokens(user)
 
             eventPublisher.publishEvent(OnRegistrationCompleteEvent(user))
-            return ResponseEntity.status(HttpStatus.CREATED).body(gson.toJson(user.email))
-        }catch (e:Exception){
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+            ResponseEntity.status(HttpStatus.CREATED).body(gson.toJson(user.email))
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.NO_CONTENT).build()
         }
     }
 
     @GetMapping("/user/confirm")
-    fun confirmAccount(
-        @RequestParam("token") token:String
-    ):ResponseEntity<String>{
+    fun confirmAccount(@RequestParam("token") token: String): ResponseEntity<String> {
         try {
             val verificationToken = verificationTokenService
                 .getTokenByJwt(token)
@@ -79,18 +76,19 @@ class UserController(
                 .orElseThrow()
 //                TODO("error: nawet nie wiem w jaki sposób ma ta sytuacja zaistnieć")
 
-            if (user.isConfirmed)return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+            if (user.isConfirmed) return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
 
             verificationTokenService.verifyVerificationToken(
                 verificationToken.jwt,
-                user)
+                user
+            )
 
-            user.isConfirmed=true
+            user.isConfirmed = true
             userService.userRepository.save(user)
 
             verificationTokenService.deleteUserTokens(user)
             return ResponseEntity.status(HttpStatus.CREATED).build()
-        }catch (_:Exception){
+        } catch (_: Exception) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
         }
     }
@@ -119,9 +117,7 @@ class UserController(
     /*** GET MAPPINGS ***/
 
     @GetMapping("/user/current")
-    fun getUserProfile(
-        @RequestHeader httpHeaders: HttpHeaders
-    ): ResponseEntity<String> {
+    fun getUserProfile(@RequestHeader httpHeaders: HttpHeaders): ResponseEntity<String> {
         val jwt = httpHeaders["Authorization"]
         jwt ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
@@ -136,18 +132,16 @@ class UserController(
                 .claims
                 .getValue("username")
                 .toString()
-            username = username.substring(1,username.length-1)
+            username = username.substring(1, username.length - 1)
 
             //If claimed user does not exist in db there is something wrong with the token
             val user = userService.getUserByLogin(username)
             if (user.isEmpty) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
-            //
-            val data= userService
+            val data = userService
                 .getUserByLogin(username)
                 .get()
                 .toUserProfileDTO()
-
 
             return ResponseEntity.status(HttpStatus.OK).body(gson.toJson(data))
         } catch (e: java.lang.Exception) {

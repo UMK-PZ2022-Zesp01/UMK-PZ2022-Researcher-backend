@@ -1,53 +1,47 @@
 package pl.umk.mat.zesp01.pz2022.researcher.idgenerator
 
 class IdGenerator {
-    fun generateUserId(userIdList: List<String>): String {
-        var userId: String
-        // userIdList contains strings like: "{"id": "ABCDEFGH"}", so we need to extract the 'ABCDEFGH' part
-        val userIdListSubstr = userIdList.map { id -> id.substring(9, 9 + 8) }
 
-        do {
-            userId = ""
-            for (i in 1..8) {
-                userId += listOf(('A'..'Z'), ('a'..'z'), ('0'..'9')).flatten().random()
-            }
-        } while (userIdListSubstr.contains(userId))
+    // userIdList in functions below (generate...Id) contains strings like
+    // {"id": "ABCDEFGH"}
+    // so we need to extract the 'ABCDEFGH' part with use of function 'retrieveIds'
+    private fun retrieveIds(list: List<String>, idLength: Int): List<String> =
+        list.map { id -> id.substring(9, 9 + idLength) }
 
-        return userId
+    private fun generateRandomId(idLength: Int): String {
+        var id = ""
+        for (i in 1..idLength) {
+            id += listOf(('A'..'Z'), ('a'..'z'), ('0'..'9')).flatten().random()
+        }
+        return id
     }
 
-    fun generateResearchId(researchIdList: List<String>): String {
-        var researchId: String
-        val researchIdListSubstr = researchIdList.map { id -> id.substring(9, 9 + 6) }
-
-        do {
-            researchId = ""
-            for (i in 1..6) {
-                researchId += listOf(('A'..'Z'), ('a'..'z'), ('0'..'9')).flatten().random()
-            }
-        } while (researchIdListSubstr.contains(researchId))
-
-        return researchId
+    // function generates ID that is not in list of used IDs
+    private fun generateUniqueId(usedIds: List<String>, idLength: Int): String {
+        var id: String
+        do id = generateRandomId(idLength)
+        while (usedIds.contains(id))
+        return id
     }
 
-    fun generateTokenId(): String {
-        var tokenId = ""
-        for (i in 1..6)
-            tokenId += listOf(('A'..'Z'), ('a'..'z'), ('0'..'9')).flatten().random()
-        return tokenId
-    }
+    fun generateUserId(userIdList: List<String>): String =
+        generateUniqueId(
+            retrieveIds(userIdList, 8),
+            8
+        )
 
-    fun generatePhotoId(photoIdList: List<String>): String {
-        var photoId: String
-        val photoIdListSubstr = photoIdList.map { id -> id.substring(9, 9 + 6) }
+    fun generateResearchId(researchIdList: List<String>): String =
+        generateUniqueId(
+            retrieveIds(researchIdList, 6),
+            6
+        )
 
-        do {
-            photoId = ""
-            for (i in 1..6) {
-                photoId += listOf(('A'..'Z'), ('a'..'z'), ('0'..'9')).flatten().random()
-            }
-        } while (photoIdListSubstr.contains(photoId))
+    fun generateTokenId(): String =
+        generateRandomId(6)
 
-        return photoId
-    }
+    fun generatePhotoId(photoIdList: List<String>): String =
+        generateUniqueId(
+            retrieveIds(photoIdList, 6),
+            6
+        )
 }

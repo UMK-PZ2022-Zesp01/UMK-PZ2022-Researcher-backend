@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Field
 class Research {
     @Id var id: String = ""
 //    @Field var creatorId: String = ""
+    @Field var creatorLogin: String = ""
     @Field var title: String = ""
     @Field var description: String = ""
     @Field var posterId: String = ""
@@ -17,7 +18,7 @@ class Research {
     @Field var endDate: String = ""
     @Field var isActive: Boolean = false
     @Field var location: ResearchLocation? = null
-//    @Field var rewards: List<ResearchReward> = listOf()
+    @Field var rewards = listOf<ResearchReward>()
 //    @Field var requirement = listOf<ResearchRequirement>()
 }
 
@@ -30,20 +31,26 @@ class ResearchResponse(
 class ResearchRequest(
     val title: String,
     val description: String,
+    val creatorLogin: String,
     val posterId: String,
     val begDate: String,
     val endDate: String,
-    val location: ResearchLocation
+    val participantLimit: Int,
+    val location: ResearchLocation,
+    val rewards: List<ResearchReward>
 ) {
     fun toResearch(): Research {
         val research = Research()
 
         research.title = this.title
         research.description = this.description
+        research.creatorLogin = this.creatorLogin
         research.posterId = this.posterId
         research.begDate = this.begDate
         research.endDate = this.endDate
+        research.participantLimit = this.participantLimit
         research.location = this.location
+        research.rewards = this.rewards
 
         return research
     }
@@ -56,8 +63,7 @@ class ResearchLocation(
 
 class ResearchReward(
     var type: String = "",
-    var cashValue: Int = 0,
-    var itemName: String = ""
+    var value: String = ""
 )
 
 class ResearchRequirement(

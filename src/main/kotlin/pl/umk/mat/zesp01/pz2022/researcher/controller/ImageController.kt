@@ -18,14 +18,14 @@ class ImageController(
     @Autowired val imageService: ImageService
 ) {
 
-    @PostMapping("/photo/upload")
+    @PostMapping("/image/upload")
     fun uploadImage(@ModelAttribute imageRequest: ImageRequest): ResponseEntity<String> {
         val image = imageRequest.toImage()
         imageService.addImage(image)
         return ResponseEntity.status(HttpStatus.CREATED).body(Gson().toJson(image.id))
     }
 
-    @GetMapping("/photos/{id}")
+    @GetMapping("/images/{id}")
     fun getImageById(@PathVariable id: String): ResponseEntity<Image> =
         ResponseEntity.status(HttpStatus.OK).body(imageService.getImage(id))
 }

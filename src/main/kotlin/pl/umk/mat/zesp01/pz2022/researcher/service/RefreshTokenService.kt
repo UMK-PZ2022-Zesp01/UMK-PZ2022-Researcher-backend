@@ -9,7 +9,6 @@ import pl.umk.mat.zesp01.pz2022.researcher.model.RefreshToken
 import pl.umk.mat.zesp01.pz2022.researcher.repository.RefreshTokenRepository
 import java.util.*
 
-
 val ACCESS_TOKEN_SECRET: String = System.getenv("ACCESS_TOKEN_SECRET")
 val REFRESH_TOKEN_SECRET: String = System.getenv("REFRESH_TOKEN_SECRET")
 const val ACCESS_EXPIRES_SEC: Long = 900
@@ -20,7 +19,7 @@ class RefreshTokenService(@Autowired val refreshTokenRepository: RefreshTokenRep
 
     /*** ADD METHODS ***/
 
-    fun createRefreshToken(username:String):String{
+    fun createRefreshToken(username: String): String {
         val payload = mapOf(Pair("username", username))
 
         val refreshToken = JWT
@@ -31,18 +30,18 @@ class RefreshTokenService(@Autowired val refreshTokenRepository: RefreshTokenRep
 
         val refreshTokenDB = RefreshToken()
 
-        refreshTokenDB.id=IdGenerator().generateTokenId()
-        refreshTokenDB.login=username
-        refreshTokenDB.expires=Date(System.currentTimeMillis() + REFRESH_EXPIRES_SEC * 1000).toString()
-        refreshTokenDB.jwt=refreshToken
+        refreshTokenDB.id = IdGenerator().generateTokenId()
+        refreshTokenDB.login = username
+        refreshTokenDB.expires = Date(System.currentTimeMillis() + REFRESH_EXPIRES_SEC * 1000).toString()
+        refreshTokenDB.jwt = refreshToken
 
         refreshTokenRepository.insert(refreshTokenDB)
 
         return refreshToken
     }
 
-    fun createAccessToken(username:String):String{
-        val payload = mapOf(Pair("username",username))
+    fun createAccessToken(username: String): String {
+        val payload = mapOf(Pair("username", username))
 
         return JWT
             .create()
@@ -51,34 +50,33 @@ class RefreshTokenService(@Autowired val refreshTokenRepository: RefreshTokenRep
             .sign(Algorithm.HMAC256(ACCESS_TOKEN_SECRET))
     }
 
-    fun verifyRefreshToken(jwt: String, username: String):Boolean{
-        try {
+    fun verifyRefreshToken(jwt: String, username: String): Boolean {
+        return try {
             JWT
                 .require(Algorithm.HMAC256(REFRESH_TOKEN_SECRET))
-                .withClaim("username",username)
+                .withClaim("username", username)
                 .build()
                 .verify(jwt)
 
-            return true
-        }catch (e:Exception){
-            return false
+            true
+        } catch (e: Exception) {
+            false
         }
     }
 
-    fun verifyAccessToken(jwt:String,username: String):Boolean{
-        try {
+    fun verifyAccessToken(jwt: String, username: String): Boolean {
+        return try {
             JWT
                 .require(Algorithm.HMAC256(ACCESS_TOKEN_SECRET))
-                .withClaim("username",username)
+                .withClaim("username", username)
                 .build()
                 .verify(jwt)
 
-            return true
-        }catch (e:Exception){
-            return false
+            true
+        } catch (e: Exception) {
+            false
         }
     }
-
 
     fun addToken(refreshToken: RefreshToken): RefreshToken {
         refreshToken.id = IdGenerator().generateTokenId()
@@ -87,21 +85,28 @@ class RefreshTokenService(@Autowired val refreshTokenRepository: RefreshTokenRep
 
     /*** DELETE METHODS ***/
 
-    fun deleteToken(id: String) = refreshTokenRepository.deleteById(id)
+    fun deleteToken(id: String) =
+        refreshTokenRepository.deleteById(id)
 
     /*** ADD METHODS ***/
 
-    fun getAllTokens(): List<RefreshToken> = refreshTokenRepository.findAll()
+    fun getAllTokens(): List<RefreshToken> =
+        refreshTokenRepository.findAll()
 
-    fun getTokenById(id: String): Optional<RefreshToken> = refreshTokenRepository.findTokenById(id)
+    fun getTokenById(id: String): Optional<RefreshToken> =
+        refreshTokenRepository.findTokenById(id)
 
-    fun getTokensByLogin(login: String): Optional<List<RefreshToken>> = refreshTokenRepository.findTokensByLogin(login)
+    fun getTokensByLogin(login: String): Optional<List<RefreshToken>> =
+        refreshTokenRepository.findTokensByLogin(login)
 
-    fun getTokenByExpires(date: String): Optional<List<RefreshToken>> = refreshTokenRepository.findTokensByExpires(date)
+    fun getTokenByExpires(date: String): Optional<List<RefreshToken>> =
+        refreshTokenRepository.findTokensByExpires(date)
 
-    fun getTokenByJwt(jwt: String): Optional<RefreshToken> = refreshTokenRepository.findTokenByJwt(jwt)
+    fun getTokenByJwt(jwt: String): Optional<RefreshToken> =
+        refreshTokenRepository.findTokenByJwt(jwt)
 
     /*** DELETE METHODS***/
+
 //    fun deleteExpiredTokens(){
 //    }
 
