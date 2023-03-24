@@ -9,7 +9,6 @@ import org.springframework.data.mongodb.core.mapping.Field
 @Document("Researches")
 class Research {
 	@Id var id: String = ""
-	//    @Field var creatorId: String = ""
 	@Field var creatorLogin: String = ""
 	@Field var title: String = ""
 	@Field var description: String = ""
@@ -18,8 +17,7 @@ class Research {
 	@Field var participants = listOf<User>()
 	@Field var begDate: String = ""
 	@Field var endDate: String = ""
-	@Field var isActive: Boolean = false
-	@Field var location: ResearchLocation? = null
+	@Field var location = ResearchLocation()
 	@Field var rewards = listOf<ResearchReward>()
 	@Field var requirements = listOf<ResearchRequirement>()
 }
@@ -55,12 +53,12 @@ class ResearchRequest(
 		research.location = this.location
 
 		research.rewards = this.rewards.map { reward ->
+
 			when (reward.type) {
-				"cash" -> ResearchReward(reward.type, reward.value.toString().toFloat())
+				"cash" -> ResearchReward(reward.type, reward.value.toString().toInt())
 				"item" -> ResearchReward(reward.type, reward.value as String)
 				else -> ResearchReward("", "")
 			}
-
 		}
 
 		research.requirements = this.requirements.map { req ->
@@ -73,7 +71,13 @@ class ResearchRequest(
 					)
 				)
 
-//                "age" -> ResearchRequirement(req.type, req.criteria as ResearchRequirementAge)
+				"age" -> ResearchRequirement(
+					req.type,
+					ObjectMapper().convertValue(
+						req.criteria,
+						object : TypeReference<List<ResearchRequirementAgeInterval>>() {}
+					)
+				)
 
 				"place" -> ResearchRequirement(
 					req.type,
@@ -99,6 +103,14 @@ class ResearchRequest(
 					)
 				)
 
+				"other" -> ResearchRequirement(
+					req.type,
+					ObjectMapper().convertValue(
+						req.criteria,
+						object : TypeReference<List<ResearchRequirementOther>>() {}
+					)
+				)
+
 				else -> ResearchRequirement("", "")
 			}
 		}
@@ -108,25 +120,26 @@ class ResearchRequest(
 }
 
 class ResearchLocation(
-	var form: String = "",
-	var place: String = ""
+	val form: String = "",
+	val place: String = ""
 )
 
 class ResearchReward(
-	var type: String = "",
-	var value: Any
+	val type: String = "",
+	val value: Any
 )
 
 class ResearchRequirement(
-	var type: String = "",
-	var criteria: Any
+	val type: String = "",
+	val criteria: Any
 )
 
 class ResearchRequirementAgeInterval(
-	var ageMin: Int? = null,
-	var ageMax: Int? = null
+	val ageMin: Int = 0,
+	val ageMax: Int = 0
 )
 
 class ResearchRequirementOther(
-	var description: String
+	val type: String = "",
+	val description: String = ""
 )
