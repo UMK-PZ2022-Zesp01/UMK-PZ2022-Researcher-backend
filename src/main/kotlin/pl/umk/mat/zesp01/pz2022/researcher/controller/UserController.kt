@@ -142,12 +142,10 @@ class UserController(
             val user = userService.getUserByLogin(username)
             if (user.isEmpty) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
-            //
             val data= userService
                 .getUserByLogin(username)
                 .get()
                 .toUserProfileDTO()
-
 
             return ResponseEntity.status(HttpStatus.OK).body(gson.toJson(data))
         } catch (e: java.lang.Exception) {
