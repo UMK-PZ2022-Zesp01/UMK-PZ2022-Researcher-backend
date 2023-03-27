@@ -51,16 +51,16 @@ class UserController(
     fun sendVerificationEmail(
         @RequestParam("username") username:String
     ):ResponseEntity<String>{
-        try {
+        return try {
             val user = userService.getUserByLogin(username).orElseThrow()
             if (user.isConfirmed)throw(Exception())
 
             verificationTokenService.deleteUserTokens(user)
 
             eventPublisher.publishEvent(OnRegistrationCompleteEvent(user))
-            return ResponseEntity.status(HttpStatus.CREATED).body(gson.toJson(user.email))
+            ResponseEntity.status(HttpStatus.CREATED).body(gson.toJson(user.email))
         }catch (e:Exception){
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+            ResponseEntity.status(HttpStatus.NO_CONTENT).build()
         }
     }
 
