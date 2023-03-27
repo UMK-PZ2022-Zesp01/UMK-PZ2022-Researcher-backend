@@ -8,6 +8,7 @@ class IdGenerator {
     private fun retrieveIds(list: List<String>, idLength: Int): List<String> =
         list.map { id -> id.substring(9, 9 + idLength) }
 
+
     private fun generateRandomId(idLength: Int): String {
         var id = ""
         for (i in 1..idLength) {
@@ -25,6 +26,7 @@ class IdGenerator {
     }
 
     fun generateUserId(userIdList: List<String>): String =
+
         generateUniqueId(
             retrieveIds(userIdList, 8),
             8

@@ -28,4 +28,5 @@ class ImageService(
             ),
             "Images", String::class.java
         ).mappedResults
+
 }

@@ -27,3 +27,5 @@ class ImageRequest(
         return image
     }
 }
+
+class ImageResponse(private val type: String, private val image: Binary)

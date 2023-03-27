@@ -49,7 +49,9 @@ class UserController(
 
     // 'return' lifted out of 'try', check whether it causes any errors
     @GetMapping("/user/sendVerificationMail")
-    fun sendVerificationEmail(@RequestParam("username") username: String): ResponseEntity<String> {
+    fun sendVerificationEmail(
+        @RequestParam("username") username:String
+    ):ResponseEntity<String>{
         return try {
             val user = userService.getUserByLogin(username).orElseThrow()
             if (user.isConfirmed) throw (Exception())
@@ -137,6 +139,7 @@ class UserController(
             //If claimed user does not exist in db there is something wrong with the token
             val user = userService.getUserByLogin(username)
             if (user.isEmpty) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+
 
             val data = userService
                 .getUserByLogin(username)

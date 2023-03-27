@@ -9,8 +9,9 @@ import pl.umk.mat.zesp01.pz2022.researcher.model.RefreshToken
 import pl.umk.mat.zesp01.pz2022.researcher.repository.RefreshTokenRepository
 import java.util.*
 
-val ACCESS_TOKEN_SECRET: String = System.getenv("ACCESS_TOKEN_SECRET")
-val REFRESH_TOKEN_SECRET: String = System.getenv("REFRESH_TOKEN_SECRET")
+lateinit var ACCESS_TOKEN_SECRET: String
+lateinit var REFRESH_TOKEN_SECRET: String
+
 const val ACCESS_EXPIRES_SEC: Long = 900
 const val REFRESH_EXPIRES_SEC: Long = 86400
 
