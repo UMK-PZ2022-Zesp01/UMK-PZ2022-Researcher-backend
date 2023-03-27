@@ -10,8 +10,8 @@ import pl.umk.mat.zesp01.pz2022.researcher.repository.ImageRepository
 
 @Service
 class ImageService(
-        @Autowired val imageRepository: ImageRepository,
-        @Autowired val mongoOperations: MongoOperations
+    @Autowired val imageRepository: ImageRepository,
+    @Autowired val mongoOperations: MongoOperations
 ) {
     fun addImage(image: Image): Image {
         image.id = IdGenerator().generatePhotoId(getAllPhotoIds())
@@ -19,13 +19,14 @@ class ImageService(
     }
 
     fun getImage(id: String): Image =
-            imageRepository.findById(id).orElseThrow { throw RuntimeException("Cannot find Image by 'id'") }
+        imageRepository.findById(id).orElseThrow { throw RuntimeException("Cannot find Image by 'id'") }
 
     fun getAllPhotoIds(): List<String> =
-            mongoOperations.aggregate(
-                    Aggregation.newAggregation(
-                            Aggregation.project("_id")
-                    ),
-                    "Images", String::class.java
-            ).mappedResults
+        mongoOperations.aggregate(
+            Aggregation.newAggregation(
+                Aggregation.project("_id")
+            ),
+            "Images", String::class.java
+        ).mappedResults
+
 }

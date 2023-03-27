@@ -6,7 +6,8 @@ class IdGenerator {
     // {"id": "ABCDEFGH"}
     // so we need to extract the 'ABCDEFGH' part with use of function 'retrieveIds'
     private fun retrieveIds(list: List<String>, idLength: Int): List<String> =
-            list.map { id -> id.substring(9, 9 + idLength) }
+        list.map { id -> id.substring(9, 9 + idLength) }
+
 
     private fun generateRandomId(idLength: Int): String {
         var id = ""
@@ -25,23 +26,24 @@ class IdGenerator {
     }
 
     fun generateUserId(userIdList: List<String>): String =
-            generateUniqueId(
-                    retrieveIds(userIdList, 8),
-                    8
-            )
+
+        generateUniqueId(
+            retrieveIds(userIdList, 8),
+            8
+        )
 
     fun generateResearchId(researchIdList: List<String>): String =
-            generateUniqueId(
-                    retrieveIds(researchIdList, 6),
-                    6
-            )
+        generateUniqueId(
+            retrieveIds(researchIdList, 6),
+            6
+        )
 
     fun generateTokenId(): String =
-            generateRandomId(6)
+        generateRandomId(6)
 
     fun generatePhotoId(photoIdList: List<String>): String =
-            generateUniqueId(
-                    retrieveIds(photoIdList, 6),
-                    6
-            )
+        generateUniqueId(
+            retrieveIds(photoIdList, 6),
+            6
+        )
 }

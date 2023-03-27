@@ -19,18 +19,24 @@ class UserService(
 
     /*** ADD METHODS ***/
 
-    fun addUser(user: User): User = userRepository.insert(user)
+    fun addUser(user: User): User =
+        userRepository.insert(user)
 
     /*** UPDATE METHODS ***/
 
     fun updateUserById(id: String, user: User) =
-        mongoOperations.findAndReplace(Query.query(Criteria.where("_id").`is`(id)), user)
+        mongoOperations.findAndReplace(
+            Query.query(Criteria.where("_id").`is`(id)),
+            user
+        )
 
     /*** DELETE METHODS ***/
-    fun deleteUserById(id: String) = userRepository.deleteById(id)
+    fun deleteUserById(id: String) =
+        userRepository.deleteById(id)
 
     /*** GET METHODS ***/
-    fun getAllUsers(): List<User> = userRepository.findAll()
+    fun getAllUsers(): List<User> =
+        userRepository.findAll()
 
     fun getAllUserIds(): List<String> =
         mongoOperations.aggregate(
@@ -40,19 +46,22 @@ class UserService(
             "Users", String::class.java
         ).mappedResults
 
-    fun getUserById(id: String): Optional<User> = userRepository.findById(id)
+    fun getUserById(id: String): Optional<User> =
+        userRepository.findById(id)
 
-    fun getUserByEmail(email: String): Optional<User> = userRepository.findUserByEmail(email)
-    //        .orElseThrow { throw RuntimeException("Cannot find User by Email") }
+    fun getUserByEmail(email: String): Optional<User> =
+        userRepository.findUserByEmail(email)
 
-    fun getUserByLogin(login: String): Optional<User> = userRepository.findUserByLogin(login)
-    //        .orElseThrow { throw RuntimeException("Cannot find User by Login") }
+    fun getUserByLogin(login: String): Optional<User> =
+        userRepository.findUserByLogin(login)
 
-    fun getUsersByFirstName(firstName: String): List<User> = userRepository.findUserByFirstName(firstName)
-        .orElseThrow { throw RuntimeException("Cannot find User by First name") }
+    fun getUsersByFirstName(firstName: String): List<User> =
+        userRepository.findUserByFirstName(firstName)
+            .orElseThrow { throw RuntimeException("Cannot find User by First name") }
 
-    fun getUsersByLastName(lastName: String): List<User> = userRepository.findUserByLastName(lastName)
-        .orElseThrow { throw RuntimeException("Cannot find User by Last name") }
+    fun getUsersByLastName(lastName: String): List<User> =
+        userRepository.findUserByLastName(lastName)
+            .orElseThrow { throw RuntimeException("Cannot find User by Last name") }
 
     // Made with MongoOperations
     fun findUsersByGender(gender: String): List<User> =
@@ -60,5 +69,4 @@ class UserService(
             Query.query(Criteria.where("gender").`is`(gender)),
             "Users"
         )
-
 }

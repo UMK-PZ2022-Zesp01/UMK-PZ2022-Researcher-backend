@@ -15,8 +15,8 @@ class Image {
 }
 
 class ImageRequest(
-        private val type: String,
-        private val image: MultipartFile
+    private val type: String,
+    private val image: MultipartFile
 ) {
     fun toImage(): Image {
         val image = Image()
@@ -29,4 +29,3 @@ class ImageRequest(
 }
 
 class ImageResponse(private val type: String, private val image: Binary)
-

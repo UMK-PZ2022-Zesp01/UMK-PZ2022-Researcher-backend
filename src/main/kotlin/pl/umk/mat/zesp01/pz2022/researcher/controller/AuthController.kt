@@ -17,28 +17,26 @@ import pl.umk.mat.zesp01.pz2022.researcher.service.UserService
 @RestController
 class AuthController(@Autowired val userService: UserService, @Autowired val refreshTokenService: RefreshTokenService) {
 
-    val gson = Gson()
-
     /*** POST MAPPINGS ***/
 
     @PostMapping("/login")
     fun handleLogin(@RequestBody loginData: LoginData): ResponseEntity<String> {
         val user = userService.getUserByLogin(loginData.login)
 
-        if ( user.isEmpty){
+        if (user.isEmpty) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login failed: user does not exist.")
         }
 
-        if (!BCrypt.checkpw(loginData.password, user.get().password)){
+        if (!BCrypt.checkpw(loginData.password, user.get().password)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login failed: user does not exist.")
         }
 
-        if(!user.get().isConfirmed){
+        if (!user.get().isConfirmed) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Login failed: account has not been activated.")
         }
 
         try {
-            val username= user.get().login
+            val username = user.get().login
 
             //CREATE JWTs
             val accessToken = refreshTokenService
@@ -67,28 +65,25 @@ class AuthController(@Autowired val userService: UserService, @Autowired val ref
             return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(gson.toJson(responseBody))
+                .body(Gson().toJson(responseBody))
 
         } catch (error: Exception) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Something went wrong, please try again")
         }
-
     }
 
     /*** GET MAPPINGS ***/
 
     @GetMapping("/auth/refresh")
-    fun handleRefreshToken(
-        @CookieValue(name = "jwt") jwt: String
-    ): ResponseEntity<String> {
+    fun handleRefreshToken(@CookieValue(name = "jwt") jwt: String): ResponseEntity<String> {
         val token = refreshTokenService.getTokenByJwt(jwt)
 
         if (token.isEmpty) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
 
-        val username= token.get().login
-        if(!refreshTokenService.verifyRefreshToken(jwt,username)){
+        val username = token.get().login
+        if (!refreshTokenService.verifyRefreshToken(jwt, username)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
 
@@ -96,18 +91,16 @@ class AuthController(@Autowired val userService: UserService, @Autowired val ref
             .createAccessToken(username)
 
         val responseBody = HashMap<String, String>()
-            responseBody["username"] = token.get().login
-            responseBody["accessToken"] = accessToken
+        responseBody["username"] = token.get().login
+        responseBody["accessToken"] = accessToken
 
-        return ResponseEntity.status(HttpStatus.OK).body(gson.toJson(responseBody))
+        return ResponseEntity.status(HttpStatus.OK).body(Gson().toJson(responseBody))
     }
 
     /*** DELETE MAPPINGS ***/
 
     @DeleteMapping("/logout")
-    fun handleLogout(
-        @CookieValue(name = "jwt") jwt: String
-    ): ResponseEntity<String> {
+    fun handleLogout(@CookieValue(name = "jwt") jwt: String): ResponseEntity<String> {
         val token = refreshTokenService.getTokenByJwt(jwt)
         if (token.isPresent) {//The token is in the db. Delete it
             refreshTokenService.deleteToken(token.get().id)

@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Service
+import pl.umk.mat.zesp01.pz2022.researcher.idgenerator.IdGenerator
 import pl.umk.mat.zesp01.pz2022.researcher.model.Research
 import pl.umk.mat.zesp01.pz2022.researcher.repository.ResearchRepository
 
@@ -18,27 +19,37 @@ class ResearchService(
 
     /*** ADD METHODS ***/
 
-    fun addResearch(research: Research): Research = researchRepository.insert(research)
+    fun addResearch(research: Research): Research {
+        research.id = IdGenerator().generateResearchId(getAllResearchIds())
+        return researchRepository.insert(research)
+    }
 
     /*** DELETE METHODS ***/
 
-    fun deleteResearchById(id: String) = researchRepository.deleteById(id)
+    fun deleteResearchById(id: String) =
+        researchRepository.deleteById(id)
 
     /*** GET METHODS ***/
 
-    fun getAllResearches(): List<Research> = researchRepository.findAll()
+    fun getAllResearches(): List<Research> =
+        researchRepository.findAll()
 
     fun getResearchById(id: String): Research =
         researchRepository.findById(id)
             .orElseThrow { throw RuntimeException("Cannot find User by Id") }
 
-    fun getResearchesByCreatorId(creatorId: String): List<Research> =mongoOperations.find(
-            Query().addCriteria(Criteria.where("creatorId").`is`(creatorId)),Research::class.java
-    )
+    fun getResearchesByCreatorId(creatorId: String): List<Research> =
+        mongoOperations.find(
+            Query().addCriteria(Criteria.where("creatorId").`is`(creatorId)),
+            Research::class.java
+        )
 
-    fun getResearchesByCreatorLogin(creatorLogin: String): List<Research> =mongoOperations.find(
-            Query().addCriteria(Criteria.where("creatorLogin").`is`(creatorLogin)),Research::class.java
-    )
+    fun getResearchesByCreatorLogin(creatorLogin: String): List<Research> =
+        mongoOperations.find(
+            Query().addCriteria(Criteria.where("creatorLogin").`is`(creatorLogin)),
+            Research::class.java
+        )
+
 
     fun sortResearchesByTitle(): List<Research> =
         mongoOperations.find(

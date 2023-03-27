@@ -15,7 +15,7 @@ import pl.umk.mat.zesp01.pz2022.researcher.service.ImageService
 
 @RestController
 class ImageController(
-        @Autowired val imageService: ImageService
+    @Autowired val imageService: ImageService
 ) {
 
     @PostMapping("/image/upload")
@@ -27,5 +27,5 @@ class ImageController(
 
     @GetMapping("/images/{id}")
     fun getImageById(@PathVariable id: String): ResponseEntity<Image> =
-            ResponseEntity.status(HttpStatus.OK).body(imageService.getImage(id))
+        ResponseEntity.status(HttpStatus.OK).body(imageService.getImage(id))
 }
