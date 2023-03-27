@@ -16,6 +16,7 @@ data class User(
     @Field var birthDate: String = "",
     @Field var gender: String = "",
     @Field var avatarImage: String = "",
+    @Field var location: String = "",
     @Field var isConfirmed: Boolean = false
 ) {
 
