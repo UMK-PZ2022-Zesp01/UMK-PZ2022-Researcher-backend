@@ -18,197 +18,197 @@ import pl.umk.mat.zesp01.pz2022.researcher.service.*
 
 @RestController
 class UserController(
-    @Autowired val userService: UserService,
-    @Autowired val userRepository: UserRepository,
-    @Autowired val verificationTokenService: VerificationTokenService,
-    @Autowired val eventPublisher: ApplicationEventPublisher
+	@Autowired val userService: UserService,
+	@Autowired val userRepository: UserRepository,
+	@Autowired val verificationTokenService: VerificationTokenService,
+	@Autowired val eventPublisher: ApplicationEventPublisher
 ) {
-    val gson = Gson()
+	val gson = Gson()
 
-    /*** POST MAPPINGS ***/
+	/*** POST MAPPINGS ***/
 
-    @PostMapping("/user/register")
-    fun addUser(@RequestBody uRD: UserRegisterData): ResponseEntity<String> {
+	@PostMapping("/user/register")
+	fun addUser(@RequestBody uRD: UserRegisterData): ResponseEntity<String> {
 
-        if (userService.getUserByEmail(uRD.email).isPresent) {
-            return ResponseEntity.status(299).build()
-        }
-        if (userService.getUserByLogin(uRD.login).isPresent) {
-            return ResponseEntity.status(298).build()
-        }
+		if (userService.getUserByEmail(uRD.email).isPresent) {
+			return ResponseEntity.status(299).build()
+		}
+		if (userService.getUserByLogin(uRD.login).isPresent) {
+			return ResponseEntity.status(298).build()
+		}
 
-        val newUser = uRD.toUser()
+		val newUser = uRD.toUser()
 
-        newUser.password = BCrypt.hashpw(newUser.password, BCrypt.gensalt())
-        newUser.id = IdGenerator().generateUserId(userService.getAllUserIds())
-        userService.addUser(newUser)
+		newUser.password = BCrypt.hashpw(newUser.password, BCrypt.gensalt())
+		newUser.id = IdGenerator().generateUserId(userService.getAllUserIds())
+		userService.addUser(newUser)
 
-        return ResponseEntity.status(HttpStatus.CREATED).build()
+		return ResponseEntity.status(HttpStatus.CREATED).build()
 
-    }
+	}
 
-    // 'return' lifted out of 'try', check whether it causes any errors
-    @GetMapping("/user/sendVerificationMail")
-    fun sendVerificationEmail(
-        @RequestParam("username") username:String
-    ):ResponseEntity<String>{
-        return try {
-            val user = userService.getUserByLogin(username).orElseThrow()
-            if (user.isConfirmed) throw (Exception())
+	// 'return' lifted out of 'try', check whether it causes any errors
+	@GetMapping("/user/sendVerificationMail")
+	fun sendVerificationEmail(
+		@RequestParam("username") username: String
+	): ResponseEntity<String> {
+		return try {
+			val user = userService.getUserByLogin(username).orElseThrow()
+			if (user.isConfirmed) throw (Exception())
 
-            verificationTokenService.deleteUserTokens(user)
+			verificationTokenService.deleteUserTokens(user)
 
-            eventPublisher.publishEvent(OnRegistrationCompleteEvent(user))
-            ResponseEntity.status(HttpStatus.CREATED).body(gson.toJson(user.email))
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.NO_CONTENT).build()
-        }
-    }
+			eventPublisher.publishEvent(OnRegistrationCompleteEvent(user))
+			ResponseEntity.status(HttpStatus.CREATED).body(gson.toJson(user.email))
+		} catch (e: Exception) {
+			ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+		}
+	}
 
-    @GetMapping("/user/confirm")
-    fun confirmAccount(@RequestParam("token") token: String): ResponseEntity<String> {
-        try {
-            val verificationToken = verificationTokenService
-                .getTokenByJwt(token)
-                .orElseThrow()
+	@GetMapping("/user/confirm")
+	fun confirmAccount(@RequestParam("token") token: String): ResponseEntity<String> {
+		try {
+			val verificationToken = verificationTokenService
+				.getTokenByJwt(token)
+				.orElseThrow()
 //                TODO("error: Nieprawidłowy token")
 
-            val user = userService
-                .getUserByLogin(verificationToken.login)
-                .orElseThrow()
+			val user = userService
+				.getUserByLogin(verificationToken.login)
+				.orElseThrow()
 //                TODO("error: nawet nie wiem w jaki sposób ma ta sytuacja zaistnieć")
 
-            if (user.isConfirmed) return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+			if (user.isConfirmed) return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
 
-            verificationTokenService.verifyVerificationToken(
-                verificationToken.jwt,
-                user
-            )
+			verificationTokenService.verifyVerificationToken(
+				verificationToken.jwt,
+				user
+			)
 
-            user.isConfirmed = true
-            userService.userRepository.save(user)
+			user.isConfirmed = true
+			userService.userRepository.save(user)
 
-            verificationTokenService.deleteUserTokens(user)
-            return ResponseEntity.status(HttpStatus.CREATED).build()
-        } catch (_: Exception) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-        }
-    }
-
-
-    /*** PUT MAPPINGS ***/
-
-    @PutMapping("/user/{id}/update")
-    fun updateUser(@PathVariable id: String, @RequestBody user: User): ResponseEntity<User> {
-        val oldUser = userRepository.findById(id).orElse(null)
-        user.id = oldUser.id
-        if (user.login.isEmpty()) user.login = oldUser.login
-        if (user.password.isEmpty()) user.password = oldUser.password
-        else user.password = BCrypt.hashpw(user.password, BCrypt.gensalt())
-        if (user.firstName.isEmpty()) user.firstName = oldUser.firstName
-        if (user.lastName.isEmpty()) user.lastName = oldUser.lastName
-        if (user.email.isEmpty()) user.email = oldUser.email
-        if (user.phone.isEmpty()) user.phone = oldUser.phone
-        if (user.birthDate.isEmpty()) user.birthDate = oldUser.birthDate
-        if (user.gender.isEmpty()) user.gender = oldUser.gender
-        if (user.avatarImage.isEmpty()) user.avatarImage = oldUser.avatarImage
-
-        return ResponseEntity.status(HttpStatus.OK).body(userRepository.save(user))
-    }
-
-    /*** GET MAPPINGS ***/
-
-    @GetMapping("/user/current")
-    fun getUserProfile(@RequestHeader httpHeaders: HttpHeaders): ResponseEntity<String> {
-        val jwt = httpHeaders["Authorization"]
-        jwt ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-
-        try {
-            val decoded = JWT.require(Algorithm.HMAC256(ACCESS_TOKEN_SECRET))
-                .withClaimPresence("username")
-                .build()
-                .verify(jwt[0])
-
-            //get the username claimed in the access token
-            var username = decoded
-                .claims
-                .getValue("username")
-                .toString()
-            username = username.substring(1, username.length - 1)
-
-            //If claimed user does not exist in db there is something wrong with the token
-            val user = userService.getUserByLogin(username)
-            if (user.isEmpty) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+			verificationTokenService.deleteUserTokens(user)
+			return ResponseEntity.status(HttpStatus.CREATED).build()
+		} catch (_: Exception) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+		}
+	}
 
 
-            val data = userService
-                .getUserByLogin(username)
-                .get()
-                .toUserProfileDTO()
+	/*** PUT MAPPINGS ***/
 
-            return ResponseEntity.status(HttpStatus.OK).body(gson.toJson(data))
-        } catch (e: java.lang.Exception) {
-            println(e)
-        }
+	@PutMapping("/user/{id}/update")
+	fun updateUser(@PathVariable id: String, @RequestBody user: User): ResponseEntity<User> {
+		val oldUser = userRepository.findById(id).orElse(null)
+		user.id = oldUser.id
+		if (user.login.isEmpty()) user.login = oldUser.login
+		if (user.password.isEmpty()) user.password = oldUser.password
+		else user.password = BCrypt.hashpw(user.password, BCrypt.gensalt())
+		if (user.firstName.isEmpty()) user.firstName = oldUser.firstName
+		if (user.lastName.isEmpty()) user.lastName = oldUser.lastName
+		if (user.email.isEmpty()) user.email = oldUser.email
+		if (user.phone.isEmpty()) user.phone = oldUser.phone
+		if (user.birthDate.isEmpty()) user.birthDate = oldUser.birthDate
+		if (user.gender.isEmpty()) user.gender = oldUser.gender
+		if (user.avatarImage.isEmpty()) user.avatarImage = oldUser.avatarImage
 
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
-    }
+		return ResponseEntity.status(HttpStatus.OK).body(userRepository.save(user))
+	}
 
-    @GetMapping("/getPhoneByUserLogin/{login}")
-    fun getPhoneByUserLogin(@PathVariable login: String): ResponseEntity<String> {
-        val user = userService.getUserByLogin(login)
+	/*** GET MAPPINGS ***/
 
-        if (user.isEmpty) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
-        }
-        val phoneNumber: String = user.get().phone
-        return ResponseEntity.status(HttpStatus.OK).body(phoneNumber)
-    }
+	@GetMapping("/user/current")
+	fun getUserProfile(@RequestHeader httpHeaders: HttpHeaders): ResponseEntity<String> {
+		val jwt = httpHeaders["Authorization"]
+		jwt ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
-    @GetMapping("/users")
-    fun getAllUsers(): ResponseEntity<List<User>> =
-        ResponseEntity.status(HttpStatus.OK).body(userService.getAllUsers())
+		try {
+			val decoded = JWT.require(Algorithm.HMAC256(ACCESS_TOKEN_SECRET))
+				.withClaimPresence("username")
+				.build()
+				.verify(jwt[0])
 
-    @GetMapping("/user/{id}")
-    fun getUserById(@PathVariable id: String): ResponseEntity<User> {
-        val user = userService.getUserById(id)
-        if (user.isEmpty) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
-        }
-        return ResponseEntity.status(HttpStatus.OK).body(user.get())
-    }
+			//get the username claimed in the access token
+			var username = decoded
+				.claims
+				.getValue("username")
+				.toString()
+			username = username.substring(1, username.length - 1)
 
-    @GetMapping("/user/email/{email}")
-    fun getUserByEmail(@PathVariable email: String): ResponseEntity<User> {
-        val user = userService.getUserByEmail(email)
-        if (user.isEmpty) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
-        }
-        return ResponseEntity.status(HttpStatus.OK).body(user.get())
-    }
+			//If claimed user does not exist in db there is something wrong with the token
+			val user = userService.getUserByLogin(username)
+			if (user.isEmpty) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
-    @GetMapping("/users/firstName/{firstName}")
-    fun getUserByFirstName(@PathVariable firstName: String): ResponseEntity<List<User>> =
-        ResponseEntity.status(HttpStatus.OK).body(userService.getUsersByFirstName(firstName))
 
-    @GetMapping("/users/lastName/{lastName}")
-    fun getUserByLastName(@PathVariable lastName: String): ResponseEntity<List<User>> =
-        ResponseEntity.status(HttpStatus.OK).body(userService.getUsersByLastName(lastName))
+			val data = userService
+				.getUserByLogin(username)
+				.get()
+				.toUserProfileDTO()
 
-    @GetMapping("/users/gender/{gender}")
-    fun findUsersByGender(@PathVariable gender: String): ResponseEntity<List<User>> =
-        ResponseEntity.status(HttpStatus.OK).body(userService.findUsersByGender(gender))
+			return ResponseEntity.status(HttpStatus.OK).body(gson.toJson(data))
+		} catch (e: java.lang.Exception) {
+			println(e)
+		}
 
-    @GetMapping("/users/idList")
-    fun getAllUserIds(): ResponseEntity<List<String>> {
-        return ResponseEntity.status(HttpStatus.OK).body(userService.getAllUserIds())
-    }
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+	}
 
-    /*** DELETE MAPPINGS ***/
+	@GetMapping("/getPhoneByUserLogin/{login}")
+	fun getPhoneByUserLogin(@PathVariable login: String): ResponseEntity<String> {
+		val user = userService.getUserByLogin(login)
 
-    @DeleteMapping("/user/{id}/delete")
-    fun deleteUserById(@PathVariable id: String): ResponseEntity<String> {
-        userService.deleteUserById(id)
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
-    }
+		if (user.isEmpty) {
+			return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+		}
+		val phoneNumber: String = user.get().phone
+		return ResponseEntity.status(HttpStatus.OK).body(phoneNumber)
+	}
+
+	@GetMapping("/users")
+	fun getAllUsers(): ResponseEntity<List<User>> =
+		ResponseEntity.status(HttpStatus.OK).body(userService.getAllUsers())
+
+	@GetMapping("/user/{id}")
+	fun getUserById(@PathVariable id: String): ResponseEntity<User> {
+		val user = userService.getUserById(id)
+		if (user.isEmpty) {
+			return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+		}
+		return ResponseEntity.status(HttpStatus.OK).body(user.get())
+	}
+
+	@GetMapping("/user/email/{email}")
+	fun getUserByEmail(@PathVariable email: String): ResponseEntity<User> {
+		val user = userService.getUserByEmail(email)
+		if (user.isEmpty) {
+			return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+		}
+		return ResponseEntity.status(HttpStatus.OK).body(user.get())
+	}
+
+	@GetMapping("/users/firstName/{firstName}")
+	fun getUserByFirstName(@PathVariable firstName: String): ResponseEntity<List<User>> =
+		ResponseEntity.status(HttpStatus.OK).body(userService.getUsersByFirstName(firstName))
+
+	@GetMapping("/users/lastName/{lastName}")
+	fun getUserByLastName(@PathVariable lastName: String): ResponseEntity<List<User>> =
+		ResponseEntity.status(HttpStatus.OK).body(userService.getUsersByLastName(lastName))
+
+	@GetMapping("/users/gender/{gender}")
+	fun findUsersByGender(@PathVariable gender: String): ResponseEntity<List<User>> =
+		ResponseEntity.status(HttpStatus.OK).body(userService.findUsersByGender(gender))
+
+	@GetMapping("/users/idList")
+	fun getAllUserIds(): ResponseEntity<List<String>> {
+		return ResponseEntity.status(HttpStatus.OK).body(userService.getAllUserIds())
+	}
+
+	/*** DELETE MAPPINGS ***/
+
+	@DeleteMapping("/user/{id}/delete")
+	fun deleteUserById(@PathVariable id: String): ResponseEntity<String> {
+		userService.deleteUserById(id)
+		return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+	}
 }
