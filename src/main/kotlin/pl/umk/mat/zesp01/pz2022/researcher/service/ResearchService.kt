@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Service
 import pl.umk.mat.zesp01.pz2022.researcher.idgenerator.IdGenerator
 import pl.umk.mat.zesp01.pz2022.researcher.model.Research
+import pl.umk.mat.zesp01.pz2022.researcher.model.User
 import pl.umk.mat.zesp01.pz2022.researcher.repository.ResearchRepository
 
 @Service
@@ -23,6 +24,14 @@ class ResearchService(
         research.id = IdGenerator().generateResearchId(getAllResearchIds())
         return researchRepository.insert(research)
     }
+
+    /*** UPDATE METHODS ***/
+
+    fun updateResearchById(id: String, research : Research) =
+        mongoOperations.findAndReplace(
+            Query.query(Criteria.where("_id").`is`(id)),
+            research
+        )
 
     /*** DELETE METHODS ***/
 

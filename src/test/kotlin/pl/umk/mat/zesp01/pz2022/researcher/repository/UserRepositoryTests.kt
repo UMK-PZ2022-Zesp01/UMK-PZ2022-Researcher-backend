@@ -21,6 +21,26 @@ class UserRepositoryTests {
     lateinit var testUserID: String
 
 
+    @BeforeEach
+    fun setup() {
+        userTestObject = User(
+            id = "_testID",
+            login = "_testLOGIN",
+            password = "testPASSWORD",
+            firstName = "testFIRSTNAME",
+            lastName = "testLASTNAME",
+            email = "testEMAIL@test.com",
+            phone = "123456789",
+            birthDate = "01-01-1970",
+            gender = "Male",
+            avatarImage = "testAVATARIMAGE.IMG",
+            location = "Bydgoszcz",
+            isConfirmed = false
+        )
+        testUserID = userTestObject.id
+        userService.deleteUserById(testUserID)
+    }
+
     @Test
     fun `add new User by userRepository`() {
         // GIVEN (userTestObject)
@@ -121,24 +141,7 @@ class UserRepositoryTests {
         Assertions.assertEquals(Optional.of(listOf(userTestObject)), result)
     }
 
-    @BeforeEach
-    fun setup() {
-        userTestObject = User(
-            "_testID",
-            "_testLOGIN",
-            "testPASSWORD",
-            "testFIRSTNAME",
-            "testLASTNAME",
-            "testEMAIL@test.com",
-            "123456789",
-            "01-01-1970",
-            "Male",
-            "testAVATARIMAGE.IMG",
-            true
-        )
-        testUserID = userTestObject.id
-        userService.deleteUserById(testUserID)
-    }
+
 
 
 }

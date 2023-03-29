@@ -18,11 +18,6 @@ lateinit var MAIL: String
 lateinit var MAIL_PWD: String
 lateinit var FRONT_URL: String
 
-@Bean
-fun getJavaMailSender(): JavaMailSender {
-    val mailSender = JavaMailSenderImpl()
-    mailSender.host = "smtp.gmail.com"
-    mailSender.port = 587
 
 class OnRegistrationCompleteEvent(
     val user: User
