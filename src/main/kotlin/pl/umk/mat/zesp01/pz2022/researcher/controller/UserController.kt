@@ -204,6 +204,16 @@ class UserController(
 		return ResponseEntity.status(HttpStatus.OK).body(userService.getAllUserIds())
 	}
 
+	@GetMapping("/users/emailList")
+	fun getAllUserEmails():ResponseEntity<List<String>>{
+		return ResponseEntity.status(HttpStatus.OK).body(userService.getAllUserEmails())
+	}
+
+	@GetMapping("/users/phoneList")
+	fun getAllUserPhones():ResponseEntity<List<String>>{
+		return ResponseEntity.status(HttpStatus.OK).body(userService.getAllUserPhones())
+	}
+
 	/*** DELETE MAPPINGS ***/
 
 	@DeleteMapping("/user/{id}/delete")

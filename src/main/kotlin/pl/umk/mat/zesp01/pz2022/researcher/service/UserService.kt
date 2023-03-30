@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service
 import pl.umk.mat.zesp01.pz2022.researcher.model.User
 import pl.umk.mat.zesp01.pz2022.researcher.repository.UserRepository
 import java.util.*
+import kotlin.collections.ArrayList
 
 @Service
 class UserService(
@@ -45,6 +46,37 @@ class UserService(
             ),
             "Users", String::class.java
         ).mappedResults
+
+    fun getAllUserEmails():List<String>{
+        val result= ArrayList<String>()
+        val emailList=mongoOperations.aggregate(
+                Aggregation.newAggregation(
+                        Aggregation.project().andExclude("_id").andInclude("email")
+                ),
+                "Users", String::class.java
+        ).mappedResults
+        for (i in emailList){
+            var temporaryEmail=i.substring(11).dropLast(2)
+            println(temporaryEmail)
+            result.add(temporaryEmail)
+        }
+        return result
+    }
+    fun getAllUserPhones():List<String>{
+        val result= ArrayList<String>()
+        var phoneList=mongoOperations.aggregate(
+                Aggregation.newAggregation(
+                        Aggregation.project().andExclude("_id").andInclude("phone")
+                ),
+                "Users", String::class.java
+        ).mappedResults
+        for (i in phoneList){
+            var temporaryPhone=i.substring(11).dropLast(2)
+            println(temporaryPhone)
+            result.add(temporaryPhone)
+        }
+        return result
+    }
 
     fun getUserById(id: String): Optional<User> =
         userRepository.findById(id)
