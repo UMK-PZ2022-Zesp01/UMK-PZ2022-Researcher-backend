@@ -1,6 +1,5 @@
 package pl.umk.mat.zesp01.pz2022.researcher.controller
 
-import com.auth0.jwt.JWT
 import com.google.gson.Gson
 import org.mindrot.jbcrypt.BCrypt
 import org.springframework.beans.factory.annotation.Autowired
@@ -10,7 +9,7 @@ import org.springframework.http.ResponseCookie
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import pl.umk.mat.zesp01.pz2022.researcher.model.LoginData
-import pl.umk.mat.zesp01.pz2022.researcher.model.RefreshToken
+
 import pl.umk.mat.zesp01.pz2022.researcher.service.REFRESH_EXPIRES_SEC
 import pl.umk.mat.zesp01.pz2022.researcher.service.RefreshTokenService
 import pl.umk.mat.zesp01.pz2022.researcher.service.UserService
@@ -23,22 +22,25 @@ class AuthController(@Autowired val userService: UserService, @Autowired val ref
 
     @PostMapping("/login")
     fun handleLogin(@RequestBody loginData: LoginData): ResponseEntity<String> {
-        val user = userService.getUserByLogin(loginData.login)
+        val user = userService.getUserByLogin(loginData.login).orElse(null)
 
-        if (user.isEmpty) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login failed: user does not exist.")
+        user ?: return ResponseEntity
+            .status(HttpStatus.UNAUTHORIZED)
+            .body("Login failed: user does not exist.")
+
+        if (!BCrypt.checkpw(loginData.password, user.password)) {
+            return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body("Login failed: user does not exist.")
         }
-
-        if (!BCrypt.checkpw(loginData.password, user.get().password)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login failed: user does not exist.")
-        }
-
-        if (!user.get().isConfirmed) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Login failed: account has not been activated.")
+        if (!user.isConfirmed) {
+            return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body("Login failed: account has not been activated.")
         }
 
         try {
-            val username = user.get().login
+            val username = user.login
 
             //CREATE JWTs
             val accessToken = refreshTokenService
@@ -60,7 +62,7 @@ class AuthController(@Autowired val userService: UserService, @Autowired val ref
             //CREATE RESPONSE BODY
 
             val responseBody = HashMap<String, String>()
-            responseBody["username"] = user.get().login
+            responseBody["username"] = user.login
             responseBody["accessToken"] = accessToken
 
             //SEND THE REFRESH TOKEN COOKIE AND THE ACCESS TOKEN
@@ -78,12 +80,34 @@ class AuthController(@Autowired val userService: UserService, @Autowired val ref
 
     @GetMapping("/auth/refresh")
     fun handleRefreshToken(@CookieValue(name = "jwt") jwt: String): ResponseEntity<String> {
-        val username = refreshTokenService.verifyRefreshToken(jwt)
+        fun deleteCookie(): ResponseEntity<String> {
+            val deleteCookie = ResponseCookie
+                .from("jwt", "")
+                .httpOnly(true)
+                .path("/")
+                .maxAge(0)
+                .sameSite("none") //Chrome, you bastard
+                .secure(true)
+                .build()
 
-        if (username.isNullOrEmpty()){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+            return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
+                .build()
         }
 
+        //Provided token is in the database - his owner logged out before it expired, and it's blacklisted.
+        val bannedToken = refreshTokenService.getTokenByJwt(jwt)
+        if (bannedToken.isPresent) return deleteCookie()
+
+        //Provided token does not have proper payload, or the user does not exist.
+        val username = refreshTokenService.verifyRefreshToken(jwt)
+        if (username.isNullOrEmpty()) return deleteCookie()
+        val user = userService.getUserByLogin(username)
+        if (user.isEmpty) return deleteCookie()
+
+
+        //Create a new access token for the user.
         val accessToken = refreshTokenService.createAccessToken(username)
 
         val responseBody = HashMap<String, String>()
@@ -99,22 +123,26 @@ class AuthController(@Autowired val userService: UserService, @Autowired val ref
     fun handleLogout(@CookieValue(name = "jwt") jwt: String): ResponseEntity<String> {
         try {
             val bannedRefreshToken = refreshTokenService.addToken(jwt)
-        }catch (e:Exception){
 
+            //Cookie deleter
+            val deleteCookie = ResponseCookie
+                .from("jwt", "")
+                .httpOnly(true)
+                .path("/")
+                .maxAge(0)
+                .sameSite("none") //Chrome, you bastard
+                .secure(true)
+                .build()
+
+            return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
+                .build()
+
+        } catch (e: Exception) {
+            return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .build()
         }
-        //Delete the cookie
-        val deleteCookie = ResponseCookie
-            .from("jwt", "")
-            .httpOnly(true)
-            .path("/")
-            .maxAge(0)
-            .sameSite("none") //Chrome, you bastard
-            .secure(true)
-            .build()
-
-        return ResponseEntity
-            .status(HttpStatus.NO_CONTENT)
-            .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
-            .build()
     }
 }

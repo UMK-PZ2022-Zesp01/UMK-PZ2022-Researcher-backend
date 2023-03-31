@@ -62,17 +62,21 @@ class RefreshTokenService(@Autowired val refreshTokenRepository: RefreshTokenRep
         }
     }
 
-    fun verifyAccessToken(jwt: String, username: String): Boolean {
-        return try {
-            JWT
+    fun verifyAccessToken(jwt: String, username: String): String? {
+        try {
+            val decoded = JWT
                 .require(Algorithm.HMAC256(ACCESS_TOKEN_SECRET))
                 .withClaim("username", username)
                 .build()
                 .verify(jwt)
 
-            true
+            val usernameClaim = decoded.getClaim("username").toString()
+
+            return usernameClaim.substring(1, username.length-1)
+
+
         } catch (e: Exception) {
-            false
+            return null
         }
     }
 
@@ -86,14 +90,12 @@ class RefreshTokenService(@Autowired val refreshTokenRepository: RefreshTokenRep
 
         val refreshToken = RefreshToken( jwt = jwt, expires = expiryDate)
 
-
-
         return refreshTokenRepository.insert(refreshToken)
     }
 
     /*** DELETE METHODS ***/
 
-    fun deleteToken(id: String) =
+    fun deleteTokenById(id: String) =
         refreshTokenRepository.deleteById(id)
 
     /*** ADD METHODS ***/
