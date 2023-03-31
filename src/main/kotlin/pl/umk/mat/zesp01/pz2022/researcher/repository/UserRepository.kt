@@ -29,4 +29,9 @@ interface UserRepository : MongoRepository<User, String> {
 
     @Query("{'lastName':?0}")
     fun findUserByLastName(lastName: String): Optional<List<User>>
+
+
+
+    @Query("{'login': ?0}", delete = true)
+    fun deleteByLogin(login: String): Optional<User>
 }

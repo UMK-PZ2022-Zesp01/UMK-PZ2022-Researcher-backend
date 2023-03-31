@@ -1,7 +1,5 @@
 package pl.umk.mat.zesp01.pz2022.researcher.controller
 
-import com.auth0.jwt.JWT
-import com.auth0.jwt.algorithms.Algorithm
 import com.google.gson.Gson
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -11,7 +9,7 @@ import pl.umk.mat.zesp01.pz2022.researcher.model.User
 import org.mindrot.jbcrypt.BCrypt
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.http.HttpHeaders
-import pl.umk.mat.zesp01.pz2022.researcher.model.UserRegisterData
+import pl.umk.mat.zesp01.pz2022.researcher.model.UserRegisterRequest
 import pl.umk.mat.zesp01.pz2022.researcher.model.UserUpdateRequest
 import pl.umk.mat.zesp01.pz2022.researcher.repository.UserRepository
 import pl.umk.mat.zesp01.pz2022.researcher.service.*
@@ -21,29 +19,27 @@ class UserController(
 	@Autowired val userService: UserService,
 	@Autowired val userRepository: UserRepository,
 	@Autowired val verificationTokenService: VerificationTokenService,
-	@Autowired val eventPublisher: ApplicationEventPublisher
+	@Autowired val refreshTokenService: RefreshTokenService,
+	@Autowired val eventPublisher: ApplicationEventPublisher,
 ) {
 	val gson = Gson()
 
 	/*** POST MAPPINGS ***/
 
 	@PostMapping("/user/register")
-	fun addUser(@RequestBody uRD: UserRegisterData): ResponseEntity<String> {
+	fun addUser(@RequestBody uRR: UserRegisterRequest): ResponseEntity<String> {
 
-		if (userService.getUserByEmail(uRD.email).isPresent) {
+		if (userService.getUserByEmail(uRR.email).isPresent) {
 			return ResponseEntity.status(299).build()
 		}
-		if (userService.getUserByLogin(uRD.login).isPresent) {
+		if (userService.getUserByLogin(uRR.login).isPresent) {
 			return ResponseEntity.status(298).build()
 		}
 
-		val newUser = uRD.toUser()
-
-//		newUser.id = IdGenerator().generateUserId(userService.getAllUserIds())
+		val newUser = uRR.toUser()
 		userService.addUser(newUser)
 
 		return ResponseEntity.status(HttpStatus.CREATED).build()
-
 	}
 
 	// 'return' lifted out of 'try', check whether it causes any errors
@@ -102,7 +98,7 @@ class UserController(
 	fun updateUser(@RequestBody user: UserUpdateRequest): ResponseEntity<User> {
 		val oldUser = userService.getUserByLogin(user.login).orElse(User())
 
-		val updatedUser= User(
+		val updatedUser = User(
 			login =  if (user.login.isEmpty())(oldUser.login) else (user.login),
 			password =  if (user.password.isEmpty())(oldUser.password) else BCrypt.hashpw(user.password, BCrypt.gensalt()),
 			firstName =  if (user.firstName.isEmpty())(oldUser.firstName) else (user.firstName),
@@ -124,22 +120,13 @@ class UserController(
 		jwt ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
 		try {
-			val decoded = JWT.require(Algorithm.HMAC256(ACCESS_TOKEN_SECRET))
-				.withClaimPresence("username")
-				.build()
-				.verify(jwt[0])
-
 			//get the username claimed in the access token
-			var username = decoded
-				.claims
-				.getValue("username")
-				.toString()
-			username = username.substring(1, username.length - 1)
+			val username = refreshTokenService.verifyAccessToken(jwt[0])
+			if (username.isNullOrEmpty())return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
 
 			//If claimed user does not exist in db there is something wrong with the token
 			val user = userService.getUserByLogin(username)
-			if (user.isEmpty) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-
+			if (user.isEmpty) return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
 
 			val data = userService
 				.getUserByLogin(username)
@@ -149,10 +136,13 @@ class UserController(
 			return ResponseEntity.status(HttpStatus.OK).body(gson.toJson(data))
 		} catch (e: java.lang.Exception) {
 			println(e)
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
 		}
-
-		return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
 	}
+
+
+
+
 
 	@GetMapping("/getPhoneByUserLogin/{login}")
 	fun getPhoneByUserLogin(@PathVariable login: String): ResponseEntity<String> {

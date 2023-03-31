@@ -33,7 +33,7 @@ data class User(
     }
 }
 
-class UserRegisterData(
+class UserRegisterRequest(
     val firstName: String,
     val lastName: String,
     val login: String,
@@ -58,7 +58,7 @@ class UserRegisterData(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as UserRegisterData
+        other as UserRegisterRequest
 
         if (firstName != other.firstName) return false
         if (lastName != other.lastName) return false

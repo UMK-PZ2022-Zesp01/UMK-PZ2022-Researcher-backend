@@ -6,13 +6,11 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import pl.umk.mat.zesp01.pz2022.researcher.model.Research
 import pl.umk.mat.zesp01.pz2022.researcher.model.ResearchRequest
-import pl.umk.mat.zesp01.pz2022.researcher.repository.ResearchRepository
 import pl.umk.mat.zesp01.pz2022.researcher.service.ResearchService
 
 @RestController
 class ResearchController(
     @Autowired val researchService: ResearchService,
-    @Autowired val researchRepository: ResearchRepository
 ) {
     /*** POST MAPPINGS ***/
 

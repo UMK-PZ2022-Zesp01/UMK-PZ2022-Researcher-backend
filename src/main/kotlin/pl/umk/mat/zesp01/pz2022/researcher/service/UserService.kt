@@ -35,6 +35,9 @@ class UserService(
     fun deleteUserById(id: String) =
         userRepository.deleteById(id)
 
+    fun deleteUserByLogin(login: String) =
+        userRepository.deleteByLogin(login)
+
     /*** GET METHODS ***/
     fun getAllUsers(): List<User> =
         userRepository.findAll()

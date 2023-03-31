@@ -19,4 +19,10 @@ interface VerificationTokenRepository : MongoRepository<VerificationToken, Strin
 
     @Query("{'jwt':?0}")
     fun findTokenByJwt(userId: String): Optional<VerificationToken>
+
+
+
+    @Query("{'jwt':?0}", delete = true)
+    fun deleteTokenByJwt(userId: String): Optional<VerificationToken>
+
 }

@@ -4,7 +4,6 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import pl.umk.mat.zesp01.pz2022.researcher.idgenerator.IdGenerator
 import pl.umk.mat.zesp01.pz2022.researcher.model.User
 import pl.umk.mat.zesp01.pz2022.researcher.model.VerificationToken
 import pl.umk.mat.zesp01.pz2022.researcher.repository.VerificationTokenRepository
@@ -32,7 +31,6 @@ class VerificationTokenService(
 
         val verificationTokenDB = VerificationToken()
 
-        verificationTokenDB.id = IdGenerator().generateTokenId()
         verificationTokenDB.login = username
         verificationTokenDB.expires = Date(System.currentTimeMillis() + VERIFICATION_EXPIRES_SEC * 1000).toString()
         verificationTokenDB.jwt = verificationToken
@@ -56,7 +54,6 @@ class VerificationTokenService(
         }
 
     fun addToken(token: VerificationToken): VerificationToken {
-        token.id = IdGenerator().generateTokenId()
         return verificationTokenRepository.insert(token)
     }
 
@@ -65,11 +62,14 @@ class VerificationTokenService(
     fun deleteUserTokens(user: User) {
         val tokens = getTokensByLogin(user.login).orElse(null)
         tokens ?: return
-        tokens.forEach { verificationToken -> deleteToken(verificationToken.id) }
+        tokens.forEach { verificationToken -> deleteTokenByJwt(verificationToken.jwt) }
     }
 
-    fun deleteToken(id: String) =
+    fun deleteTokenById(id: String) =
         verificationTokenRepository.deleteById(id)
+
+    fun deleteTokenByJwt (jwt: String) =
+        verificationTokenRepository.deleteTokenByJwt(jwt)
 
     //    fun deleteExpiredTokens(){
 //    }
@@ -90,7 +90,6 @@ class VerificationTokenService(
 
     fun getTokenByJwt(jwt: String): Optional<VerificationToken> =
         verificationTokenRepository.findTokenByJwt(jwt)
-
 }
 
 
