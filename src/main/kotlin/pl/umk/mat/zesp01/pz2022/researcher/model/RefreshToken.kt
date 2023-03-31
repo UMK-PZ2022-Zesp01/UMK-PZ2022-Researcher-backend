@@ -5,9 +5,8 @@ import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
 
 @Document ("RefreshTokens")
-class RefreshToken {
-    @Id var id: String = ""
-    @Field var login: String = ""
-    @Field var expires: String = ""
-    @Field var jwt: String = ""
-}
+class RefreshToken (
+    @Id val id: String ="",
+    @Field val expires: String = "",
+    @Field val jwt: String = "",
+)

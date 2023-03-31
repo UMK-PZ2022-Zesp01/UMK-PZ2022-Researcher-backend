@@ -1,5 +1,6 @@
 package pl.umk.mat.zesp01.pz2022.researcher.controller
 
+import com.auth0.jwt.JWT
 import com.google.gson.Gson
 import org.mindrot.jbcrypt.BCrypt
 import org.springframework.beans.factory.annotation.Autowired
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseCookie
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import pl.umk.mat.zesp01.pz2022.researcher.model.LoginData
+import pl.umk.mat.zesp01.pz2022.researcher.model.RefreshToken
 import pl.umk.mat.zesp01.pz2022.researcher.service.REFRESH_EXPIRES_SEC
 import pl.umk.mat.zesp01.pz2022.researcher.service.RefreshTokenService
 import pl.umk.mat.zesp01.pz2022.researcher.service.UserService
@@ -76,22 +78,16 @@ class AuthController(@Autowired val userService: UserService, @Autowired val ref
 
     @GetMapping("/auth/refresh")
     fun handleRefreshToken(@CookieValue(name = "jwt") jwt: String): ResponseEntity<String> {
-        val token = refreshTokenService.getTokenByJwt(jwt)
+        val username = refreshTokenService.verifyRefreshToken(jwt)
 
-        if (token.isEmpty) {
+        if (username.isNullOrEmpty()){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
 
-        val username = token.get().login
-        if (!refreshTokenService.verifyRefreshToken(jwt, username)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
-        }
-
-        val accessToken = refreshTokenService
-            .createAccessToken(username)
+        val accessToken = refreshTokenService.createAccessToken(username)
 
         val responseBody = HashMap<String, String>()
-        responseBody["username"] = token.get().login
+        responseBody["username"] = username
         responseBody["accessToken"] = accessToken
 
         return ResponseEntity.status(HttpStatus.OK).body(Gson().toJson(responseBody))
@@ -101,9 +97,10 @@ class AuthController(@Autowired val userService: UserService, @Autowired val ref
 
     @DeleteMapping("/logout")
     fun handleLogout(@CookieValue(name = "jwt") jwt: String): ResponseEntity<String> {
-        val token = refreshTokenService.getTokenByJwt(jwt)
-        if (token.isPresent) {//The token is in the db. Delete it
-            refreshTokenService.deleteToken(token.get().id)
+        try {
+            val bannedRefreshToken = refreshTokenService.addToken(jwt)
+        }catch (e:Exception){
+
         }
         //Delete the cookie
         val deleteCookie = ResponseCookie

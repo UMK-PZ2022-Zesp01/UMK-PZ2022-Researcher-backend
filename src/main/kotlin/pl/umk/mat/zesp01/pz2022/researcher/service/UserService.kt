@@ -56,7 +56,7 @@ class UserService(
                 "Users", String::class.java
         ).mappedResults
         for (i in emailList){
-            var temporaryEmail=i.substring(11).dropLast(2)
+            val temporaryEmail=i.substring(11).dropLast(2)
             println(temporaryEmail)
             result.add(temporaryEmail)
         }
@@ -64,14 +64,14 @@ class UserService(
     }
     fun getAllUserPhones():List<String>{
         val result= ArrayList<String>()
-        var phoneList=mongoOperations.aggregate(
+        val phoneList=mongoOperations.aggregate(
                 Aggregation.newAggregation(
                         Aggregation.project().andExclude("_id").andInclude("phone")
                 ),
                 "Users", String::class.java
         ).mappedResults
         for (i in phoneList){
-            var temporaryPhone=i.substring(11).dropLast(2)
+            val temporaryPhone=i.substring(11).dropLast(2)
             println(temporaryPhone)
             result.add(temporaryPhone)
         }

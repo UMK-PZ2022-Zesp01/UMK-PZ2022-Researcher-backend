@@ -4,7 +4,6 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import pl.umk.mat.zesp01.pz2022.researcher.idgenerator.IdGenerator
 import pl.umk.mat.zesp01.pz2022.researcher.model.RefreshToken
 import pl.umk.mat.zesp01.pz2022.researcher.repository.RefreshTokenRepository
 import java.util.*
@@ -23,22 +22,11 @@ class RefreshTokenService(@Autowired val refreshTokenRepository: RefreshTokenRep
     fun createRefreshToken(username: String): String {
         val payload = mapOf(Pair("username", username))
 
-        val refreshToken = JWT
+        return JWT
             .create()
             .withPayload(payload)
             .withExpiresAt(Date(System.currentTimeMillis() + REFRESH_EXPIRES_SEC * 1000))
             .sign(Algorithm.HMAC256(REFRESH_TOKEN_SECRET))
-
-        val refreshTokenDB = RefreshToken()
-
-        refreshTokenDB.id = IdGenerator().generateTokenId()
-        refreshTokenDB.login = username
-        refreshTokenDB.expires = Date(System.currentTimeMillis() + REFRESH_EXPIRES_SEC * 1000).toString()
-        refreshTokenDB.jwt = refreshToken
-
-        refreshTokenRepository.insert(refreshTokenDB)
-
-        return refreshToken
     }
 
     fun createAccessToken(username: String): String {
@@ -51,17 +39,26 @@ class RefreshTokenService(@Autowired val refreshTokenRepository: RefreshTokenRep
             .sign(Algorithm.HMAC256(ACCESS_TOKEN_SECRET))
     }
 
-    fun verifyRefreshToken(jwt: String, username: String): Boolean {
-        return try {
-            JWT
-                .require(Algorithm.HMAC256(REFRESH_TOKEN_SECRET))
-                .withClaim("username", username)
-                .build()
-                .verify(jwt)
+    fun verifyRefreshToken(jwt: String): String? {
+        val token = refreshTokenRepository.findTokenByJwt(jwt)
 
-            true
+        if (token.isPresent){
+            return null
+        }
+
+        try {
+             val decoded = JWT
+                 .require(Algorithm.HMAC256(REFRESH_TOKEN_SECRET))
+                 .withClaimPresence("username")
+                 .build()
+                 .verify(jwt)
+
+            val username = decoded.claims.getValue("username").toString()
+
+            return username.substring(1, username.length-1)
+
         } catch (e: Exception) {
-            false
+            return null
         }
     }
 
@@ -79,8 +76,18 @@ class RefreshTokenService(@Autowired val refreshTokenRepository: RefreshTokenRep
         }
     }
 
-    fun addToken(refreshToken: RefreshToken): RefreshToken {
-        refreshToken.id = IdGenerator().generateTokenId()
+//    fun addToken(refreshToken: RefreshToken): RefreshToken {
+//        refreshToken.id = IdGenerator().generateTokenId()
+//        return refreshTokenRepository.insert(refreshToken)
+//    }
+
+    fun addToken(jwt: String): RefreshToken {
+        val expiryDate = JWT.decode(jwt).expiresAt.toString()
+
+        val refreshToken = RefreshToken( jwt = jwt, expires = expiryDate)
+
+
+
         return refreshTokenRepository.insert(refreshToken)
     }
 

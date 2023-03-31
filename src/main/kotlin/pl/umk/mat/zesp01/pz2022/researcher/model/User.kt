@@ -1,82 +1,57 @@
 package pl.umk.mat.zesp01.pz2022.researcher.model
 
-import org.springframework.data.annotation.Id
+import org.mindrot.jbcrypt.BCrypt
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
 
 @Document("Users")
 data class User(
-    @Id var id: String = "",
-    @Field var login: String = "",
-    @Field var password: String = "",
-    @Field var firstName: String = "",
-    @Field var lastName: String = "",
-    @Field var email: String = "",
-    @Field var phone: String = "",
-    @Field var birthDate: String = "",
-    @Field var gender: String = "",
-    @Field var avatarImage: String = "",
-    @Field var location: String = "",
-    @Field var isConfirmed: Boolean = false
+    @Field val login: String = "",
+    @Field val password: String = "",
+    @Field val firstName: String = "",
+    @Field val lastName: String = "",
+    @Field val email: String = "",
+    @Field val phone: String = "",
+    @Field val birthDate: String = "",
+    @Field val gender: String = "",
+    @Field val avatarImage: String = "",
+    @Field val location: String = "",
+    @Field val isConfirmed: Boolean = false
 ) {
 
-    fun toUserProfileDTO(): UserProfileDTO {
-        val userProfileDTO = UserProfileDTO()
-
-        userProfileDTO.id = this.id
-
-        userProfileDTO.login = this.login
-        userProfileDTO.firstName = this.firstName
-        userProfileDTO.lastName = this.lastName
-        userProfileDTO.email = this.email
-        userProfileDTO.phone = this.phone
-        userProfileDTO.birthDate = this.birthDate
-        userProfileDTO.gender = this.gender
-        userProfileDTO.avatarImage = this.avatarImage
-
-        return userProfileDTO
+    fun toUserResponse(): UserResponse {
+        return UserResponse(
+            login=login,
+            firstName=firstName,
+            lastName=lastName,
+            email=email,
+            phone=phone,
+            birthDate=birthDate,
+            gender=gender,
+            avatarImage=avatarImage,
+        )
     }
 }
 
-class UserProfileDTO(
-    var id: String = "",
-
-    var login: String = "",
-    var firstName: String = "",
-    var lastName: String = "",
-    var email: String = "",
-    var phone: String = "",
-    var birthDate: String = "",
-    var gender: String = "",
-    var avatarImage: String = ""
-)
-
-class LoginData(
-    var login: String = "",
-    var password: String = ""
-)
-
 class UserRegisterData(
-    var firstName: String = "",
-    var lastName: String = "",
-    var login: String = "",
-    var email: String = "",
-    var password: String="",
-    var gender: String = "",
-    var birthDate: String = ""
-){
-    fun toUser(): User{
-        val user = User()
-
-        user.firstName=firstName
-        user.lastName=lastName
-        user.login=login
-        user.email=email
-        user.password=password
-        user.gender=gender
-        user.birthDate=birthDate
-
-        return user;
+    val firstName: String,
+    val lastName: String,
+    val login: String,
+    val email: String,
+    val password: String,
+    val gender: String,
+    val birthDate: String,
+) {
+    fun toUser(): User {
+        return User(
+            login = login,
+            password = BCrypt.hashpw(password, BCrypt.gensalt()),
+            firstName = firstName,
+            lastName = lastName,
+            email = email,
+            gender = gender,
+            birthDate = birthDate
+        )
     }
 
     override fun equals(other: Any?): Boolean {
@@ -95,10 +70,38 @@ class UserRegisterData(
 
         return true
     }
-
-
-
 }
+
+class UserUpdateRequest(
+    val login: String = "",
+    val password: String = "",
+    val firstName: String = "",
+    val lastName: String = "",
+    val email: String = "",
+    val phone: String = "",
+    val birthDate: String = "",
+    val gender: String = "",
+    val avatarImage: String = ""
+)
+
+class UserResponse(
+    val login: String = "",
+    val firstName: String = "",
+    val lastName: String = "",
+    val email: String = "",
+    val phone: String = "",
+    val birthDate: String = "",
+    val gender: String = "",
+    val avatarImage: String = ""
+)
+
+
+class LoginData(
+    val login: String,
+    val password: String,
+)
+
+
 
 
 

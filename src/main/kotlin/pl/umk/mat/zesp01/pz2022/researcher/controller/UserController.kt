@@ -11,8 +11,8 @@ import pl.umk.mat.zesp01.pz2022.researcher.model.User
 import org.mindrot.jbcrypt.BCrypt
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.http.HttpHeaders
-import pl.umk.mat.zesp01.pz2022.researcher.idgenerator.IdGenerator
 import pl.umk.mat.zesp01.pz2022.researcher.model.UserRegisterData
+import pl.umk.mat.zesp01.pz2022.researcher.model.UserUpdateRequest
 import pl.umk.mat.zesp01.pz2022.researcher.repository.UserRepository
 import pl.umk.mat.zesp01.pz2022.researcher.service.*
 
@@ -39,8 +39,7 @@ class UserController(
 
 		val newUser = uRD.toUser()
 
-		newUser.password = BCrypt.hashpw(newUser.password, BCrypt.gensalt())
-		newUser.id = IdGenerator().generateUserId(userService.getAllUserIds())
+//		newUser.id = IdGenerator().generateUserId(userService.getAllUserIds())
 		userService.addUser(newUser)
 
 		return ResponseEntity.status(HttpStatus.CREATED).build()
@@ -85,8 +84,9 @@ class UserController(
 				user
 			)
 
-			user.isConfirmed = true
-			userService.userRepository.save(user)
+			val activeUser = user.copy(isConfirmed = true)
+
+			userService.userRepository.save(activeUser)
 
 			verificationTokenService.deleteUserTokens(user)
 			return ResponseEntity.status(HttpStatus.CREATED).build()
@@ -98,22 +98,22 @@ class UserController(
 
 	/*** PUT MAPPINGS ***/
 
-	@PutMapping("/user/{id}/update")
-	fun updateUser(@PathVariable id: String, @RequestBody user: User): ResponseEntity<User> {
-		val oldUser = userRepository.findById(id).orElse(null)
-		user.id = oldUser.id
-		if (user.login.isEmpty()) user.login = oldUser.login
-		if (user.password.isEmpty()) user.password = oldUser.password
-		else user.password = BCrypt.hashpw(user.password, BCrypt.gensalt())
-		if (user.firstName.isEmpty()) user.firstName = oldUser.firstName
-		if (user.lastName.isEmpty()) user.lastName = oldUser.lastName
-		if (user.email.isEmpty()) user.email = oldUser.email
-		if (user.phone.isEmpty()) user.phone = oldUser.phone
-		if (user.birthDate.isEmpty()) user.birthDate = oldUser.birthDate
-		if (user.gender.isEmpty()) user.gender = oldUser.gender
-		if (user.avatarImage.isEmpty()) user.avatarImage = oldUser.avatarImage
+	@PutMapping("/user/update")
+	fun updateUser(@RequestBody user: UserUpdateRequest): ResponseEntity<User> {
+		val oldUser = userService.getUserByLogin(user.login).orElse(User())
 
-		return ResponseEntity.status(HttpStatus.OK).body(userRepository.save(user))
+		val updatedUser= User(
+			login =  if (user.login.isEmpty())(oldUser.login) else (user.login),
+			password =  if (user.password.isEmpty())(oldUser.password) else BCrypt.hashpw(user.password, BCrypt.gensalt()),
+			firstName =  if (user.firstName.isEmpty())(oldUser.firstName) else (user.firstName),
+			lastName =  if (user.lastName.isEmpty())(oldUser.lastName) else (user.lastName),
+			email =  if (user.email.isEmpty())(oldUser.email) else (user.email),
+			phone =  if(user.phone.isEmpty())(oldUser.phone) else (user.phone),
+			birthDate =  if(user.birthDate.isEmpty())(oldUser.birthDate) else (user.birthDate),
+			gender =  if(user.gender.isEmpty())(oldUser.gender) else (user.gender),
+			avatarImage =  if(user.avatarImage.isEmpty())(oldUser.avatarImage) else (user.avatarImage),
+		)
+		return ResponseEntity.status(HttpStatus.OK).body(userRepository.save(updatedUser))
 	}
 
 	/*** GET MAPPINGS ***/
@@ -144,7 +144,7 @@ class UserController(
 			val data = userService
 				.getUserByLogin(username)
 				.get()
-				.toUserProfileDTO()
+				.toUserResponse()
 
 			return ResponseEntity.status(HttpStatus.OK).body(gson.toJson(data))
 		} catch (e: java.lang.Exception) {
