@@ -31,6 +31,12 @@ class UserService(
             user
         )
 
+    fun updateUserByLogin(login: String,user: User) =
+        mongoOperations.findAndReplace(
+            Query.query(Criteria.where("login").`is`(login)),
+            user
+        )
+
     /*** DELETE METHODS ***/
     fun deleteUserById(id: String) =
         userRepository.deleteById(id)

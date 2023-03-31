@@ -82,7 +82,7 @@ class UserController(
 
 			val activeUser = user.copy(isConfirmed = true)
 
-			userService.userRepository.save(activeUser)
+			userService.updateUserByLogin(activeUser.login, activeUser)
 
 			verificationTokenService.deleteUserTokens(user)
 			return ResponseEntity.status(HttpStatus.CREATED).build()
