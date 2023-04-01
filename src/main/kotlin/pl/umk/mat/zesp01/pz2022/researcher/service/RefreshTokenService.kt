@@ -17,120 +17,120 @@ const val REFRESH_EXPIRES_SEC: Long = 86400
 @Service
 class RefreshTokenService(@Autowired val refreshTokenRepository: RefreshTokenRepository) {
 
-    /*** ADD METHODS ***/
+	/*** ADD METHODS ***/
 
-    fun createRefreshToken(username: String): String {
-        val payload = mapOf(Pair("username", username))
+	fun createRefreshToken(username: String): String {
+		val payload = mapOf(Pair("username", username))
 
-        return JWT
-            .create()
-            .withPayload(payload)
-            .withExpiresAt(Date(System.currentTimeMillis() + REFRESH_EXPIRES_SEC * 1000))
-            .sign(Algorithm.HMAC256(REFRESH_TOKEN_SECRET))
-    }
+		return JWT
+			.create()
+			.withPayload(payload)
+			.withExpiresAt(Date(System.currentTimeMillis() + REFRESH_EXPIRES_SEC * 1000))
+			.sign(Algorithm.HMAC256(REFRESH_TOKEN_SECRET))
+	}
 
-    fun createAccessToken(username: String): String {
-        val payload = mapOf(Pair("username", username))
+	fun createAccessToken(username: String): String {
+		val payload = mapOf(Pair("username", username))
 
-        return JWT
-            .create()
-            .withPayload(payload)
-            .withExpiresAt(Date(System.currentTimeMillis() + ACCESS_EXPIRES_SEC * 1000))
-            .sign(Algorithm.HMAC256(ACCESS_TOKEN_SECRET))
-    }
+		return JWT
+			.create()
+			.withPayload(payload)
+			.withExpiresAt(Date(System.currentTimeMillis() + ACCESS_EXPIRES_SEC * 1000))
+			.sign(Algorithm.HMAC256(ACCESS_TOKEN_SECRET))
+	}
 
-    fun verifyRefreshToken(jwt: String): String? {
-        val token = refreshTokenRepository.findTokenByJwt(jwt)
+	fun verifyRefreshToken(jwt: String): String? {
+		val token = refreshTokenRepository.findTokenByJwt(jwt)
 
-        if (token.isPresent){
-            return null
-        }
+		if (token.isPresent) {
+			return null
+		}
 
-        try {
-             val decoded = JWT
-                 .require(Algorithm.HMAC256(REFRESH_TOKEN_SECRET))
-                 .withClaimPresence("username")
-                 .build()
-                 .verify(jwt)
+		try {
+			val decoded = JWT
+				.require(Algorithm.HMAC256(REFRESH_TOKEN_SECRET))
+				.withClaimPresence("username")
+				.build()
+				.verify(jwt)
 
-            val username = decoded.claims.getValue("username").toString()
+			val username = decoded.claims.getValue("username").toString()
 
-            return username.substring(1, username.length-1)
+			return username.substring(1, username.length - 1)
 
-        } catch (e: Exception) {
-            return null
-        }
-    }
+		} catch (e: Exception) {
+			return null
+		}
+	}
 
-    fun verifyAccessToken(jwt: String): String? {
-        try {
-            val decoded = JWT
-                .require(Algorithm.HMAC256(ACCESS_TOKEN_SECRET))
-                .withClaimPresence("username")
-                .build()
-                .verify(jwt)
+	fun verifyAccessToken(jwt: String): String? {
+		try {
+			val decoded = JWT
+				.require(Algorithm.HMAC256(ACCESS_TOKEN_SECRET))
+				.withClaimPresence("username")
+				.build()
+				.verify(jwt)
 
-            val usernameClaim = decoded.getClaim("username").toString()
+			val usernameClaim = decoded.getClaim("username").toString()
 
-            return usernameClaim.substring(1, usernameClaim.length-1)
+			return usernameClaim.substring(1, usernameClaim.length - 1)
 
-        } catch (e: Exception) {
-            return null
-        }
-    }
+		} catch (e: Exception) {
+			return null
+		}
+	}
 
-    fun verifyAccessToken(jwt: String, username: String): String? {
-        try {
-            val decoded = JWT
-                .require(Algorithm.HMAC256(ACCESS_TOKEN_SECRET))
-                .withClaim("username", username)
-                .build()
-                .verify(jwt)
+	fun verifyAccessToken(jwt: String, username: String): String? {
+		try {
+			val decoded = JWT
+				.require(Algorithm.HMAC256(ACCESS_TOKEN_SECRET))
+				.withClaim("username", username)
+				.build()
+				.verify(jwt)
 
-            val usernameClaim = decoded.getClaim("username").toString()
+			val usernameClaim = decoded.getClaim("username").toString()
 
-            return usernameClaim.substring(1, username.length-1)
-        } catch (e: Exception) {
-            return null
-        }
-    }
+			return usernameClaim.substring(1, username.length - 1)
+		} catch (e: Exception) {
+			return null
+		}
+	}
 
 //    fun addToken(refreshToken: RefreshToken): RefreshToken {
 //        refreshToken.id = IdGenerator().generateTokenId()
 //        return refreshTokenRepository.insert(refreshToken)
 //    }
 
-    fun addToken(jwt: String): RefreshToken {
-        val expiryDate = JWT.decode(jwt).expiresAt.toString()
+	fun addToken(jwt: String): RefreshToken {
+		val expiryDate = JWT.decode(jwt).expiresAt.toString()
 
-        val refreshToken = RefreshToken( jwt = jwt, expires = expiryDate)
+		val refreshToken = RefreshToken(jwt = jwt, expires = expiryDate)
 
-        return refreshTokenRepository.insert(refreshToken)
-    }
+		return refreshTokenRepository.insert(refreshToken)
+	}
 
-    /*** DELETE METHODS ***/
+	/*** DELETE METHODS ***/
 
-    fun deleteTokenById(id: String) =
-        refreshTokenRepository.deleteById(id)
+	fun deleteTokenById(id: String) =
+		refreshTokenRepository.deleteById(id)
 
-    /*** ADD METHODS ***/
+	/*** ADD METHODS ***/
 
-    fun getAllTokens(): List<RefreshToken> =
-        refreshTokenRepository.findAll()
+	fun getAllTokens(): List<RefreshToken> =
+		refreshTokenRepository.findAll()
 
-    fun getTokenById(id: String): Optional<RefreshToken> =
-        refreshTokenRepository.findTokenById(id)
+	fun getTokenById(id: String): Optional<RefreshToken> =
+		refreshTokenRepository.findTokenById(id)
 
-    fun getTokensByLogin(login: String): Optional<List<RefreshToken>> =
-        refreshTokenRepository.findTokensByLogin(login)
+	fun getTokensByLogin(login: String): Optional<List<RefreshToken>> =
+		refreshTokenRepository.findTokensByLogin(login)
 
-    fun getTokenByExpires(date: String): Optional<List<RefreshToken>> =
-        refreshTokenRepository.findTokensByExpires(date)
+	fun getTokenByExpires(date: String): Optional<List<RefreshToken>> =
+		refreshTokenRepository.findTokensByExpires(date)
 
-    fun getTokenByJwt(jwt: String): Optional<RefreshToken> =
-        refreshTokenRepository.findTokenByJwt(jwt)
+	fun getTokenByJwt(jwt: String): Optional<RefreshToken> =
+		refreshTokenRepository.findTokenByJwt(jwt)
 
-    /*** DELETE METHODS***/
+	/*** DELETE METHODS***/
 
 //    fun deleteExpiredTokens(){
 //    }

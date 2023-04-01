@@ -8,15 +8,15 @@ import java.util.*
 
 @Repository
 interface RefreshTokenRepository : MongoRepository<RefreshToken, String> {
-    @Query("{'id':?0}")
-    fun findTokenById(id: String): Optional<RefreshToken>
+	@Query("{'id':?0}")
+	fun findTokenById(id: String): Optional<RefreshToken>
 
-    @Query("{'login':?0}")
-    fun findTokensByLogin(userId: String): Optional<List<RefreshToken>>
+	@Query("{'login':?0}")
+	fun findTokensByLogin(userId: String): Optional<List<RefreshToken>>
 
-    @Query("{'expires':?0}")
-    fun findTokensByExpires(userId: String): Optional<List<RefreshToken>>
+	@Query("{'expires':?0}")
+	fun findTokensByExpires(userId: String): Optional<List<RefreshToken>>
 
-    @Query("{'jwt':?0}")
-    fun findTokenByJwt(userId: String): Optional<RefreshToken>
+	@Query("{'jwt':?0}")
+	fun findTokenByJwt(userId: String): Optional<RefreshToken>
 }

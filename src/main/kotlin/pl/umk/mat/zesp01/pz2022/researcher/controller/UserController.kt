@@ -22,7 +22,6 @@ class UserController(
 	@Autowired val refreshTokenService: RefreshTokenService,
 	@Autowired val eventPublisher: ApplicationEventPublisher,
 ) {
-	val gson = Gson()
 
 	/*** POST MAPPINGS ***/
 
@@ -54,7 +53,7 @@ class UserController(
 			verificationTokenService.deleteUserTokens(user)
 
 			eventPublisher.publishEvent(OnRegistrationCompleteEvent(user))
-			ResponseEntity.status(HttpStatus.CREATED).body(gson.toJson(user.email))
+			ResponseEntity.status(HttpStatus.CREATED).body(Gson().toJson(user.email))
 		} catch (e: Exception) {
 			ResponseEntity.status(HttpStatus.NO_CONTENT).build()
 		}
@@ -99,15 +98,16 @@ class UserController(
 		val oldUser = userService.getUserByLogin(user.login).orElse(User())
 
 		val updatedUser = User(
-			login =  if (user.login.isEmpty())(oldUser.login) else (user.login),
-			password =  if (user.password.isEmpty())(oldUser.password) else BCrypt.hashpw(user.password, BCrypt.gensalt()),
-			firstName =  if (user.firstName.isEmpty())(oldUser.firstName) else (user.firstName),
-			lastName =  if (user.lastName.isEmpty())(oldUser.lastName) else (user.lastName),
-			email =  if (user.email.isEmpty())(oldUser.email) else (user.email),
-			phone =  if(user.phone.isEmpty())(oldUser.phone) else (user.phone),
-			birthDate =  if(user.birthDate.isEmpty())(oldUser.birthDate) else (user.birthDate),
-			gender =  if(user.gender.isEmpty())(oldUser.gender) else (user.gender),
-			avatarImage =  if(user.avatarImage.isEmpty())(oldUser.avatarImage) else (user.avatarImage),
+			login = if (user.login.isEmpty()) (oldUser.login) else (user.login),
+			password = if (user.password.isEmpty()) (oldUser.password)
+			else BCrypt.hashpw(user.password, BCrypt.gensalt()),
+			firstName = if (user.firstName.isEmpty()) (oldUser.firstName) else (user.firstName),
+			lastName = if (user.lastName.isEmpty()) (oldUser.lastName) else (user.lastName),
+			email = if (user.email.isEmpty()) (oldUser.email) else (user.email),
+			phone = if (user.phone.isEmpty()) (oldUser.phone) else (user.phone),
+			birthDate = if (user.birthDate.isEmpty()) (oldUser.birthDate) else (user.birthDate),
+			gender = if (user.gender.isEmpty()) (oldUser.gender) else (user.gender),
+			avatarImage = if (user.avatarImage.isEmpty()) (oldUser.avatarImage) else (user.avatarImage),
 		)
 		return ResponseEntity.status(HttpStatus.OK).body(userRepository.save(updatedUser))
 	}
@@ -122,7 +122,7 @@ class UserController(
 		try {
 			//get the username claimed in the access token
 			val username = refreshTokenService.verifyAccessToken(jwt[0])
-			if (username.isNullOrEmpty())return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+			if (username.isNullOrEmpty()) return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
 
 			//If claimed user does not exist in db there is something wrong with the token
 			val user = userService.getUserByLogin(username)
@@ -133,16 +133,12 @@ class UserController(
 				.get()
 				.toUserResponse()
 
-			return ResponseEntity.status(HttpStatus.OK).body(gson.toJson(data))
+			return ResponseEntity.status(HttpStatus.OK).body(Gson().toJson(data))
 		} catch (e: java.lang.Exception) {
 			println(e)
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
 		}
 	}
-
-
-
-
 
 	@GetMapping("/getPhoneByUserLogin/{login}")
 	fun getPhoneByUserLogin(@PathVariable login: String): ResponseEntity<String> {
@@ -195,12 +191,12 @@ class UserController(
 	}
 
 	@GetMapping("/users/emailList")
-	fun getAllUserEmails():ResponseEntity<List<String>>{
+	fun getAllUserEmails(): ResponseEntity<List<String>> {
 		return ResponseEntity.status(HttpStatus.OK).body(userService.getAllUserEmails())
 	}
 
 	@GetMapping("/users/phoneList")
-	fun getAllUserPhones():ResponseEntity<List<String>>{
+	fun getAllUserPhones(): ResponseEntity<List<String>> {
 		return ResponseEntity.status(HttpStatus.OK).body(userService.getAllUserPhones())
 	}
 

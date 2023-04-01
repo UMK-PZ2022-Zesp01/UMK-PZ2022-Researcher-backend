@@ -14,100 +14,101 @@ import kotlin.collections.ArrayList
 
 @Service
 class UserService(
-    @Autowired val userRepository: UserRepository,
-    @Autowired val mongoOperations: MongoOperations
+	@Autowired val userRepository: UserRepository,
+	@Autowired val mongoOperations: MongoOperations
 ) {
 
-    /*** ADD METHODS ***/
+	/*** ADD METHODS ***/
 
-    fun addUser(user: User): User =
-        userRepository.insert(user)
+	fun addUser(user: User): User =
+		userRepository.insert(user)
 
-    /*** UPDATE METHODS ***/
+	/*** UPDATE METHODS ***/
 
-    fun updateUserById(id: String, user: User) =
-        mongoOperations.findAndReplace(
-            Query.query(Criteria.where("_id").`is`(id)),
-            user
-        )
+	fun updateUserById(id: String, user: User) =
+		mongoOperations.findAndReplace(
+			Query.query(Criteria.where("_id").`is`(id)),
+			user
+		)
 
-    fun updateUserByLogin(login: String,user: User) =
-        mongoOperations.findAndReplace(
-            Query.query(Criteria.where("login").`is`(login)),
-            user
-        )
+	fun updateUserByLogin(login: String, user: User) =
+		mongoOperations.findAndReplace(
+			Query.query(Criteria.where("login").`is`(login)),
+			user
+		)
 
-    /*** DELETE METHODS ***/
-    fun deleteUserById(id: String) =
-        userRepository.deleteById(id)
+	/*** DELETE METHODS ***/
+	fun deleteUserById(id: String) =
+		userRepository.deleteById(id)
 
-    fun deleteUserByLogin(login: String) =
-        userRepository.deleteByLogin(login)
+	fun deleteUserByLogin(login: String) =
+		userRepository.deleteByLogin(login)
 
-    /*** GET METHODS ***/
-    fun getAllUsers(): List<User> =
-        userRepository.findAll()
+	/*** GET METHODS ***/
+	fun getAllUsers(): List<User> =
+		userRepository.findAll()
 
-    fun getAllUserIds(): List<String> =
-        mongoOperations.aggregate(
-            Aggregation.newAggregation(
-                Aggregation.project("_id")
-            ),
-            "Users", String::class.java
-        ).mappedResults
+	fun getAllUserIds(): List<String> =
+		mongoOperations.aggregate(
+			Aggregation.newAggregation(
+				Aggregation.project("_id")
+			),
+			"Users", String::class.java
+		).mappedResults
 
-    fun getAllUserEmails():List<String>{
-        val result= ArrayList<String>()
-        val emailList=mongoOperations.aggregate(
-                Aggregation.newAggregation(
-                        Aggregation.project().andExclude("_id").andInclude("email")
-                ),
-                "Users", String::class.java
-        ).mappedResults
-        for (i in emailList){
-            val temporaryEmail=i.substring(11).dropLast(2)
-            println(temporaryEmail)
-            result.add(temporaryEmail)
-        }
-        return result
-    }
-    fun getAllUserPhones():List<String>{
-        val result= ArrayList<String>()
-        val phoneList=mongoOperations.aggregate(
-                Aggregation.newAggregation(
-                        Aggregation.project().andExclude("_id").andInclude("phone")
-                ),
-                "Users", String::class.java
-        ).mappedResults
-        for (i in phoneList){
-            val temporaryPhone=i.substring(11).dropLast(2)
-            println(temporaryPhone)
-            result.add(temporaryPhone)
-        }
-        return result
-    }
+	fun getAllUserEmails(): List<String> {
+		val result = ArrayList<String>()
+		val emailList = mongoOperations.aggregate(
+			Aggregation.newAggregation(
+				Aggregation.project().andExclude("_id").andInclude("email")
+			),
+			"Users", String::class.java
+		).mappedResults
+		for (i in emailList) {
+			val temporaryEmail = i.substring(11).dropLast(2)
+			println(temporaryEmail)
+			result.add(temporaryEmail)
+		}
+		return result
+	}
 
-    fun getUserById(id: String): Optional<User> =
-        userRepository.findById(id)
+	fun getAllUserPhones(): List<String> {
+		val result = ArrayList<String>()
+		val phoneList = mongoOperations.aggregate(
+			Aggregation.newAggregation(
+				Aggregation.project().andExclude("_id").andInclude("phone")
+			),
+			"Users", String::class.java
+		).mappedResults
+		for (i in phoneList) {
+			val temporaryPhone = i.substring(11).dropLast(2)
+			println(temporaryPhone)
+			result.add(temporaryPhone)
+		}
+		return result
+	}
 
-    fun getUserByEmail(email: String): Optional<User> =
-        userRepository.findUserByEmail(email)
+	fun getUserById(id: String): Optional<User> =
+		userRepository.findById(id)
 
-    fun getUserByLogin(login: String): Optional<User> =
-        userRepository.findUserByLogin(login)
+	fun getUserByEmail(email: String): Optional<User> =
+		userRepository.findUserByEmail(email)
 
-    fun getUsersByFirstName(firstName: String): List<User> =
-        userRepository.findUserByFirstName(firstName)
-            .orElseThrow { throw RuntimeException("Cannot find User by First name") }
+	fun getUserByLogin(login: String): Optional<User> =
+		userRepository.findUserByLogin(login)
 
-    fun getUsersByLastName(lastName: String): List<User> =
-        userRepository.findUserByLastName(lastName)
-            .orElseThrow { throw RuntimeException("Cannot find User by Last name") }
+	fun getUsersByFirstName(firstName: String): List<User> =
+		userRepository.findUserByFirstName(firstName)
+			.orElseThrow { throw RuntimeException("Cannot find User by First name") }
 
-    // Made with MongoOperations
-    fun findUsersByGender(gender: String): List<User> =
-        mongoOperations.find(
-            Query.query(Criteria.where("gender").`is`(gender)),
-            "Users"
-        )
+	fun getUsersByLastName(lastName: String): List<User> =
+		userRepository.findUserByLastName(lastName)
+			.orElseThrow { throw RuntimeException("Cannot find User by Last name") }
+
+	// Made with MongoOperations
+	fun findUsersByGender(gender: String): List<User> =
+		mongoOperations.find(
+			Query.query(Criteria.where("gender").`is`(gender)),
+			"Users"
+		)
 }

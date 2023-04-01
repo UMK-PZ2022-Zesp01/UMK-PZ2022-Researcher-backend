@@ -8,21 +8,19 @@ import java.util.*
 
 @Repository
 interface VerificationTokenRepository : MongoRepository<VerificationToken, String> {
-    @Query("{'id':?0}")
-    fun findTokenById(id: String): Optional<VerificationToken>
+	@Query("{'id':?0}")
+	fun findTokenById(id: String): Optional<VerificationToken>
 
-    @Query("{'login':?0}")
-    fun findTokensByLogin(userId: String): Optional<List<VerificationToken>>
+	@Query("{'login':?0}")
+	fun findTokensByLogin(userId: String): Optional<List<VerificationToken>>
 
-    @Query("{'expires':?0}")
-    fun findTokensByExpires(userId: String): Optional<List<VerificationToken>>
+	@Query("{'expires':?0}")
+	fun findTokensByExpires(userId: String): Optional<List<VerificationToken>>
 
-    @Query("{'jwt':?0}")
-    fun findTokenByJwt(userId: String): Optional<VerificationToken>
+	@Query("{'jwt':?0}")
+	fun findTokenByJwt(userId: String): Optional<VerificationToken>
 
-
-
-    @Query("{'jwt':?0}", delete = true)
-    fun deleteTokenByJwt(userId: String): Optional<VerificationToken>
+	@Query("{'jwt':?0}", delete = true)
+	fun deleteTokenByJwt(userId: String): Optional<VerificationToken>
 
 }

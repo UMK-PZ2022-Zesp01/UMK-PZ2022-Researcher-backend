@@ -2,25 +2,30 @@ package pl.umk.mat.zesp01.pz2022.researcher.model
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.bson.BsonBinarySubType
+import org.bson.types.Binary
+import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
+import org.springframework.web.multipart.MultipartFile
 
 @Document("Researches")
-class Research {
-	@Id var id: String = ""
-	@Field var creatorLogin: String = ""
-	@Field var title: String = ""
-	@Field var description: String = ""
-	@Field var posterId: String = ""
-	@Field var participantLimit: Int = 0
-	@Field var participants = listOf<User>()
-	@Field var begDate: String = ""
-	@Field var endDate: String = ""
-	@Field var location = ResearchLocation()
-	@Field var rewards = listOf<ResearchReward>()
-	@Field var requirements = listOf<ResearchRequirement>()
-}
+data class Research(
+	@Id val id: ObjectId = ObjectId(),
+	@Field val researchCode: String = "",
+	@Field val creatorLogin: String = "",
+	@Field val title: String = "",
+	@Field val description: String = "",
+	@Field val poster: Binary = Binary(ByteArray(0)),
+	@Field val participantLimit: Int = 0,
+	@Field val participants: List<String> = listOf(),
+	@Field val begDate: String = "",
+	@Field val endDate: String = "",
+	@Field val location: ResearchLocation = ResearchLocation(),
+	@Field val rewards: List<ResearchReward> = listOf(),
+	@Field val requirements: List<ResearchRequirement> = listOf()
+)
 
 class ResearchResponse(
 	var id: String,
@@ -28,11 +33,17 @@ class ResearchResponse(
 	// TODO
 )
 
+class ResearchUpdateRequest(
+	val title: String,
+	val description: String,
+	val participantLimit: Int,
+	val location: ResearchLocation,
+)
+
 class ResearchRequest(
 	private val title: String,
 	private val description: String,
 	private val creatorLogin: String,
-	private val posterId: String,
 	private val begDate: String,
 	private val endDate: String,
 	private val participantLimit: Int,
@@ -40,82 +51,80 @@ class ResearchRequest(
 	private val rewards: List<ResearchReward>,
 	private val requirements: List<ResearchRequirement>
 ) {
-	fun toResearch(): Research {
-		val research = Research()
+	fun toResearch(posterFile: MultipartFile): Research {
+		return Research(
+			title = this.title,
+			description = this.description,
+			creatorLogin = this.creatorLogin,
+			poster = Binary(BsonBinarySubType.BINARY, posterFile.bytes),
+			begDate = this.begDate,
+			endDate = this.endDate,
+			participantLimit = this.participantLimit,
+			location = this.location,
 
-		research.title = this.title
-		research.description = this.description
-		research.creatorLogin = this.creatorLogin
-		research.posterId = this.posterId
-		research.begDate = this.begDate
-		research.endDate = this.endDate
-		research.participantLimit = this.participantLimit
-		research.location = this.location
+			rewards = this.rewards.map { reward ->
 
-		research.rewards = this.rewards.map { reward ->
+				when (reward.type) {
+					"cash" -> ResearchReward(reward.type, reward.value.toString().toInt())
+					"item" -> ResearchReward(reward.type, reward.value as String)
+					else -> ResearchReward("", "")
+				}
+			},
 
-			when (reward.type) {
-				"cash" -> ResearchReward(reward.type, reward.value.toString().toInt())
-				"item" -> ResearchReward(reward.type, reward.value as String)
-				else -> ResearchReward("", "")
+			requirements = this.requirements.map { req ->
+				when (req.type) {
+					"gender" -> ResearchRequirement(
+						req.type,
+						ObjectMapper().convertValue(
+							req.criteria,
+							object : TypeReference<List<String>>() {}
+						)
+					)
+
+					"age" -> ResearchRequirement(
+						req.type,
+						ObjectMapper().convertValue(
+							req.criteria,
+							object : TypeReference<List<ResearchRequirementAgeInterval>>() {}
+						)
+					)
+
+					"place" -> ResearchRequirement(
+						req.type,
+						ObjectMapper().convertValue(
+							req.criteria,
+							object : TypeReference<List<String>>() {}
+						)
+					)
+
+					"education" -> ResearchRequirement(
+						req.type,
+						ObjectMapper().convertValue(
+							req.criteria,
+							object : TypeReference<List<String>>() {}
+						)
+					)
+
+					"marital" -> ResearchRequirement(
+						req.type,
+						ObjectMapper().convertValue(
+							req.criteria,
+							object : TypeReference<List<String>>() {}
+						)
+					)
+
+					"other" -> ResearchRequirement(
+						req.type,
+						ObjectMapper().convertValue(
+							req.criteria,
+							object : TypeReference<List<ResearchRequirementOther>>() {}
+						)
+					)
+
+					else -> ResearchRequirement("", "")
+				}
 			}
-		}
-
-		research.requirements = this.requirements.map { req ->
-			when (req.type) {
-				"gender" -> ResearchRequirement(
-					req.type,
-					ObjectMapper().convertValue(
-						req.criteria,
-						object : TypeReference<List<String>>() {}
-					)
-				)
-
-				"age" -> ResearchRequirement(
-					req.type,
-					ObjectMapper().convertValue(
-						req.criteria,
-						object : TypeReference<List<ResearchRequirementAgeInterval>>() {}
-					)
-				)
-
-				"place" -> ResearchRequirement(
-					req.type,
-					ObjectMapper().convertValue(
-						req.criteria,
-						object : TypeReference<List<String>>() {}
-					)
-				)
-
-				"education" -> ResearchRequirement(
-					req.type,
-					ObjectMapper().convertValue(
-						req.criteria,
-						object : TypeReference<List<String>>() {}
-					)
-				)
-
-				"marital" -> ResearchRequirement(
-					req.type,
-					ObjectMapper().convertValue(
-						req.criteria,
-						object : TypeReference<List<String>>() {}
-					)
-				)
-
-				"other" -> ResearchRequirement(
-					req.type,
-					ObjectMapper().convertValue(
-						req.criteria,
-						object : TypeReference<List<ResearchRequirementOther>>() {}
-					)
-				)
-
-				else -> ResearchRequirement("", "")
-			}
-		}
-
-		return research
+		)
 	}
 }
 
