@@ -1,6 +1,6 @@
 package pl.umk.mat.zesp01.pz2022.researcher.repository
 
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -88,7 +88,6 @@ class UserRepositoryTests {
         )
     }
 
-
     @Test
     fun `get user by email using userRepository`() {
         // GIVEN
@@ -99,7 +98,7 @@ class UserRepositoryTests {
         val result = userRepository.findUserByEmail(testUserMail)
 
         // THEN
-        Assertions.assertEquals(Optional.of(userTestObject), result)
+        assertEquals(Optional.of(userTestObject), result)
     }
 
     @Test
@@ -112,7 +111,7 @@ class UserRepositoryTests {
         val result = userRepository.findUserByLogin(testUserLogin)
 
         // THEN
-        Assertions.assertEquals(Optional.of(userTestObject), result)
+        assertEquals(Optional.of(userTestObject), result)
     }
 
     @Test
@@ -125,7 +124,7 @@ class UserRepositoryTests {
         val result = userRepository.findUserByFirstName(testUserFirstName)
 
         // THEN
-        Assertions.assertEquals(Optional.of(listOf(userTestObject)), result)
+        assertEquals(Optional.of(listOf(userTestObject)), result)
     }
 
     @Test
@@ -138,11 +137,7 @@ class UserRepositoryTests {
         val result = userRepository.findUserByLastName(testUserLastName)
 
         // THEN
-        Assertions.assertEquals(Optional.of(listOf(userTestObject)), result)
+        assertEquals(Optional.of(listOf(userTestObject)), result)
     }
-
-
-
-
 }
 

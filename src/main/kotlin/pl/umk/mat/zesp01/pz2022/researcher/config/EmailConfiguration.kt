@@ -46,6 +46,26 @@ class EmailConfiguration {
         return mailSender
     }
 
+    @Profile("integration")
+    @Bean
+    fun getJavaMailSenderTests(): JavaMailSender {
+        val mailSender = JavaMailSenderImpl()
+        mailSender.host ="localhost"
+        mailSender.port = 3025
+
+        mailSender.username = "username"
+        mailSender.password = "secret"
+
+        val properties = mailSender.javaMailProperties
+        properties["mail.transport.protocol"] = "smtp"
+        properties["mail.smtp.auth"] = "true"
+        properties["mail.smtp.starttls.enable"] = "true"
+        properties["mail.debug"] = "true"
+
+        return mailSender
+    }
+
+
 
 
 }

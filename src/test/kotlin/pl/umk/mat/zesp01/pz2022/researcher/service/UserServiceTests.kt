@@ -39,7 +39,7 @@ class UserServiceTests {
             avatarImage = "testAVATARIMAGE.IMG",
             location = "Bydgoszcz",
             isConfirmed = false)
-        testUserID = userTestObject.id;
+        testUserID = userTestObject.id
     }
 
 

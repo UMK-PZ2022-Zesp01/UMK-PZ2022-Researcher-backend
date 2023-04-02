@@ -1,7 +1,5 @@
 package pl.umk.mat.zesp01.pz2022.researcher.controller
 
-import com.google.gson.Gson
-import com.google.gson.JsonElement
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -67,6 +65,7 @@ class UserControllerTests(
 
         // THEN
         assertEquals(CREATED, result.statusCode)
+        //TODO czy jest w database i czy poszedl mail
     }
 
     @Test
