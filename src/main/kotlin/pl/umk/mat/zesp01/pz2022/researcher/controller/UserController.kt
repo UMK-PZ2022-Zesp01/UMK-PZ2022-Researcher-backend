@@ -38,8 +38,10 @@ class UserController(
 		return try {
 			val user = userService.getUserByLogin(login).get()
 			if (user.isConfirmed) throw (Exception())
+
 			verificationTokenService.deleteUserTokens(user)
 			eventPublisher.publishEvent(OnRegistrationCompleteEvent(user))
+
 			ResponseEntity.status(HttpStatus.CREATED).body(Gson().toJson(user.email))
 		} catch (e: Exception) {
 			ResponseEntity.status(HttpStatus.NO_CONTENT).build()
@@ -83,11 +85,11 @@ class UserController(
 			?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
 		try {
-			//get the username claimed in the access token
+			/** Get the username claimed in the access token **/
 			val username = refreshTokenService.verifyAccessToken(jwt[0])
 			if (username.isNullOrEmpty()) throw Exception()
 
-			//If claimed user does not exist in db there is something wrong with the token
+			/** If claimed user does not exist in db there is something wrong with the token **/
 			val user = userService.getUserByLogin(username)
 			if (user.isEmpty) throw Exception()
 
@@ -101,30 +103,6 @@ class UserController(
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
 		}
 	}
-
-//	@GetMapping("/getPhoneByUserLogin/{login}")
-//	fun getPhoneByUserLogin(@PathVariable login: String): ResponseEntity<String> {
-//		val user = userService.getUserByLogin(login)
-//
-//		if (user.isEmpty) {
-//			return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
-//		}
-//		val phoneNumber: String = user.get().phone
-//		return ResponseEntity.status(HttpStatus.OK).body(phoneNumber)
-//	}
-
-//	@GetMapping("/user/all")
-//	fun getAllUsers(): ResponseEntity<List<User>> =
-//		ResponseEntity.status(HttpStatus.OK).body(userService.getAllUsers())
-
-//	@GetMapping("/user/email/{email}")
-//	fun getUserByEmail(@PathVariable email: String): ResponseEntity<User> {
-//		val user = userService.getUserByEmail(email)
-//		if (user.isEmpty) {
-//			return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
-//		}
-//		return ResponseEntity.status(HttpStatus.OK).body(user.get())
-//	}
 
 	// ???/
 	@GetMapping("/users/emailList")

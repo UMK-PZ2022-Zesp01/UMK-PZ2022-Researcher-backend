@@ -12,7 +12,6 @@ import java.util.*
 lateinit var VERIFICATION_TOKEN_SECRET: String
 const val VERIFICATION_EXPIRES_SEC = 86400
 
-
 @Service
 class VerificationTokenService(
 	@Autowired val verificationTokenRepository: VerificationTokenRepository
@@ -47,17 +46,15 @@ class VerificationTokenService(
 				.verify(jwt)
 
 			val usernameClaim = decoded.getClaim("username").toString()
-
 			usernameClaim.substring(1, usernameClaim.length - 1)
-
 		} catch (e: Exception) {
 			null
 		}
 	}
 
-	fun addToken(token: VerificationToken): VerificationToken {
-		return verificationTokenRepository.insert(token)
-	}
+//	fun addToken(token: VerificationToken): VerificationToken {
+//		return verificationTokenRepository.insert(token)
+//	}
 
 	fun getTokenByJwt(jwt: String): Optional<VerificationToken> =
 		verificationTokenRepository.findVerificationTokenByJwt(jwt)
@@ -67,28 +64,9 @@ class VerificationTokenService(
 		tokens.forEach { verificationToken -> deleteTokenByJwt(verificationToken.jwt) }
 	}
 
-	fun deleteTokenById(id: String) =
-		verificationTokenRepository.deleteById(id)
-
 	fun deleteTokenByJwt(jwt: String) =
 		verificationTokenRepository.deleteVerificationTokenByJwt(jwt)
 
-	//    fun deleteExpiredTokens(){
-//    }
-
-	/*** ADD METHODS ***/
-
-	fun getAllTokens(): List<VerificationToken> =
-		verificationTokenRepository.findAll()
-
-	fun getTokenById(id: String): Optional<VerificationToken> =
-		verificationTokenRepository.findTokenById(id)
-
-	fun getTokensByLogin(login: String): Optional<List<VerificationToken>> =
-		verificationTokenRepository.findVerificationTokensByLogin(login)
-
-	fun getTokenByExpires(date: String): Optional<List<VerificationToken>> =
-		verificationTokenRepository.findTokensByExpires(date)
 }
 
 

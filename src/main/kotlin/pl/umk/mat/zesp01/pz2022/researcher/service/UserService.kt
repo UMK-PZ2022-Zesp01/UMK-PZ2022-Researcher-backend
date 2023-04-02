@@ -11,7 +11,6 @@ import pl.umk.mat.zesp01.pz2022.researcher.model.User
 import pl.umk.mat.zesp01.pz2022.researcher.model.UserUpdateRequest
 import pl.umk.mat.zesp01.pz2022.researcher.repository.UserRepository
 import java.util.*
-import kotlin.collections.ArrayList
 
 @Service
 class UserService(
@@ -113,27 +112,7 @@ class UserService(
 		return result
 	}
 
-//	fun getUserById(id: String): Optional<User> =
-//		userRepository.findById(id)
-//
-//	fun getUserByEmail(email: String): Optional<User> =
-//		userRepository.findUserByEmail(email)
-
 	fun getUserByLogin(login: String): Optional<User> =
 		userRepository.findUserByLogin(login)
 
-//	fun getUsersByFirstName(firstName: String): List<User> =
-//		userRepository.findUserByFirstName(firstName)
-//			.orElseThrow { throw RuntimeException("Cannot find User by First name") }
-//
-//	fun getUsersByLastName(lastName: String): List<User> =
-//		userRepository.findUserByLastName(lastName)
-//			.orElseThrow { throw RuntimeException("Cannot find User by Last name") }
-//
-//	// Made with MongoOperations
-//	fun findUsersByGender(gender: String): List<User> =
-//		mongoOperations.find(
-//			Query.query(Criteria.where("gender").`is`(gender)),
-//			"Users"
-//		)
 }

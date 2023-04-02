@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
 
 @Document("VerificationTokens")
-class VerificationToken (
+class VerificationToken(
 	@Id val id: ObjectId = ObjectId(),
 	@Field val login: String = "",
 	@Field val expires: String = "",

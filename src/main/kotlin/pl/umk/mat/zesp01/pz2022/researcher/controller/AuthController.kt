@@ -76,20 +76,20 @@ class AuthController(
 	fun handleRefreshToken(@CookieValue(name = "jwt") jwt: String): ResponseEntity<String> {
 
 		try {
-			//Check if provided token is in the database
-			//It would mean his owner logged out before it expired, and the token is now blacklisted.
+			/** Check if provided token is in the database
+			It would mean his owner logged out before it expired, and the token is now blacklisted. **/
 			val bannedToken = refreshTokenService.getTokenByJwt(jwt)
 			if (bannedToken.isPresent) throw Exception()
 
-			//Check if provided token has proper payload.
+			/** Check if provided token has proper payload. **/
 			val username = refreshTokenService.verifyRefreshToken(jwt)
 			if (username.isNullOrEmpty()) throw Exception()
 
-			//Check if user mentioned in the payload is in the database.
+			/** Check if user mentioned in the payload is in the database. **/
 			val user = userService.getUserByLogin(username)
 			if (user.isEmpty) throw Exception()
 
-			//Create a new access token for the user and send it.
+			/** Create a new access token for the user and send it. **/
 			val accessToken = refreshTokenService.createAccessToken(username)
 
 			val responseBody = HashMap<String, String>()
@@ -117,10 +117,10 @@ class AuthController(
 	@DeleteMapping("/logout")
 	fun handleLogout(@CookieValue(name = "jwt") jwt: String): ResponseEntity<String> {
 		try {
-			//Add the token to blacklist, as it is not expired yet.
-			val bannedRefreshToken = refreshTokenService.addToken(jwt)
+			/** Add the token to blacklist, as it is not expired yet. **/
+			refreshTokenService.addToken(jwt)
 
-			//Prepare the cookie deleter
+			/** Prepare the cookie deleter **/
 			val deleteCookie = ResponseCookie
 				.from("jwt", "")
 				.httpOnly(true)
