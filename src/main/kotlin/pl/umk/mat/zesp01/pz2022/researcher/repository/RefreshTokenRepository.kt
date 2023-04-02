@@ -20,4 +20,6 @@ interface RefreshTokenRepository : MongoRepository<RefreshToken, String> {
 	fun findRefreshTokensByUsername(username: String): Optional<List<RefreshToken>>
 
 	fun findRefreshTokenByJwt(jwt: String): Optional<RefreshToken>
+
+	fun deleteRefreshTokensByJwt(jwt: String)
 }
