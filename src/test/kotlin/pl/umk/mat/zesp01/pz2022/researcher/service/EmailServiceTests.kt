@@ -1,80 +1,103 @@
 package pl.umk.mat.zesp01.pz2022.researcher.service
 
-import com.icegreen.greenmail.util.GreenMail
-import com.icegreen.greenmail.util.ServerSetup
-import com.icegreen.greenmail.util.ServerSetup.PROTOCOL_SMTP
-import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.*
-import org.junit.jupiter.api.Assertions.*
+import com.icegreen.greenmail.configuration.GreenMailConfiguration
+import com.icegreen.greenmail.junit5.GreenMailExtension
+import com.icegreen.greenmail.util.ServerSetupTest
+import org.json.JSONException
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.RegisterExtension
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.web.client.TestRestTemplate
+import org.springframework.http.HttpStatusCode
 import org.springframework.mail.SimpleMailMessage
-import org.springframework.mail.javamail.JavaMailSenderImpl
+import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.test.context.ActiveProfiles
 import pl.umk.mat.zesp01.pz2022.researcher.model.User
+import pl.umk.mat.zesp01.pz2022.researcher.repository.UserRepository
 
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @ActiveProfiles("integration")
-class EmailServiceTests(
-    @Autowired val verificationTokenService: VerificationTokenService
-){
-    private val mailSender = JavaMailSenderImpl()
-    private lateinit var greenMail: GreenMail
-
-//
-//    @Test
-//    fun `should send confirmation email`() {
-//
-//
-//        mailSender.host = "localhost"
-//        mailSender.port = 3025
-//        mailSender.username = "username"
-//        mailSender.password = "secret"
-//
-//        val properties = mailSender.javaMailProperties
-//        properties["mail.transport.protocol"] = "smtp"
-//        properties["mail.smtp.auth"] = "true"
-//        properties["mail.smtp.starttls.enable"] = "true"
-//        properties["mail.debug"] = "false"
-//
-//        greenMail = GreenMail(ServerSetup(mailSender.port, null, PROTOCOL_SMTP))
-//        greenMail.setUser("username", "secret")
-//        greenMail.start()
-//
-//
-//
-//        // given
-//        val user = User(login = "john.doe", email = "john.doe@gmail.com")
-//        val event = OnRegistrationCompleteEvent(user)
-//        val listener = RegistrationListener(verificationTokenService, mailSender)
-//
-//        // when
-//
-//        val t = Thread.currentThread()
-//        val ccl = t.contextClassLoader
-//        t.contextClassLoader = GreenMail::class.java.classLoader
-//        try {
-//            listener.sendConfirmationEmail(event)
-//        } finally {
-//            t.contextClassLoader = ccl
-//        }
-//
-//        // then
-//        val receivedMessages = greenMail.receivedMessages
-//        assertThat(receivedMessages).hasSize(1)
-//
-//        val receivedMessage = receivedMessages[0]
-//        assertThat(receivedMessage.subject).isEqualTo("Researcher | Potwierdzenie rejestracji")
-////        assertThat(receivedMessage.content).contains("Naciśnij link poniżej aby aktywować konto Researcher.")
-////        assertThat(receivedMessage.to[0].address).isEqualTo("john.doe@example.com")
-//
-//        greenMail.stop()
-//    }
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+internal class EmailControllerTest {
+    @Autowired lateinit var testRestTemplate: TestRestTemplate
+    @Autowired lateinit var userRepository: UserRepository
+    @Autowired lateinit var mailSender: JavaMailSender
 
 
+    @Test
+    fun `send test email`(){
+
+        val recipientAddress = "testEMAIL@test.com"
+        val subject = "Researcher | Potwierdzenie rejestracji"
+
+        val token = "testtoken"
+        val confirmationUrl = "${FRONT_URL}confirmEmail/$token"
+        val message = "Naciśnij link poniżej aby aktywować konto Researcher.\r\n$confirmationUrl"
+
+        val mail = SimpleMailMessage()
+        mail.setTo(recipientAddress)
+        mail.from = "noreply@researcher.pz2022.gmail.com"
+        mail.subject = subject
+        mail.text = message
+
+        mailSender.send(mail)
+
+
+
+        val receivedMessage = greenMail.receivedMessages[0]
+        assertEquals(1, receivedMessage.allRecipients.size)
+        assertEquals(recipientAddress, receivedMessage.allRecipients[0].toString())
+        assertEquals("noreply@researcher.pz2022.gmail.com", receivedMessage.from[0].toString())
+        assertEquals(subject, receivedMessage.subject)
+    }
+
+    @Test
+    fun `send verification email when user profile is not confirmed`() {
+        // GIVEN
+        val userTestObject = User(
+            login = "testLOGIN",
+            password = "testPASSWORD",
+            firstName = "testFIRSTNAME",
+            lastName = "testLASTNAME",
+            email = "testEMAIL@test.com",
+            phone = "123456789",
+            birthDate = "01-01-1970",
+            gender = "Male",
+            avatarImage = "testAVATARIMAGE.IMG",
+            location = "Bydgoszcz",
+            isConfirmed = false)
+
+        userRepository.save(userTestObject)
+
+
+        // WHEN
+        val responseEntity = testRestTemplate.getForEntity(
+            "/user/sendVerificationMail?username=${userTestObject.login}",
+            String::class.java
+        )
+
+
+        // Assert
+        assertEquals(HttpStatusCode.valueOf(201), responseEntity.statusCode)
+
+        val isMailArrived = greenMail.waitForIncomingEmail(20000, 1)
+        println(isMailArrived)
+
+        val receivedMessage = greenMail.receivedMessages[0]
+            assertEquals(1, receivedMessage.allRecipients.size)
+            assertEquals("testEMAIL@test.com", receivedMessage.allRecipients[0].toString())
+            assertEquals("noreply@researcher.pz2022.gmail.com", receivedMessage.from[0].toString())
+            assertEquals("Researcher | Potwierdzenie rejestracji", receivedMessage.subject)
+//            assertEquals("Hello this is a simple email message", GreenMailUtil.getBody(receivedMessage.content as Part))
+    }
+
+    companion object {
+        @JvmField
+        @RegisterExtension
+        var greenMail: GreenMailExtension = GreenMailExtension(ServerSetupTest.SMTP)
+            .withConfiguration(GreenMailConfiguration.aConfig().withUser("username", "secret"))
+            .withPerMethodLifecycle(false)
+    }
 }
-
-
-
-

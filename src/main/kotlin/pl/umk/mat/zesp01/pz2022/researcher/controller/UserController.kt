@@ -52,7 +52,6 @@ class UserController(
 			if (user.isConfirmed) throw (Exception())
 
 			verificationTokenService.deleteUserTokens(user)
-
 			eventPublisher.publishEvent(OnRegistrationCompleteEvent(user))
 			ResponseEntity.status(HttpStatus.CREATED).body(Gson().toJson(user.email))
 		} catch (e: Exception) {
