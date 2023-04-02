@@ -118,36 +118,10 @@ class RefreshTokenService(
         }
     }
 
-//    fun addToken(refreshToken: RefreshToken): RefreshToken {
-//        refreshToken.id = IdGenerator().generateTokenId()
-//        return refreshTokenRepository.insert(refreshToken)
-//    }
-
 //	fun addToken(jwt: String): RefreshToken {
 //		val expiryDate = JWT.decode(jwt).expiresAt.toString()
-//
 //		val refreshToken = RefreshToken(jwt = jwt, expires = expiryDate)
-//
 //		return refreshTokenRepository.insert(refreshToken)
 //	}
-
-
-    fun deleteTokenById(id: String) =
-        refreshTokenRepository.deleteById(id)
-
-    fun getAllTokens(): List<RefreshToken> =
-        refreshTokenRepository.findAll()
-
-    fun getTokenById(id: String): Optional<RefreshToken> =
-        refreshTokenRepository.findTokenById(id)
-
-    fun getTokensByLogin(login: String): Optional<List<RefreshToken>> =
-        refreshTokenRepository.findTokensByLogin(login)
-
-    fun getTokenByExpires(date: String): Optional<List<RefreshToken>> =
-        refreshTokenRepository.findTokensByExpires(date)
-
-//    fun deleteExpiredTokens(){
-//    }
 
 }
