@@ -17,6 +17,7 @@ interface RefreshTokenRepository : MongoRepository<RefreshToken, String> {
 	@Query("{'expires':?0}")
 	fun findTokensByExpires(userId: String): Optional<List<RefreshToken>>
 
-	@Query("{'jwt':?0}")
-	fun findTokenByJwt(userId: String): Optional<RefreshToken>
+	fun findRefreshTokensByUsername(username: String): Optional<List<RefreshToken>>
+
+	fun findRefreshTokenByJwt(jwt: String): Optional<RefreshToken>
 }

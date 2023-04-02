@@ -17,21 +17,8 @@ const val REFRESH_EXPIRES_SEC: Long = 86400
 @Service
 class RefreshTokenService(@Autowired val refreshTokenRepository: RefreshTokenRepository) {
 
-	/*** ADD METHODS ***/
-
-	fun createRefreshToken(username: String): String {
-		val payload = mapOf(Pair("username", username))
-
-		return JWT
-			.create()
-			.withPayload(payload)
-			.withExpiresAt(Date(System.currentTimeMillis() + REFRESH_EXPIRES_SEC * 1000))
-			.sign(Algorithm.HMAC256(REFRESH_TOKEN_SECRET))
-	}
-
 	fun createAccessToken(username: String): String {
 		val payload = mapOf(Pair("username", username))
-
 		return JWT
 			.create()
 			.withPayload(payload)
@@ -39,8 +26,17 @@ class RefreshTokenService(@Autowired val refreshTokenRepository: RefreshTokenRep
 			.sign(Algorithm.HMAC256(ACCESS_TOKEN_SECRET))
 	}
 
+	fun createRefreshToken(username: String): String {
+		val payload = mapOf(Pair("username", username))
+		return JWT
+			.create()
+			.withPayload(payload)
+			.withExpiresAt(Date(System.currentTimeMillis() + REFRESH_EXPIRES_SEC * 1000))
+			.sign(Algorithm.HMAC256(REFRESH_TOKEN_SECRET))
+	}
+
 	fun verifyRefreshToken(jwt: String): String? {
-		val token = refreshTokenRepository.findTokenByJwt(jwt)
+		val token = refreshTokenRepository.findRefreshTokenByJwt(jwt)
 
 		if (token.isPresent) {
 			return null
@@ -63,7 +59,7 @@ class RefreshTokenService(@Autowired val refreshTokenRepository: RefreshTokenRep
 	}
 
 	fun verifyAccessToken(jwt: String): String? {
-		try {
+		return try {
 			val decoded = JWT
 				.require(Algorithm.HMAC256(ACCESS_TOKEN_SECRET))
 				.withClaimPresence("username")
@@ -71,11 +67,9 @@ class RefreshTokenService(@Autowired val refreshTokenRepository: RefreshTokenRep
 				.verify(jwt)
 
 			val usernameClaim = decoded.getClaim("username").toString()
-
-			return usernameClaim.substring(1, usernameClaim.length - 1)
-
+			usernameClaim.substring(1, usernameClaim.length - 1)
 		} catch (e: Exception) {
-			return null
+			null
 		}
 	}
 
@@ -128,7 +122,7 @@ class RefreshTokenService(@Autowired val refreshTokenRepository: RefreshTokenRep
 		refreshTokenRepository.findTokensByExpires(date)
 
 	fun getTokenByJwt(jwt: String): Optional<RefreshToken> =
-		refreshTokenRepository.findTokenByJwt(jwt)
+		refreshTokenRepository.findRefreshTokenByJwt(jwt)
 
 	/*** DELETE METHODS***/
 

@@ -69,33 +69,38 @@ class UserRegisterRequest(
 		if (email != other.email) return false
 		if (password != other.password) return false
 		if (gender != other.gender) return false
-		if (birthDate != other.birthDate) return false
+		return birthDate == other.birthDate
+	}
 
-		return true
+	override fun hashCode(): Int {
+		var result = firstName.hashCode()
+		result = 31 * result + lastName.hashCode()
+		result = 31 * result + login.hashCode()
+		result = 31 * result + email.hashCode()
+		result = 31 * result + password.hashCode()
+		result = 31 * result + gender.hashCode()
+		result = 31 * result + birthDate.hashCode()
+		return result
 	}
 }
 
 class UserUpdateRequest(
-	val login: String = "",
-	val password: String = "",
-	val firstName: String = "",
-	val lastName: String = "",
-	val email: String = "",
-	val phone: String = "",
-	val birthDate: String = "",
-	val gender: String = "",
-	val avatarImage: String = ""
+	val password: String?,
+	val firstName: String?,
+	val lastName: String?,
+	val email: String?,
+	val phone: String?
 )
 
 class UserResponse(
-	val login: String = "",
-	val firstName: String = "",
-	val lastName: String = "",
-	val email: String = "",
-	val phone: String = "",
-	val birthDate: String = "",
-	val gender: String = "",
-	val avatarImage: String = ""
+	val login: String,
+	val firstName: String,
+	val lastName: String,
+	val email: String,
+	val phone: String,
+	val birthDate: String,
+	val gender: String,
+	val avatarImage: String
 )
 
 class LoginData(

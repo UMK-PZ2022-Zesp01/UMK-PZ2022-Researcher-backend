@@ -19,38 +19,35 @@ class AuthController(
 	@Autowired val refreshTokenService: RefreshTokenService
 ) {
 
-	/*** POST MAPPINGS ***/
-
 	@PostMapping("/login")
 	fun handleLogin(@RequestBody loginData: LoginData): ResponseEntity<String> {
 		val user = userService.getUserByLogin(loginData.login).orElse(null)
-
-		user ?: return ResponseEntity
-			.status(HttpStatus.UNAUTHORIZED)
-			.body("Login failed: user does not exist.")
+			?: return ResponseEntity
+				.status(HttpStatus.UNAUTHORIZED)
+				.body("Login failed: User ${loginData.login} does not exist")
 
 		if (!BCrypt.checkpw(loginData.password, user.password)) {
 			return ResponseEntity
 				.status(HttpStatus.UNAUTHORIZED)
-				.body("Login failed: user does not exist.")
+				.body("Login failed: Wrong password")
 		}
 		if (!user.isConfirmed) {
 			return ResponseEntity
 				.status(HttpStatus.FORBIDDEN)
-				.body("Login failed: account has not been activated.")
+				.body("Login failed: Account has not been activated")
 		}
 
 		try {
 			val username = user.login
 
-			//CREATE JWTs
+			/** Create JWTs **/
 			val accessToken = refreshTokenService
 				.createAccessToken(username)
 
 			val refreshToken = refreshTokenService
 				.createRefreshToken(username)
 
-			//CREATE REFRESH TOKEN COOKIE
+			/** Create Refresh Token Cookie **/
 			val cookie = ResponseCookie
 				.from("jwt", refreshToken)
 				.httpOnly(true)
@@ -60,28 +57,47 @@ class AuthController(
 				.secure(true)
 				.build()
 
-			//CREATE RESPONSE BODY
-
+			/** Create Response Body **/
 			val responseBody = HashMap<String, String>()
 			responseBody["username"] = user.login
 			responseBody["accessToken"] = accessToken
 
-			//SEND THE REFRESH TOKEN COOKIE AND THE ACCESS TOKEN
+			/** Send Refresh Token Cookie & Access Token **/
 			return ResponseEntity
 				.status(HttpStatus.CREATED)
 				.header(HttpHeaders.SET_COOKIE, cookie.toString())
 				.body(Gson().toJson(responseBody))
-
-		} catch (error: Exception) {
+		} catch (e: Exception) {
 			return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Something went wrong, please try again")
 		}
 	}
 
-	/*** GET MAPPINGS ***/
-
 	@GetMapping("/auth/refresh")
 	fun handleRefreshToken(@CookieValue(name = "jwt") jwt: String): ResponseEntity<String> {
-		fun deleteCookie(): ResponseEntity<String> {
+
+		try {
+			//Check if provided token is in the database
+			//It would mean his owner logged out before it expired, and the token is now blacklisted.
+			val bannedToken = refreshTokenService.getTokenByJwt(jwt)
+			if (bannedToken.isPresent) throw Exception()
+
+			//Check if provided token has proper payload.
+			val username = refreshTokenService.verifyRefreshToken(jwt)
+			if (username.isNullOrEmpty()) throw Exception()
+
+			//Check if user mentioned in the payload is in the database.
+			val user = userService.getUserByLogin(username)
+			if (user.isEmpty) throw Exception()
+
+			//Create a new access token for the user and send it.
+			val accessToken = refreshTokenService.createAccessToken(username)
+
+			val responseBody = HashMap<String, String>()
+			responseBody["username"] = username
+			responseBody["accessToken"] = accessToken
+
+			return ResponseEntity.status(HttpStatus.OK).body(Gson().toJson(responseBody))
+		} catch (e: Exception) {
 			val deleteCookie = ResponseCookie
 				.from("jwt", "")
 				.httpOnly(true)
@@ -96,31 +112,7 @@ class AuthController(
 				.header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
 				.build()
 		}
-
-		//Check if provided token is in the database
-		//It would mean his owner logged out before it expired, and the token is now blacklisted.
-		val bannedToken = refreshTokenService.getTokenByJwt(jwt)
-		if (bannedToken.isPresent) return deleteCookie()
-
-		//Check if provided token has proper payload.
-		val username = refreshTokenService.verifyRefreshToken(jwt)
-		if (username.isNullOrEmpty()) return deleteCookie()
-
-		//Check if user mentioned in the payload is in the database.
-		val user = userService.getUserByLogin(username)
-		if (user.isEmpty) return deleteCookie()
-
-		//Create a new access token for the user and send it.
-		val accessToken = refreshTokenService.createAccessToken(username)
-
-		val responseBody = HashMap<String, String>()
-		responseBody["username"] = username
-		responseBody["accessToken"] = accessToken
-
-		return ResponseEntity.status(HttpStatus.OK).body(Gson().toJson(responseBody))
 	}
-
-	/*** DELETE MAPPINGS ***/
 
 	@DeleteMapping("/logout")
 	fun handleLogout(@CookieValue(name = "jwt") jwt: String): ResponseEntity<String> {

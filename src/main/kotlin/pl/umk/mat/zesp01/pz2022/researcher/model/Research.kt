@@ -22,22 +22,16 @@ data class Research(
 	@Field val participants: List<String> = listOf(),
 	@Field val begDate: String = "",
 	@Field val endDate: String = "",
-	@Field val location: ResearchLocation = ResearchLocation(),
+	@Field val location: ResearchLocation = ResearchLocation("", ""),
 	@Field val rewards: List<ResearchReward> = listOf(),
 	@Field val requirements: List<ResearchRequirement> = listOf()
 )
 
-class ResearchResponse(
-	var id: String,
-	var researchCreatorId: String
-	// TODO
-)
-
 class ResearchUpdateRequest(
-	val title: String,
-	val description: String,
-	val participantLimit: Int,
-	val location: ResearchLocation,
+	val title: String?,
+	val description: String?,
+	val participantLimit: Int?,
+	val location: ResearchLocation?
 )
 
 class ResearchRequest(
@@ -63,7 +57,6 @@ class ResearchRequest(
 			location = this.location,
 
 			rewards = this.rewards.map { reward ->
-
 				when (reward.type) {
 					"cash" -> ResearchReward(reward.type, reward.value.toString().toInt())
 					"item" -> ResearchReward(reward.type, reward.value as String)
@@ -129,26 +122,26 @@ class ResearchRequest(
 }
 
 class ResearchLocation(
-	val form: String = "",
-	val place: String = ""
+	private val form: String,
+	private val place: String
 )
 
 class ResearchReward(
-	val type: String = "",
+	val type: String,
 	val value: Any
 )
 
 class ResearchRequirement(
-	val type: String = "",
+	val type: String,
 	val criteria: Any
 )
 
 class ResearchRequirementAgeInterval(
-	val ageMin: Int = 0,
-	val ageMax: Int = 0
+	private val ageMin: Int,
+	private val ageMax: Int
 )
 
 class ResearchRequirementOther(
-	val type: String = "",
-	val description: String = ""
+	private val type: String,
+	private val description: String
 )

@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Field
 @Document("RefreshTokens")
 class RefreshToken(
 	@Id val id: ObjectId = ObjectId(),
+	@Field val username: String = "",
 	@Field val expires: String = "",
 	@Field val jwt: String = "",
 )

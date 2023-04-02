@@ -1,6 +1,7 @@
-package pl.umk.mat.zesp01.pz2022.researcher.idgenerator
+package pl.umk.mat.zesp01.pz2022.researcher.codegenerator
 
 import org.bson.types.ObjectId
+
 class CodeGenerator {
 	private val codeLetters = listOf(('0'..'9'), ('A'..'Z'), ('a'..'z')).flatten()
 
@@ -15,6 +16,6 @@ class CodeGenerator {
 				else -> '0'
 			}
 		}
-		return researchCode.takeLast(6).reversed()
+		return researchCode.substring(4)
 	}
 }

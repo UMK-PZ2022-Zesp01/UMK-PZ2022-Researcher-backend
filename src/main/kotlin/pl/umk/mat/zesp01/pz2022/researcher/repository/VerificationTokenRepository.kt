@@ -11,16 +11,17 @@ interface VerificationTokenRepository : MongoRepository<VerificationToken, Strin
 	@Query("{'id':?0}")
 	fun findTokenById(id: String): Optional<VerificationToken>
 
-	@Query("{'login':?0}")
-	fun findTokensByLogin(userId: String): Optional<List<VerificationToken>>
+	fun findVerificationTokensByLogin(login: String): Optional<List<VerificationToken>>
 
 	@Query("{'expires':?0}")
 	fun findTokensByExpires(userId: String): Optional<List<VerificationToken>>
 
-	@Query("{'jwt':?0}")
-	fun findTokenByJwt(userId: String): Optional<VerificationToken>
+//	@Query("{'jwt':?0}")
+	fun findVerificationTokenByJwt(jwt: String): Optional<VerificationToken>
 
-	@Query("{'jwt':?0}", delete = true)
-	fun deleteTokenByJwt(userId: String): Optional<VerificationToken>
+//	@Query("{'jwt':?0}", delete = true)
+//	fun deleteTokenByJwt(userId: String): Optional<VerificationToken>
+
+	fun deleteVerificationTokenByJwt(jwt: String)
 
 }
