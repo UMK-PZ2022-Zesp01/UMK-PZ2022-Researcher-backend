@@ -73,7 +73,6 @@ class ResearchService(
 			Research::class.java
 		)
 
-
 	fun sortResearchesByTitle(): List<Research> =
 		mongoOperations.find(
 			Query().with(Sort.by(Sort.Direction.ASC, "title")),

@@ -126,29 +126,111 @@ class ResearchRequest(
 			}
 		)
 	}
+
+	override fun equals(other: Any?): Boolean {
+		if (this === other) return true
+		if (javaClass != other?.javaClass) return false
+
+		other as ResearchRequest
+
+		if (title != other.title) return false
+		if (description != other.description) return false
+		if (creatorLogin != other.creatorLogin) return false
+		if (begDate != other.begDate) return false
+		if (endDate != other.endDate) return false
+		if (participantLimit != other.participantLimit) return false
+		if (location != other.location) return false
+		if (rewards != other.rewards) return false
+		if (requirements != other.requirements) return false
+
+		return true
+	}
 }
 
 class ResearchLocation(
 	val form: String = "",
 	val place: String = ""
-)
+) {
+	override fun equals(other: Any?): Boolean {
+		if (this === other) return true
+		if (javaClass != other?.javaClass) return false
+
+		other as ResearchLocation
+
+		if (form != other.form) return false
+		if (place != other.place) return false
+
+		return true
+	}
+}
 
 class ResearchReward(
 	val type: String = "",
 	val value: Any
-)
+){
+	override fun equals(other: Any?): Boolean {
+		if (this === other) return true
+		if (javaClass != other?.javaClass) return false
+
+		other as ResearchReward
+
+		if (type != other.type) return false
+		if (value != other.value) return false
+
+		return true
+	}
+
+}
 
 class ResearchRequirement(
 	val type: String = "",
 	val criteria: Any
-)
+){
+	override fun equals(other: Any?): Boolean {
+		if (this === other) return true
+		if (javaClass != other?.javaClass) return false
+
+		other as ResearchRequirement
+
+		if (type != other.type) return false
+		if (criteria != other.criteria) return false
+
+		return true
+	}
+
+}
 
 class ResearchRequirementAgeInterval(
 	val ageMin: Int = 0,
 	val ageMax: Int = 0
-)
+){
+	override fun equals(other: Any?): Boolean {
+		if (this === other) return true
+		if (javaClass != other?.javaClass) return false
+
+		other as ResearchRequirementAgeInterval
+
+		if (ageMin != other.ageMin) return false
+		if (ageMax != other.ageMax) return false
+
+		return true
+	}
+
+}
 
 class ResearchRequirementOther(
 	val type: String = "",
 	val description: String = ""
-)
+){
+	override fun equals(other: Any?): Boolean {
+		if (this === other) return true
+		if (javaClass != other?.javaClass) return false
+
+		other as ResearchRequirementOther
+
+		if (type != other.type) return false
+		if (description != other.description) return false
+
+		return true
+	}
+}

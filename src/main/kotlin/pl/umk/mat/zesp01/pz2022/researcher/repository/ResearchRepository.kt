@@ -7,4 +7,5 @@ import pl.umk.mat.zesp01.pz2022.researcher.model.Research
 @Repository
 interface ResearchRepository : MongoRepository<Research, String> {
 	fun findResearchByResearchCode(researchCode: String): Research
+
 }

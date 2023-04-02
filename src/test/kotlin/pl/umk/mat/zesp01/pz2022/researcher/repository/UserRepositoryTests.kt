@@ -1,6 +1,6 @@
 package pl.umk.mat.zesp01.pz2022.researcher.repository
 
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -20,6 +20,26 @@ class UserRepositoryTests {
     lateinit var userTestObject: User
     lateinit var testUserID: String
 
+
+    @BeforeEach
+    fun setup() {
+        userTestObject = User(
+            id = "_testID",
+            login = "_testLOGIN",
+            password = "testPASSWORD",
+            firstName = "testFIRSTNAME",
+            lastName = "testLASTNAME",
+            email = "testEMAIL@test.com",
+            phone = "123456789",
+            birthDate = "01-01-1970",
+            gender = "Male",
+            avatarImage = "testAVATARIMAGE.IMG",
+            location = "Bydgoszcz",
+            isConfirmed = false
+        )
+        testUserID = userTestObject.id
+        userService.deleteUserById(testUserID)
+    }
 
     @Test
     fun `add new User by userRepository`() {
@@ -68,7 +88,6 @@ class UserRepositoryTests {
         )
     }
 
-
     @Test
     fun `get user by email using userRepository`() {
         // GIVEN
@@ -79,7 +98,7 @@ class UserRepositoryTests {
         val result = userRepository.findUserByEmail(testUserMail)
 
         // THEN
-        Assertions.assertEquals(Optional.of(userTestObject), result)
+        assertEquals(Optional.of(userTestObject), result)
     }
 
     @Test
@@ -92,7 +111,7 @@ class UserRepositoryTests {
         val result = userRepository.findUserByLogin(testUserLogin)
 
         // THEN
-        Assertions.assertEquals(Optional.of(userTestObject), result)
+        assertEquals(Optional.of(userTestObject), result)
     }
 
     @Test
@@ -105,7 +124,7 @@ class UserRepositoryTests {
         val result = userRepository.findUserByFirstName(testUserFirstName)
 
         // THEN
-        Assertions.assertEquals(Optional.of(listOf(userTestObject)), result)
+        assertEquals(Optional.of(listOf(userTestObject)), result)
     }
 
     @Test
@@ -118,28 +137,7 @@ class UserRepositoryTests {
         val result = userRepository.findUserByLastName(testUserLastName)
 
         // THEN
-        Assertions.assertEquals(Optional.of(listOf(userTestObject)), result)
+        assertEquals(Optional.of(listOf(userTestObject)), result)
     }
-
-    @BeforeEach
-    fun setup() {
-        userTestObject = User(
-            "_testID",
-            "_testLOGIN",
-            "testPASSWORD",
-            "testFIRSTNAME",
-            "testLASTNAME",
-            "testEMAIL@test.com",
-            "123456789",
-            "01-01-1970",
-            "Male",
-            "testAVATARIMAGE.IMG",
-            true
-        )
-        testUserID = userTestObject.id
-        userService.deleteUserById(testUserID)
-    }
-
-
 }
 

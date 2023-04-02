@@ -21,6 +21,28 @@ class UserServiceTests {
     lateinit var testUserID: String
 
 
+
+
+    @BeforeEach
+    fun setup() {
+        userRepository.deleteAll()
+        userTestObject = User(
+            id = "_testID",
+            login = "_testLOGIN",
+            password = "testPASSWORD",
+            firstName = "testFIRSTNAME",
+            lastName = "testLASTNAME",
+            email = "testEMAIL@test.com",
+            phone = "123456789",
+            birthDate = "01-01-1970",
+            gender = "Male",
+            avatarImage = "testAVATARIMAGE.IMG",
+            location = "Bydgoszcz",
+            isConfirmed = false)
+        testUserID = userTestObject.id
+    }
+
+
     @Test
     fun `add new User by UserService`() {
         // GIVEN (userTestObject)
@@ -38,8 +60,6 @@ class UserServiceTests {
     @Test
     fun `delete existing user by UserService`() {
         // GIVEN
-
-        val testUserID = userTestObject.id
         userRepository.save(userTestObject)
 
         // WHEN
@@ -75,17 +95,18 @@ class UserServiceTests {
     fun `get all user IDs using userService`() {
         // GIVEN
         val userTestObject2 = User(
-            "_testID2",
-            "_testLOGIN2",
-            "testPASSWORD2",
-            "testFIRSTNAME2",
-            "testLASTNAME2",
-            "testEMAIL@test.com2",
-            "1234567892",
-            "02-01-1970",
-            "Female",
-            "testAVATARIMAGE2.IMG",
-            false)
+            id = "_testID2",
+            login = "_testLOGIN2",
+            password = "testPASSWORD2",
+            firstName = "testFIRSTNAME2",
+            lastName = "testLASTNAME2",
+            email = "testEMAIL@test.com2",
+            phone = "1234567892",
+            birthDate = "02-01-1970",
+            gender = "Female",
+            avatarImage = "testAVATARIMAGE2.IMG",
+            location = "Warszawa",
+            isConfirmed = false)
 
          userRepository.saveAll(listOf(userTestObject, userTestObject2))
 
@@ -177,23 +198,6 @@ class UserServiceTests {
 
 
 
-    @BeforeEach
-    fun setup() {
-        userRepository.deleteAll()
-        userTestObject = User(
-            "_testID",
-            "_testLOGIN",
-            "testPASSWORD",
-            "testFIRSTNAME",
-            "testLASTNAME",
-            "testEMAIL@test.com",
-            "123456789",
-            "01-01-1970",
-            "Male",
-            "testAVATARIMAGE.IMG",
-            false)
-        testUserID = userTestObject.id;
-    }
 
 
 

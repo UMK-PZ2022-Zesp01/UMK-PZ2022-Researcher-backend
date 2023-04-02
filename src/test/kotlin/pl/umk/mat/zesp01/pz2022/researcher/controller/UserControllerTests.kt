@@ -1,7 +1,5 @@
 package pl.umk.mat.zesp01.pz2022.researcher.controller
 
-import com.google.gson.Gson
-import com.google.gson.JsonElement
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -39,17 +37,18 @@ class UserControllerTests(
     @BeforeEach
     fun setup() {
         userTestObject = User(
-            "_testID",
-            "_testLOGIN",
-            "testPASSWORD",
-            "testFIRSTNAME",
-            "testLASTNAME",
-            "testEMAIL@test.com",
-            "123456789",
-            "01-01-1970",
-            "Male",
-            "testAVATARIMAGE.IMG",
-            false)
+            id = "_testID",
+            login = "_testLOGIN",
+            password = "testPASSWORD",
+            firstName = "testFIRSTNAME",
+            lastName = "testLASTNAME",
+            email = "testEMAIL@test.com",
+            phone = "123456789",
+            birthDate = "01-01-1970",
+            gender = "Male",
+            avatarImage = "testAVATARIMAGE.IMG",
+            location = "Bydgoszcz",
+            isConfirmed = false)
         testUserID = userTestObject.id
         testUserLogin = userTestObject.login
         userRepository.deleteAll()
@@ -66,24 +65,27 @@ class UserControllerTests(
 
         // THEN
         assertEquals(CREATED, result.statusCode)
+        //TODO czy jest w database i czy poszedl mail
     }
 
     @Test
     fun `add user whose email is already in the database and returns 299`() {
         // GIVEN (userTestObject)
         val userTestObject2 = User(
-            "_testID2",
-            "_testLOGIN2",
-            "testPASSWORD2",
-            "testFIRSTNAME2",
-            "testLASTNAME2",
-            "testEMAIL@test.com",
-            "1234567892",
-            "01-01-19702",
-            "Male2",
-            "testAVATARIMAGE.IMG2",
-            false
+            id = "_testID2",
+            login = "_testLOGIN2",
+            password = "testPASSWORD2",
+            firstName = "testFIRSTNAME2",
+            lastName = "testLASTNAME2",
+            email = "testEMAIL@test.com",
+            phone = "1234567892",
+            birthDate = "02-01-1970",
+            gender = "Female",
+            avatarImage = "testAVATARIMAGE2.IMG",
+            location = "Warszawa",
+            isConfirmed = false
         )
+
         userRepository.save(userTestObject)
 
         // WHEN
@@ -98,17 +100,18 @@ class UserControllerTests(
     fun `add user whose login is already in the database and returns 298`() {
         // GIVEN (userTestObject)
         val userTestObject2 = User(
-            "_testID2",
-            "_testLOGIN",
-            "testPASSWORD2",
-            "testFIRSTNAME2",
-            "testLASTNAME2",
-            "testEMAIL@test.com2",
-            "1234567892",
-            "01-01-19702",
-            "Male2",
-            "testAVATARIMAGE.IMG2",
-            false
+            id = "_testID2",
+            login = "_testLOGIN",
+            password = "testPASSWORD2",
+            firstName = "testFIRSTNAME2",
+            lastName = "testLASTNAME2",
+            email = "testEMAIL@test.com2",
+            phone = "1234567892",
+            birthDate = "02-01-1970",
+            gender = "Female",
+            avatarImage = "testAVATARIMAGE2.IMG",
+            location = "Warszawa",
+            isConfirmed = false
         )
         userRepository.save(userTestObject)
 
@@ -214,17 +217,19 @@ class UserControllerTests(
     fun `updateUser should update user with given ID and returns OK (200)`() {
         // GIVEN
         val userTestObject2 = User(
-            "_testID",
-            "_testLOGIN2",
-            "testPASSWORD2",
-            "testFIRSTNAME2",
-            "testLASTNAME2",
-            "testEMAIL@test.com2",
-            "1234567892",
-            "02-01-1970",
-            "Female",
-            "testAVATARIMAGE2.IMG",
-            false)
+            id = "_testID2",
+            login = "_testLOGIN2",
+            password = "testPASSWORD2",
+            firstName = "testFIRSTNAME2",
+            lastName = "testLASTNAME2",
+            email = "testEMAIL@test.com2",
+            phone = "1234567892",
+            birthDate = "02-01-1970",
+            gender = "Female",
+            avatarImage = "testAVATARIMAGE2.IMG",
+            location = "Warszawa",
+            isConfirmed = false
+        )
         userRepository.save(userTestObject)
 
 
@@ -344,17 +349,19 @@ class UserControllerTests(
     fun `getAllUsers and returns OK (200)`() {
         // GIVEN
         val userTestObject2 = User(
-            "_testID2",
-            "_testLOGIN2",
-            "testPASSWORD2",
-            "testFIRSTNAME2",
-            "testLASTNAME2",
-            "testEMAIL@test.com2",
-            "1234567892",
-            "02-01-1970",
-            "Female",
-            "testAVATARIMAGE2.IMG",
-            false)
+            id = "_testID2",
+            login = "_testLOGIN2",
+            password = "testPASSWORD2",
+            firstName = "testFIRSTNAME2",
+            lastName = "testLASTNAME2",
+            email = "testEMAIL@test.com2",
+            phone = "1234567892",
+            birthDate = "02-01-1970",
+            gender = "Female",
+            avatarImage = "testAVATARIMAGE2.IMG",
+            location = "Warszawa",
+            isConfirmed = false
+        )
         val expectedUsers: List<User> = listOf(userTestObject, userTestObject2)
 
         userRepository.saveAll(expectedUsers)
@@ -372,17 +379,19 @@ class UserControllerTests(
     fun `getAllUserIDs and returns OK (200)`() {
         // GIVEN
         val userTestObject2 = User(
-            "_testID2",
-            "_testLOGIN2",
-            "testPASSWORD2",
-            "testFIRSTNAME2",
-            "testLASTNAME2",
-            "testEMAIL@test.com2",
-            "1234567892",
-            "02-01-1970",
-            "Female",
-            "testAVATARIMAGE2.IMG",
-            false)
+            id = "_testID2",
+            login = "_testLOGIN2",
+            password = "testPASSWORD2",
+            firstName = "testFIRSTNAME2",
+            lastName = "testLASTNAME2",
+            email = "testEMAIL@test.com2",
+            phone = "1234567892",
+            birthDate = "02-01-1970",
+            gender = "Female",
+            avatarImage = "testAVATARIMAGE2.IMG",
+            location = "Warszawa",
+            isConfirmed = false
+        )
         val expectedUserIDs = listOf("{\"_id\": \"_testID\"}","{\"_id\": \"_testID2\"}")
 
         userRepository.saveAll(listOf(userTestObject, userTestObject2))
@@ -453,33 +462,6 @@ class UserControllerTests(
         assertEquals(NO_CONTENT, response.statusCode)
         assertTrue(userRepository.findById(testUserID).isEmpty)
     }
-
-//    @Test
-//    fun `getUsersByGender with used Firstname and returns OK (200)`() {
-//        // GIVEN
-//        val userTestObject2 = User(
-//            "_testID2",
-//            "_testLOGIN2",
-//            "testPASSWORD2",
-//            "testFIRSTNAME",
-//            "testLASTNAME2",
-//            "testEMAIL@test.com2",
-//            "1234567892",
-//            "02-01-1970",
-//            "Female",
-//            "testAVATARIMAGE2.IMG",
-//            false)
-//
-//        val expectedUsers: List<User> = listOf(userTestObject, userTestObject2)
-//        userRepository.saveAll(expectedUsers)
-//
-//        // WHEN
-//        val response = restTemplate.exchange<List<User>>("/users/firstName/${userTestObject.firstName}", HttpMethod.GET, null)
-//
-//        // THEN
-//        assertEquals(OK, response.statusCode)
-//        assertEquals(expectedUsers, response.body)
-//    }
 
 
 }
