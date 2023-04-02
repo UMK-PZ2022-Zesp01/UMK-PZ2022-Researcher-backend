@@ -8,4 +8,6 @@ import java.util.*
 @Repository
 interface RefreshTokenRepository : MongoRepository<RefreshToken, String> {
 	fun findRefreshTokenByJwt(jwt: String): Optional<RefreshToken>
+
+	fun deleteRefreshTokensByJwt(jwt: String)
 }
