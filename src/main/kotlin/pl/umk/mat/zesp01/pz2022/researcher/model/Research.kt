@@ -12,7 +12,6 @@ import org.springframework.web.multipart.MultipartFile
 
 @Document("Researches")
 data class Research(
-	@Id val id: ObjectId = ObjectId(),
 	@Field val researchCode: String = "",
 	@Field val creatorLogin: String = "",
 	@Field val title: String = "",

@@ -5,7 +5,7 @@ import org.springframework.data.mongodb.core.MongoOperations
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Service
-import pl.umk.mat.zesp01.pz2022.researcher.codegenerator.CodeGenerator
+import pl.umk.mat.zesp01.pz2022.researcher.codegenerator.CodeGenerator.Companion.generateResearchCode
 import pl.umk.mat.zesp01.pz2022.researcher.model.Research
 import pl.umk.mat.zesp01.pz2022.researcher.model.ResearchUpdateRequest
 import pl.umk.mat.zesp01.pz2022.researcher.repository.ResearchRepository
@@ -18,7 +18,7 @@ class ResearchService(
 
 	fun addResearch(research: Research): Research {
 		val updatedResearch = research.copy(
-			researchCode = CodeGenerator().generateResearchCode(research.id)
+			researchCode = generateResearchCode()
 		)
 		return researchRepository.insert(updatedResearch)
 	}
