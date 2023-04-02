@@ -3,12 +3,14 @@ package pl.umk.mat.zesp01.pz2022.researcher.config
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
+import org.springframework.core.annotation.Order
 import pl.umk.mat.zesp01.pz2022.researcher.service.ACCESS_TOKEN_SECRET
 import pl.umk.mat.zesp01.pz2022.researcher.service.REFRESH_TOKEN_SECRET
 import pl.umk.mat.zesp01.pz2022.researcher.service.VERIFICATION_TOKEN_SECRET
 
 @Configuration
 class TokenConfiguration {
+	@Order(1)
 	@Bean
 	@Profile("!integration")
 	fun configureTokenProd() {
@@ -17,6 +19,7 @@ class TokenConfiguration {
 		REFRESH_TOKEN_SECRET = System.getenv("REFRESH_TOKEN_SECRET")
 	}
 
+	@Order(1)
 	@Bean
 	@Profile("integration")
 	fun configureTokenTest() {

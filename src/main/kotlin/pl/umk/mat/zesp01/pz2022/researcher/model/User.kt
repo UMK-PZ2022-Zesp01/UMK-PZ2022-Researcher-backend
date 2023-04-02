@@ -9,17 +9,17 @@ import org.springframework.data.mongodb.core.mapping.Field
 @Document("Users")
 data class User(
 	@Id val id: ObjectId = ObjectId(),
-	@Field val login: String = "",
-	@Field val password: String = "",
-	@Field val firstName: String = "",
-	@Field val lastName: String = "",
-	@Field val email: String = "",
-	@Field val phone: String = "",
-	@Field val birthDate: String = "",
-	@Field val gender: String = "",
-	@Field val avatarImage: String = "",
-	@Field val location: String = "",
-	@Field val isConfirmed: Boolean = false
+	@Field var login: String = "",
+	@Field var password: String = "",
+	@Field var firstName: String = "",
+	@Field var lastName: String = "",
+	@Field var email: String = "",
+	@Field var phone: String = "",
+	@Field var birthDate: String = "",
+	@Field var gender: String = "",
+	@Field var avatarImage: String = "",
+	@Field var location: String = "",
+	@Field var isConfirmed: Boolean = false
 ) {
 
 	fun toUserResponse(): UserResponse {
@@ -34,6 +34,25 @@ data class User(
 			avatarImage = avatarImage,
 		)
 	}
+
+	override fun equals(other: Any?): Boolean {
+		if (this === other) return true
+		if (javaClass != other?.javaClass) return false
+
+		other as User
+
+		if (login != other.login) return false
+		if (password != other.password) return false
+		if (firstName != other.firstName) return false
+		if (lastName != other.lastName) return false
+		if (email != other.email) return false
+		if (phone != other.phone) return false
+		if (birthDate != other.birthDate) return false
+		if (gender != other.gender) return false
+		if (location != other.location) return false
+		return isConfirmed == other.isConfirmed
+	}
+
 }
 
 class UserRegisterRequest(
@@ -69,10 +88,9 @@ class UserRegisterRequest(
 		if (email != other.email) return false
 		if (password != other.password) return false
 		if (gender != other.gender) return false
-		if (birthDate != other.birthDate) return false
-
-		return true
+		return birthDate == other.birthDate
 	}
+
 }
 
 class UserUpdateRequest(

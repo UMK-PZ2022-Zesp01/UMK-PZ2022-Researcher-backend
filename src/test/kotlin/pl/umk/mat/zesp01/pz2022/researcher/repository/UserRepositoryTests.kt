@@ -1,5 +1,6 @@
 package pl.umk.mat.zesp01.pz2022.researcher.repository
 
+import org.bson.types.ObjectId
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -18,14 +19,13 @@ class UserRepositoryTests {
     @Autowired lateinit var userService: UserService
     @Autowired lateinit var userRepository: UserRepository
     lateinit var userTestObject: User
-    lateinit var testUserID: String
+    lateinit var testUserLogin: String
 
 
     @BeforeEach
     fun setup() {
         userTestObject = User(
-            id = "_testID",
-            login = "_testLOGIN",
+            login = "testLOGIN",
             password = "testPASSWORD",
             firstName = "testFIRSTNAME",
             lastName = "testLASTNAME",
@@ -37,8 +37,8 @@ class UserRepositoryTests {
             location = "Bydgoszcz",
             isConfirmed = false
         )
-        testUserID = userTestObject.id
-        userService.deleteUserById(testUserID)
+        testUserLogin = userTestObject.login
+        userService.deleteUserByLogin(testUserLogin)
     }
 
     @Test
@@ -50,7 +50,7 @@ class UserRepositoryTests {
 
         // THEN
         assertTrue(
-            userTestObject == userService.getUserById(testUserID).get(),
+            userTestObject == userService.getUserByLogin(testUserLogin).get(),
             "Users are not the same (addUser failed)."
         )
     }
@@ -61,10 +61,10 @@ class UserRepositoryTests {
         userService.addUser(userTestObject)
 
         // WHEN
-        userRepository.deleteById(testUserID)
+        userRepository.deleteByLogin(testUserLogin)
 
         // THEN
-        assertTrue(userService.getUserById(testUserID).isEmpty, "User has not been deleted (deleteUser failed).")
+        assertTrue(userService.getUserByLogin(testUserLogin).isEmpty, "User has not been deleted (deleteUser failed).")
     }
 
     @Test
@@ -83,7 +83,7 @@ class UserRepositoryTests {
 
         // THEN
         assertTrue(
-            userTestObject == userService.getUserById(testUserID).get(),
+            userTestObject == userService.getUserByLogin(testUserLogin).get(),
             "User has not been changed (update failed)."
         )
     }

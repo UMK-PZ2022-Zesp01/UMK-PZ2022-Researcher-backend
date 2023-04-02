@@ -18,7 +18,7 @@ class UserServiceTests {
     @Autowired lateinit var userService: UserService
     @Autowired lateinit var userRepository: UserRepository
     lateinit var userTestObject: User
-    lateinit var testUserID: String
+    lateinit var testUserLogin: String
 
 
 
@@ -27,8 +27,7 @@ class UserServiceTests {
     fun setup() {
         userRepository.deleteAll()
         userTestObject = User(
-            id = "_testID",
-            login = "_testLOGIN",
+            login = "testLOGIN",
             password = "testPASSWORD",
             firstName = "testFIRSTNAME",
             lastName = "testLASTNAME",
@@ -39,7 +38,7 @@ class UserServiceTests {
             avatarImage = "testAVATARIMAGE.IMG",
             location = "Bydgoszcz",
             isConfirmed = false)
-        testUserID = userTestObject.id
+        testUserLogin = userTestObject.login
     }
 
 
@@ -52,7 +51,7 @@ class UserServiceTests {
 
         // THEN
         assertTrue(
-            userTestObject == userRepository.findById(testUserID).get(),
+            userTestObject == userRepository.findUserByLogin(testUserLogin).get(),
             "Users are not the same (addUser failed)."
         )
     }
@@ -63,10 +62,10 @@ class UserServiceTests {
         userRepository.save(userTestObject)
 
         // WHEN
-        userService.deleteUserById(testUserID)
+        userService.deleteUserByLogin(testUserLogin)
 
         // THEN
-        assertTrue(userRepository.findById(testUserID).isEmpty, "User has not been deleted (deleteUser failed).")
+        assertTrue(userRepository.findUserByLogin(testUserLogin).isEmpty, "User has not been deleted (deleteUser failed).")
     }
 
 
@@ -82,52 +81,16 @@ class UserServiceTests {
         userTestObject.phone = newUserPhoneNumber
         userTestObject.gender = newUserGender
 
-        userService.updateUserById(testUserID, userTestObject)
+        userService.updateUserByLogin(testUserLogin, userTestObject)
 
         // THEN
         assertTrue(
-            userTestObject == userRepository.findById(testUserID).get(),
+            userTestObject == userRepository.findUserByLogin(testUserLogin).get(),
             "User has not been changed (update failed)."
         )
     }
 
-    @Test
-    fun `get all user IDs using userService`() {
-        // GIVEN
-        val userTestObject2 = User(
-            id = "_testID2",
-            login = "_testLOGIN2",
-            password = "testPASSWORD2",
-            firstName = "testFIRSTNAME2",
-            lastName = "testLASTNAME2",
-            email = "testEMAIL@test.com2",
-            phone = "1234567892",
-            birthDate = "02-01-1970",
-            gender = "Female",
-            avatarImage = "testAVATARIMAGE2.IMG",
-            location = "Warszawa",
-            isConfirmed = false)
 
-         userRepository.saveAll(listOf(userTestObject, userTestObject2))
-
-        // WHEN
-        val result = userService.getAllUserIds()
-
-        // THEN
-        assertEquals(listOf("{\"_id\": \"_testID\"}", "{\"_id\": \"_testID2\"}"), result)
-    }
-
-    @Test
-    fun `get user by ID using userService`() {
-        // GIVEN
-        userRepository.save(userTestObject)
-
-        // WHEN
-        val result = userService.getUserById(testUserID)
-
-        // THEN
-        assertEquals(Optional.of(userTestObject), result)
-    }
 
     @Test
     fun `get user by email using userService`() {

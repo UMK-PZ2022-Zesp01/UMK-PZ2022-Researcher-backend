@@ -13,19 +13,40 @@ import org.springframework.web.multipart.MultipartFile
 @Document("Researches")
 data class Research(
 	@Id val id: ObjectId = ObjectId(),
-	@Field val researchCode: String = "",
-	@Field val creatorLogin: String = "",
-	@Field val title: String = "",
-	@Field val description: String = "",
-	@Field val poster: Binary = Binary(ByteArray(0)),
-	@Field val participantLimit: Int = 0,
-	@Field val participants: List<String> = listOf(),
-	@Field val begDate: String = "",
-	@Field val endDate: String = "",
-	@Field val location: ResearchLocation = ResearchLocation(),
-	@Field val rewards: List<ResearchReward> = listOf(),
-	@Field val requirements: List<ResearchRequirement> = listOf()
-)
+	@Field var researchCode: String = "",
+	@Field var creatorLogin: String = "",
+	@Field var title: String = "",
+	@Field var description: String = "",
+	@Field var poster: Binary = Binary(ByteArray(0)),
+	@Field var participantLimit: Int = 0,
+	@Field var participants: List<String> = listOf(),
+	@Field var begDate: String = "",
+	@Field var endDate: String = "",
+	@Field var location: ResearchLocation = ResearchLocation(),
+	@Field var rewards: List<ResearchReward> = listOf(),
+	@Field var requirements: List<ResearchRequirement> = listOf()
+){
+
+	override fun equals(other: Any?): Boolean {
+		if (this === other) return true
+		if (javaClass != other?.javaClass) return false
+
+		other as Research
+
+		if (researchCode != other.researchCode) return false
+		if (creatorLogin != other.creatorLogin) return false
+		if (title != other.title) return false
+		if (description != other.description) return false
+		if (poster != other.poster) return false
+		if (participantLimit != other.participantLimit) return false
+		if (participants != other.participants) return false
+		if (begDate != other.begDate) return false
+		if (endDate != other.endDate) return false
+		if (location != other.location) return false
+		if (rewards != other.rewards) return false
+		return requirements == other.requirements
+	}
+}
 
 class ResearchResponse(
 	var id: String,
@@ -33,11 +54,11 @@ class ResearchResponse(
 	// TODO
 )
 
-class ResearchUpdateRequest(
-	val title: String,
-	val description: String,
-	val participantLimit: Int,
-	val location: ResearchLocation,
+data class ResearchUpdateRequest(
+	var title: String,
+	var description: String,
+	var participantLimit: Int,
+	var location: ResearchLocation,
 )
 
 class ResearchRequest(

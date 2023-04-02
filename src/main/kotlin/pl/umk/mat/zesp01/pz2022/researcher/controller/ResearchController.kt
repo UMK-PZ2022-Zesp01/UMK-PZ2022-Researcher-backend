@@ -36,7 +36,7 @@ class ResearchController(
 		@PathVariable code: String,
 		@RequestBody researchUpdateData: ResearchUpdateRequest
 	): ResponseEntity<String> {
-		val research = researchRepository.findResearchByResearchCode(code)
+		val research = researchRepository.findResearchByResearchCode(code).get()
 		researchService.updateResearch(research, researchUpdateData)
 		return ResponseEntity.status(HttpStatus.OK).build()
 	}
@@ -47,9 +47,6 @@ class ResearchController(
 	fun getAllResearches(): ResponseEntity<List<Research>> =
 		ResponseEntity.status(HttpStatus.OK).body(researchService.getAllResearches())
 
-	@GetMapping("/research/id/{id}")
-	fun getResearchById(@PathVariable id: String): ResponseEntity<Research> =
-		ResponseEntity.status(HttpStatus.OK).body(researchService.getResearchById(id))
 
 	@GetMapping("/research/creatorId/{creatorId}")
 	fun getResearchByUserId(@PathVariable creatorId: String): ResponseEntity<List<Research>> =
@@ -65,13 +62,13 @@ class ResearchController(
 
 	@GetMapping("/researches/idList")
 	fun getAllResearchIds(): ResponseEntity<List<String>> =
-		ResponseEntity.status(HttpStatus.OK).body(researchService.getAllResearchIds())
+		ResponseEntity.status(HttpStatus.OK).body(researchService.getAllResearchCodes())
 
 	/*** DELETE MAPPINGS ***/
 
-	@DeleteMapping("/research/{id}/delete")
-	fun deleteResearchById(@PathVariable id: String): ResponseEntity<String> {
-		researchService.deleteResearchById(id)
+	@DeleteMapping("/research/{researchCode}/delete")
+	fun deleteResearchByLogin(@PathVariable researchCode: String): ResponseEntity<String> {
+		researchService.deleteResearchByResearchCode(researchCode)
 		return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
 	}
 }

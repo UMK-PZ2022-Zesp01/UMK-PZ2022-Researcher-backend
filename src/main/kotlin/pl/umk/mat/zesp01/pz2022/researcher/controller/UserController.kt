@@ -1,6 +1,7 @@
 package pl.umk.mat.zesp01.pz2022.researcher.controller
 
 import com.google.gson.Gson
+import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -155,9 +156,9 @@ class UserController(
 	fun getAllUsers(): ResponseEntity<List<User>> =
 		ResponseEntity.status(HttpStatus.OK).body(userService.getAllUsers())
 
-	@GetMapping("/user/{id}")
-	fun getUserById(@PathVariable id: String): ResponseEntity<User> {
-		val user = userService.getUserById(id)
+	@GetMapping("/user/{login}")
+	fun getUserByLogin(@PathVariable login: String): ResponseEntity<User> {
+		val user = userService.getUserByLogin(login)
 		if (user.isEmpty) {
 			return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
 		}

@@ -3,6 +3,7 @@ package pl.umk.mat.zesp01.pz2022.researcher.config
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
+import org.springframework.core.annotation.Order
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.JavaMailSenderImpl
 import pl.umk.mat.zesp01.pz2022.researcher.service.*
@@ -10,6 +11,7 @@ import pl.umk.mat.zesp01.pz2022.researcher.service.*
 @Configuration
 class EmailConfiguration {
 
+    @Order(1)
 	@Bean
 	@Profile("!integration")
 	fun configureEmailProd() {
@@ -18,6 +20,7 @@ class EmailConfiguration {
 		FRONT_URL = System.getenv("FRONT_URL")
 	}
 
+    @Order(1)
     @Bean
     @Profile("integration")
     fun configureEmailTest(){
@@ -26,6 +29,7 @@ class EmailConfiguration {
         FRONT_URL= ""
     }
 
+    @Order(2)
     @Profile("!integration")
     @Bean
     fun getJavaMailSender(): JavaMailSender {
@@ -45,6 +49,7 @@ class EmailConfiguration {
         return mailSender
     }
 
+    @Order(2)
     @Profile("integration")
     @Bean
     fun getJavaMailSenderTests(): JavaMailSender {

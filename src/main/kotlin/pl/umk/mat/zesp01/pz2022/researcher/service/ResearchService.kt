@@ -49,17 +49,17 @@ class ResearchService(
 
 	/*** DELETE METHODS ***/
 
-	fun deleteResearchById(id: String) =
-		researchRepository.deleteById(id)
+	fun deleteResearchByResearchCode(code: String) =
+		researchRepository.deleteResearchByResearchCode(code)
 
 	/*** GET METHODS ***/
 
 	fun getAllResearches(): List<Research> =
 		researchRepository.findAll()
 
-	fun getResearchById(id: String): Research =
-		researchRepository.findById(id)
-			.orElseThrow { throw RuntimeException("Cannot find User by Id") }
+	fun getResearchByResearchCode(code: String): Research =
+		researchRepository.findResearchByResearchCode(code)
+			.orElseThrow { throw RuntimeException("Cannot find User by Research Code") }
 
 	fun getResearchesByCreatorId(creatorId: String): List<Research> =
 		mongoOperations.find(
@@ -79,10 +79,10 @@ class ResearchService(
 			Research::class.java
 		)
 
-	fun getAllResearchIds(): List<String> =
+	fun getAllResearchCodes(): List<String> =
 		mongoOperations.aggregate(
 			Aggregation.newAggregation(
-				Aggregation.project("_id")
+				Aggregation.project("researchCode").andExclude("_id")
 			),
 			"Researches", String::class.java
 		).mappedResults

@@ -1,5 +1,6 @@
 package pl.umk.mat.zesp01.pz2022.researcher.controller
 
+import org.bson.types.ObjectId
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -12,7 +13,9 @@ import org.springframework.http.*
 import org.springframework.http.HttpStatus.*
 import org.springframework.test.context.ActiveProfiles
 import pl.umk.mat.zesp01.pz2022.researcher.model.User
+import pl.umk.mat.zesp01.pz2022.researcher.repository.RefreshTokenRepository
 import pl.umk.mat.zesp01.pz2022.researcher.repository.UserRepository
+import pl.umk.mat.zesp01.pz2022.researcher.repository.VerificationTokenRepository
 import pl.umk.mat.zesp01.pz2022.researcher.service.RefreshTokenService
 import pl.umk.mat.zesp01.pz2022.researcher.service.VerificationTokenService
 import java.net.URI
@@ -24,20 +27,21 @@ class UserControllerTests(
         @Autowired val restTemplate: TestRestTemplate,
         @Autowired val userRepository: UserRepository,
         @Autowired val verificationTokenService: VerificationTokenService,
-        @Autowired val refreshTokenService: RefreshTokenService
+        @Autowired val verificationTokenRepository: VerificationTokenRepository,
+        @Autowired val refreshTokenService: RefreshTokenService,
+        @Autowired val refreshTokenRepository: RefreshTokenRepository
 ) {
 
     @LocalServerPort
     private val port: Int = 3000
 
     lateinit var userTestObject: User
-    lateinit var testUserID: String
+    lateinit var testUserID: ObjectId
     lateinit var testUserLogin: String
 
     @BeforeEach
     fun setup() {
         userTestObject = User(
-            id = "_testID",
             login = "_testLOGIN",
             password = "testPASSWORD",
             firstName = "testFIRSTNAME",
@@ -52,8 +56,8 @@ class UserControllerTests(
         testUserID = userTestObject.id
         testUserLogin = userTestObject.login
         userRepository.deleteAll()
-        verificationTokenService.deleteUserTokens(userTestObject)
-        refreshTokenService.deleteToken(testUserID)
+        refreshTokenRepository.deleteAll()
+        verificationTokenRepository.deleteAll()
     }
 
     @Test
@@ -72,7 +76,6 @@ class UserControllerTests(
     fun `add user whose email is already in the database and returns 299`() {
         // GIVEN (userTestObject)
         val userTestObject2 = User(
-            id = "_testID2",
             login = "_testLOGIN2",
             password = "testPASSWORD2",
             firstName = "testFIRSTNAME2",
@@ -100,7 +103,6 @@ class UserControllerTests(
     fun `add user whose login is already in the database and returns 298`() {
         // GIVEN (userTestObject)
         val userTestObject2 = User(
-            id = "_testID2",
             login = "_testLOGIN",
             password = "testPASSWORD2",
             firstName = "testFIRSTNAME2",
@@ -214,10 +216,9 @@ class UserControllerTests(
     }
 
     @Test
-    fun `updateUser should update user with given ID and returns OK (200)`() {
+    fun `updateUser should update user and returns OK (200)`() {
         // GIVEN
         val userTestObject2 = User(
-            id = "_testID2",
             login = "_testLOGIN2",
             password = "testPASSWORD2",
             firstName = "testFIRSTNAME2",
@@ -238,11 +239,16 @@ class UserControllerTests(
             contentType = MediaType.APPLICATION_JSON
         }
         val request = HttpEntity(userTestObject2, headers)
-        val response = restTemplate.exchange<User>("/user/$testUserID/update", HttpMethod.PUT, request)
+
+        val response = restTemplate.exchange(
+            "/user/update",
+            HttpMethod.PUT,
+            request,
+            User::class.java
+        )
 
         // THEN
         assertEquals(OK, response.statusCode)
-        assertEquals(testUserID, response.body?.id)
         assertEquals(userTestObject2.login, response.body?.login)
         assertNotEquals(userTestObject2.password, response.body?.password) //password should be hashed
         assertEquals(userTestObject2.firstName, response.body?.firstName)
@@ -254,18 +260,16 @@ class UserControllerTests(
         assertEquals(userTestObject2.avatarImage, response.body?.avatarImage)
 
         // Verify that user was actually updated in the database
-        val updatedUserResponse = restTemplate.getForEntity("/user/$testUserID", User::class.java)
-        assertEquals(OK, updatedUserResponse.statusCode)
-        assertEquals(testUserID, updatedUserResponse.body?.id)
-        assertEquals(userTestObject2.login, updatedUserResponse.body?.login)
-        assertNotEquals(userTestObject2.password, updatedUserResponse.body?.password) //password should be hashed
-        assertEquals(userTestObject2.firstName, updatedUserResponse.body?.firstName)
-        assertEquals(userTestObject2.lastName, updatedUserResponse.body?.lastName)
-        assertEquals(userTestObject2.email, updatedUserResponse.body?.email)
-        assertEquals(userTestObject2.phone, updatedUserResponse.body?.phone)
-        assertEquals(userTestObject2.birthDate, updatedUserResponse.body?.birthDate)
-        assertEquals(userTestObject2.gender, updatedUserResponse.body?.gender)
-        assertEquals(userTestObject2.avatarImage, updatedUserResponse.body?.avatarImage)
+        val updatedUser = userRepository.findUserByLogin(testUserLogin).get()
+        assertEquals(userTestObject2.login, updatedUser.login)
+        assertNotEquals(userTestObject2.password, updatedUser.password) //password should be hashed
+        assertEquals(userTestObject2.firstName, updatedUser.firstName)
+        assertEquals(userTestObject2.lastName, updatedUser.lastName)
+        assertEquals(userTestObject2.email, updatedUser.email)
+        assertEquals(userTestObject2.phone, updatedUser.phone)
+        assertEquals(userTestObject2.birthDate, updatedUser.birthDate)
+        assertEquals(userTestObject2.gender, updatedUser.gender)
+        assertEquals(userTestObject2.avatarImage, updatedUser.avatarImage)
     }
 
     @Test
@@ -349,7 +353,6 @@ class UserControllerTests(
     fun `getAllUsers and returns OK (200)`() {
         // GIVEN
         val userTestObject2 = User(
-            id = "_testID2",
             login = "_testLOGIN2",
             password = "testPASSWORD2",
             firstName = "testFIRSTNAME2",
@@ -376,43 +379,12 @@ class UserControllerTests(
     }
 
     @Test
-    fun `getAllUserIDs and returns OK (200)`() {
-        // GIVEN
-        val userTestObject2 = User(
-            id = "_testID2",
-            login = "_testLOGIN2",
-            password = "testPASSWORD2",
-            firstName = "testFIRSTNAME2",
-            lastName = "testLASTNAME2",
-            email = "testEMAIL@test.com2",
-            phone = "1234567892",
-            birthDate = "02-01-1970",
-            gender = "Female",
-            avatarImage = "testAVATARIMAGE2.IMG",
-            location = "Warszawa",
-            isConfirmed = false
-        )
-        val expectedUserIDs = listOf("{\"_id\": \"_testID\"}","{\"_id\": \"_testID2\"}")
-
-        userRepository.saveAll(listOf(userTestObject, userTestObject2))
-
-
-        // WHEN
-        val response = restTemplate.exchange<List<String>>("/users/idList", HttpMethod.GET, null)
-
-        // THEN
-        assertEquals(OK, response.statusCode)
-        assertEquals(expectedUserIDs, response.body)
-
-    }
-
-    @Test
-    fun `getUserById with valid id and returns OK (200)`() {
+    fun `getUserByLogin with valid Login and returns OK (200)`() {
         // GIVEN
         userRepository.save(userTestObject)
 
         // WHEN
-        val response = restTemplate.exchange<User>("/user/$testUserID", HttpMethod.GET, null)
+        val response = restTemplate.exchange<User>("/user/$testUserLogin", HttpMethod.GET, null)
 
         // THEN
         assertEquals(OK, response.statusCode)
@@ -420,9 +392,9 @@ class UserControllerTests(
     }
 
     @Test
-    fun `getUserById with invalid id and returns NO_CONTENT (204)`() {
+    fun `getUserByLogin with invalid Login and returns NO_CONTENT (204)`() {
         // WHEN
-        val response = restTemplate.exchange<User>("/user/invalid-id", HttpMethod.GET, null)
+        val response = restTemplate.exchange<User>("/user/invalid-login", HttpMethod.GET, null)
 
         // THEN
         assertEquals(NO_CONTENT, response.statusCode)
@@ -451,16 +423,16 @@ class UserControllerTests(
     }
 
     @Test
-    fun `deleteUserById and returns NO_CONTENT (204)`() {
+    fun `deleteUserByLogin and returns NO_CONTENT (204)`() {
         // GIVEN
         userRepository.save(userTestObject)
 
         // WHEN
-        val response = restTemplate.exchange<String>("/user/$testUserID/delete", HttpMethod.DELETE, null)
+        val response = restTemplate.exchange<String>("/user/$testUserLogin/delete", HttpMethod.DELETE, null)
 
         // THEN
         assertEquals(NO_CONTENT, response.statusCode)
-        assertTrue(userRepository.findById(testUserID).isEmpty)
+        assertTrue(userRepository.findById(testUserLogin).isEmpty)
     }
 
 

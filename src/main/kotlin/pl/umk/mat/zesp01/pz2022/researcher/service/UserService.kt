@@ -1,5 +1,6 @@
 package pl.umk.mat.zesp01.pz2022.researcher.service
 
+import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.MongoOperations
 import org.springframework.data.mongodb.core.aggregation.Aggregation
@@ -88,8 +89,8 @@ class UserService(
 		return result
 	}
 
-	fun getUserById(id: String): Optional<User> =
-		userRepository.findById(id)
+	fun getUserById(id: ObjectId): Optional<User> =
+		userRepository.findById(id.toString())
 
 	fun getUserByEmail(email: String): Optional<User> =
 		userRepository.findUserByEmail(email)
