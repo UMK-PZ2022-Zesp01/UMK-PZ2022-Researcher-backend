@@ -1,11 +1,11 @@
 package pl.umk.mat.zesp01.pz2022.researcher.model
 
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.bson.BsonBinarySubType
 import org.bson.types.Binary
-import org.bson.types.ObjectId
-import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
 import org.springframework.web.multipart.MultipartFile
@@ -170,11 +170,11 @@ class ResearchRequirement(
 )
 
 class ResearchRequirementAgeInterval(
-    private val ageMin: Int,
-    private val ageMax: Int
+    @JsonProperty("ageMin") private val ageMin: Int,
+    @JsonProperty("ageMax") private val ageMax: Int
 )
 
 class ResearchRequirementOther(
-    private val type: String,
-    private val description: String
+    @JsonProperty("type") private val type: String,
+    @JsonProperty("description") private val description: String
 )

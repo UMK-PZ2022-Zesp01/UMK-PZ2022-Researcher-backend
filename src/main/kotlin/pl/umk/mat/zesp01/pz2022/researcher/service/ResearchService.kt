@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Service
 import pl.umk.mat.zesp01.pz2022.researcher.codegenerator.CodeGenerator.Companion.generateResearchCode
 import pl.umk.mat.zesp01.pz2022.researcher.model.Research
+import pl.umk.mat.zesp01.pz2022.researcher.model.ResearchResponse
 import pl.umk.mat.zesp01.pz2022.researcher.model.ResearchUpdateRequest
 import pl.umk.mat.zesp01.pz2022.researcher.repository.ResearchRepository
 
@@ -42,6 +43,11 @@ class ResearchService(
 
 	fun getResearchByCode(code: String): Research =
 		researchRepository.findResearchByResearchCode(code)
+
+	fun getResearchResponseByCode(code: String): ResearchResponse {
+		val research = researchRepository.findResearchByResearchCode(code)
+		return research.toResearchResponse()
+	}
 
 	fun getResearchesByCreatorLogin(creatorLogin: String): List<Research> =
 		mongoOperations.find(

@@ -27,18 +27,18 @@ class ResearchController(
         @RequestPart("posterImage") posterImage: MultipartFile
     ): ResponseEntity<String> {
         val research = researchRequest.toResearch(posterImage)
-        researchService.addResearch(research)
-        return ResponseEntity.status(HttpStatus.CREATED).body(Gson().toJson(research.researchCode))
+        val addedResearch = researchService.addResearch(research)
+        return ResponseEntity.status(HttpStatus.CREATED).body(Gson().toJson(addedResearch.researchCode))
     }
 
     @PutMapping("/research/{code}/update")
     fun updateResearch(
         @PathVariable code: String,
         @RequestBody researchUpdateData: ResearchUpdateRequest
-    ): ResponseEntity<Research> {
+    ): ResponseEntity<String> {
         val research = researchService.getResearchByCode(code)
         researchService.updateResearch(research, researchUpdateData)
-        return ResponseEntity.status(HttpStatus.OK).body(researchService.getResearchByCode(code))
+        return ResponseEntity.status(HttpStatus.OK).build()
     }
 
     @GetMapping("/research/all")
@@ -74,8 +74,10 @@ class ResearchController(
     }
 
     @GetMapping("/research/code/{code}")
-    fun getResearchByCode(@PathVariable code: String): ResponseEntity<Research> =
-        ResponseEntity.status(HttpStatus.OK).body(researchService.getResearchByCode(code))
+    fun getResearchByCode(@PathVariable code: String): ResponseEntity<String> =
+        ResponseEntity.status(HttpStatus.OK).body(
+            Gson().toJson(researchService.getResearchResponseByCode(code))
+        )
 
     @GetMapping("/research/creator/{creatorLogin}")
     fun getResearchByUserLogin(@PathVariable creatorLogin: String): ResponseEntity<List<Research>> =
