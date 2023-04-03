@@ -3,7 +3,6 @@ package pl.umk.mat.zesp01.pz2022.researcher.service
 import com.icegreen.greenmail.configuration.GreenMailConfiguration
 import com.icegreen.greenmail.junit5.GreenMailExtension
 import com.icegreen.greenmail.util.ServerSetupTest
-import org.json.JSONException
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
@@ -14,6 +13,13 @@ import org.springframework.http.HttpStatusCode
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.DynamicPropertyRegistry
+import org.springframework.test.context.DynamicPropertySource
+import org.testcontainers.containers.GenericContainer
+import org.testcontainers.containers.wait.strategy.Wait
+import org.testcontainers.junit.jupiter.Container
+import org.testcontainers.junit.jupiter.Testcontainers
+import org.testcontainers.utility.DockerImageName
 import pl.umk.mat.zesp01.pz2022.researcher.model.User
 import pl.umk.mat.zesp01.pz2022.researcher.repository.UserRepository
 
@@ -30,19 +36,14 @@ internal class EmailControllerTest {
     fun `send test email`(){
 
         val recipientAddress = "testEMAIL@test.com"
-        val subject = "Researcher | Potwierdzenie rejestracji"
 
-        val token = "testtoken"
-        val confirmationUrl = "${FRONT_URL}confirmEmail/$token"
-        val message = "Naciśnij link poniżej aby aktywować konto Researcher.\r\n$confirmationUrl"
+        val message = SimpleMailMessage()
+        message.setFrom("test.sender@hotmail.com")
+        message.setSubject("Message from Java Mail Sender")
+        message.setText("content")
+        message.setTo(recipientAddress)
 
-        val mail = SimpleMailMessage()
-        mail.setTo(recipientAddress)
-        mail.from = "noreply@researcher.pz2022.gmail.com"
-        mail.subject = subject
-        mail.text = message
-
-        mailSender.send(mail)
+        mailSender.send(message)
 
 
 
@@ -50,7 +51,7 @@ internal class EmailControllerTest {
         assertEquals(1, receivedMessage.allRecipients.size)
         assertEquals(recipientAddress, receivedMessage.allRecipients[0].toString())
         assertEquals("noreply@researcher.pz2022.gmail.com", receivedMessage.from[0].toString())
-        assertEquals(subject, receivedMessage.subject)
+        assertEquals("Message from Java Mail Sender", receivedMessage.subject)
     }
 
     @Test
@@ -99,5 +100,8 @@ internal class EmailControllerTest {
         var greenMail: GreenMailExtension = GreenMailExtension(ServerSetupTest.SMTP)
             .withConfiguration(GreenMailConfiguration.aConfig().withUser("username", "secret"))
             .withPerMethodLifecycle(false)
+
     }
+
+
 }
