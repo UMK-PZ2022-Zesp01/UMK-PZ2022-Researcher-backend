@@ -82,7 +82,7 @@ class UserController(
 
 	}
 
-	@GetMapping("/user/current")
+	@GetMapping("/user/current", produces = ["application/json;charset:UTF-8"])
 	fun getUserProfile(@RequestHeader httpHeaders: HttpHeaders): ResponseEntity<String> {
 		val jwt = httpHeaders["Authorization"]
 			?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
