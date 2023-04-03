@@ -2,12 +2,11 @@ package pl.umk.mat.zesp01.pz2022.researcher.controller
 
 import com.google.gson.Gson
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationEventPublisher
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import pl.umk.mat.zesp01.pz2022.researcher.model.User
-import org.springframework.context.ApplicationEventPublisher
-import org.springframework.http.HttpHeaders
 import pl.umk.mat.zesp01.pz2022.researcher.model.UserRegisterRequest
 import pl.umk.mat.zesp01.pz2022.researcher.model.UserUpdateRequest
 import pl.umk.mat.zesp01.pz2022.researcher.service.*
@@ -73,10 +72,11 @@ class UserController(
 	fun updateUser(
 		@PathVariable login: String,
 		@RequestBody userUpdateData: UserUpdateRequest
-	): ResponseEntity<User> {
+	): ResponseEntity<String> {
 		val user = userService.getUserByLogin(login).get()
-		userService.updateUser(user, userUpdateData)
-		return ResponseEntity.status(HttpStatus.OK).body(userService.getUserByLogin(login).get())
+		val isSuccessfullyUpdated = userService.updateUser(user, userUpdateData)
+		return if (isSuccessfullyUpdated) ResponseEntity.status(HttpStatus.OK).build()
+		else ResponseEntity.status(HttpStatus.NO_CONTENT).build()
 	}
 
 	@GetMapping("/user/current")
@@ -102,18 +102,6 @@ class UserController(
 		} catch (e: Exception) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
 		}
-	}
-
-	// ???/
-	@GetMapping("/users/emailList")
-	fun getAllUserEmails(): ResponseEntity<List<String>> {
-		return ResponseEntity.status(HttpStatus.OK).body(userService.getAllUserEmails())
-	}
-
-	// ??/?
-	@GetMapping("/users/phoneList")
-	fun getAllUserPhones(): ResponseEntity<List<String>> {
-		return ResponseEntity.status(HttpStatus.OK).body(userService.getAllUserPhones())
 	}
 
 	@DeleteMapping("/user/{login}/delete")

@@ -21,20 +21,29 @@ class UserService(
 	fun addUser(user: User): User =
 		userRepository.insert(user)
 
-	fun updateUser(user: User, userData: UserUpdateRequest) {
+	fun updateUser(user: User, userData: UserUpdateRequest): Boolean {
+		if (userData.email != null) {
+			if(isEmailAlreadyTaken(userData.email)) return false
+		}
+		if (userData.phone != null) {
+			if(isPhoneAlreadyTaken(userData.phone)) return false
+		}
+
 		val updatedUser = user.copy(
 			password = if (userData.password != null) BCrypt.hashpw(userData.password, BCrypt.gensalt())
 			else user.password,
 			firstName = userData.firstName ?: user.firstName,
 			lastName = userData.lastName ?: user.lastName,
 			email = userData.email ?: user.email,
-			phone = userData.phone ?: user.phone
+			phone = userData.phone ?: user.phone,
+			location = userData.location ?: user.location
 		)
 
 		mongoOperations.findAndReplace(
 			Query.query(Criteria.where("login").`is`(user.login)),
 			updatedUser
 		)
+		return true
 	}
 
 	fun activateUserAccount(user: User) {
@@ -106,10 +115,14 @@ class UserService(
 		).mappedResults
 		for (i in phoneList) {
 			val temporaryPhone = i.substring(11).dropLast(2)
-			println(temporaryPhone)
 			result.add(temporaryPhone)
 		}
 		return result
+	}
+
+	fun isPhoneAlreadyTaken(phone: String): Boolean {
+		val phoneList = getAllUserPhones()
+		return phoneList.contains(phone)
 	}
 
 	fun getUserByLogin(login: String): Optional<User> =

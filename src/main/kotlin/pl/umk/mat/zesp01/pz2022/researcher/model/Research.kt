@@ -44,7 +44,6 @@ data class Research(
     }
 }
 
-
 class ResearchUpdateRequest(
     val title: String?,
     val description: String?,
@@ -78,6 +77,7 @@ class ResearchRequest(
                 when (reward.type) {
                     "cash" -> ResearchReward(reward.type, reward.value.toString().toInt())
                     "item" -> ResearchReward(reward.type, reward.value as String)
+                    "other" -> ResearchReward(reward.type, reward.value as String)
                     else -> ResearchReward("", "")
                 }
             },

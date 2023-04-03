@@ -8,9 +8,7 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import pl.umk.mat.zesp01.pz2022.researcher.model.Research
 import pl.umk.mat.zesp01.pz2022.researcher.model.ResearchRequest
-import pl.umk.mat.zesp01.pz2022.researcher.model.ResearchResponse
 import pl.umk.mat.zesp01.pz2022.researcher.model.ResearchUpdateRequest
-import pl.umk.mat.zesp01.pz2022.researcher.repository.ResearchRepository
 import pl.umk.mat.zesp01.pz2022.researcher.service.ResearchService
 import kotlin.math.min
 
@@ -18,8 +16,6 @@ import kotlin.math.min
 class ResearchController(
     @Autowired val researchService: ResearchService,
 ) {
-    val gson = Gson()
-
 
     @PostMapping(value = ["/research/add"], consumes = ["multipart/form-data"])
     fun addResearch(
@@ -65,7 +61,7 @@ class ResearchController(
 
             return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(gson.toJson(responseBody))
+                .body(Gson().toJson(responseBody))
         }
 
         return ResponseEntity
@@ -80,8 +76,10 @@ class ResearchController(
         )
 
     @GetMapping("/research/creator/{creatorLogin}")
-    fun getResearchByUserLogin(@PathVariable creatorLogin: String): ResponseEntity<List<Research>> =
-        ResponseEntity.status(HttpStatus.OK).body(researchService.getResearchesByCreatorLogin(creatorLogin))
+    fun getResearchByUserLogin(@PathVariable creatorLogin: String): ResponseEntity<String> =
+        ResponseEntity.status(HttpStatus.OK).body(
+            Gson().toJson(researchService.getResearchesByCreatorLogin(creatorLogin))
+        )
 
 //	@GetMapping("/research/all/sorted")
 //	fun getSortedResearches(): ResponseEntity<List<Research>> =

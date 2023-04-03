@@ -8,7 +8,6 @@ import org.springframework.data.mongodb.core.mapping.Field
 
 @Document("Users")
 data class User(
-	@Id val id: ObjectId = ObjectId(),
 	@Field val login: String = "",
 	@Field val password: String = "",
 	@Field val firstName: String = "",
@@ -29,6 +28,7 @@ data class User(
 			lastName = lastName,
 			email = email,
 			phone = phone,
+			location = location,
 			birthDate = birthDate,
 			gender = gender,
 			avatarImage = avatarImage,
@@ -90,21 +90,23 @@ class UserUpdateRequest(
 	val firstName: String?,
 	val lastName: String?,
 	val email: String?,
-	val phone: String?
+	val phone: String?,
+	val location: String?
 )
 
 class UserResponse(
-	val login: String,
-	val firstName: String,
-	val lastName: String,
-	val email: String,
-	val phone: String,
-	val birthDate: String,
-	val gender: String,
-	val avatarImage: String
+	private val login: String,
+	private val firstName: String,
+	private val lastName: String,
+	private val email: String,
+	private val phone: String,
+	private val location: String,
+	private val birthDate: String,
+	private val gender: String,
+	private val avatarImage: String
 )
 
 class LoginData(
 	val login: String,
-	val password: String,
+	val password: String
 )
