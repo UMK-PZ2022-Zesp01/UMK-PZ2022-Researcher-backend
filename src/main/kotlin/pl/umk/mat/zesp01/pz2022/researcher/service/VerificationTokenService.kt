@@ -12,13 +12,10 @@ import java.util.*
 lateinit var VERIFICATION_TOKEN_SECRET: String
 const val VERIFICATION_EXPIRES_SEC = 86400
 
-
 @Service
 class VerificationTokenService(
 	@Autowired val verificationTokenRepository: VerificationTokenRepository
 ) {
-
-	/*** ADD METHODS ***/
 
 	fun createToken(username: String): String {
 		val payload = mapOf(Pair("username", username))
@@ -40,56 +37,36 @@ class VerificationTokenService(
 		return verificationToken
 	}
 
-	fun verifyVerificationToken(jwt: String, user: User): Boolean =
-		try {
-			JWT
+	fun verifyToken(jwt: String): String? {
+		return try {
+			val decoded = JWT
 				.require(Algorithm.HMAC256(VERIFICATION_TOKEN_SECRET))
-				.withClaim("username", user.login)
+				.withClaimPresence("username")
 				.build()
 				.verify(jwt)
 
-			true
+			val usernameClaim = decoded.getClaim("username").toString()
+			usernameClaim.substring(1, usernameClaim.length - 1)
 		} catch (e: Exception) {
-			false
+			null
 		}
-
-	fun addToken(token: VerificationToken): VerificationToken {
-		return verificationTokenRepository.insert(token)
 	}
 
-	/*** DELETE METHODS ***/
+//	fun addToken(token: VerificationToken): VerificationToken {
+//		return verificationTokenRepository.insert(token)
+//	}
+
+	fun getTokenByJwt(jwt: String): Optional<VerificationToken> =
+		verificationTokenRepository.findVerificationTokenByJwt(jwt)
 
 	fun deleteUserTokens(user: User) {
-		val tokens = getTokensByLogin(user.login).orElse(null)
-		tokens ?: return
+		val tokens = verificationTokenRepository.findVerificationTokensByLogin(user.login).get()
 		tokens.forEach { verificationToken -> deleteTokenByJwt(verificationToken.jwt) }
 	}
 
-	fun deleteTokenById(id: String) =
-		verificationTokenRepository.deleteById(id)
-
 	fun deleteTokenByJwt(jwt: String) =
-		verificationTokenRepository.deleteTokenByJwt(jwt)
+		verificationTokenRepository.deleteVerificationTokenByJwt(jwt)
 
-	//    fun deleteExpiredTokens(){
-//    }
-
-	/*** ADD METHODS ***/
-
-	fun getAllTokens(): List<VerificationToken> =
-		verificationTokenRepository.findAll()
-
-	fun getTokenById(id: String): Optional<VerificationToken> =
-		verificationTokenRepository.findTokenById(id)
-
-	fun getTokensByLogin(login: String): Optional<List<VerificationToken>> =
-		verificationTokenRepository.findTokensByLogin(login)
-
-	fun getTokenByExpires(date: String): Optional<List<VerificationToken>> =
-		verificationTokenRepository.findTokensByExpires(date)
-
-	fun getTokenByJwt(jwt: String): Optional<VerificationToken> =
-		verificationTokenRepository.findTokenByJwt(jwt)
 }
 
 

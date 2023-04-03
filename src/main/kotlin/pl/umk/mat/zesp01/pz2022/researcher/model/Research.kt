@@ -1,146 +1,136 @@
 package pl.umk.mat.zesp01.pz2022.researcher.model
 
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.bson.BsonBinarySubType
 import org.bson.types.Binary
-import org.bson.types.ObjectId
-import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
 import org.springframework.web.multipart.MultipartFile
+import java.util.Base64
 
 @Document("Researches")
 data class Research(
-	@Id val id: ObjectId = ObjectId(),
-	@Field var researchCode: String = "",
-	@Field var creatorLogin: String = "",
-	@Field var title: String = "",
-	@Field var description: String = "",
-	@Field var poster: Binary = Binary(ByteArray(0)),
-	@Field var participantLimit: Int = 0,
-	@Field var participants: List<String> = listOf(),
-	@Field var begDate: String = "",
-	@Field var endDate: String = "",
-	@Field var location: ResearchLocation = ResearchLocation(),
-	@Field var rewards: List<ResearchReward> = listOf(),
-	@Field var requirements: List<ResearchRequirement> = listOf()
-){
-
-	override fun equals(other: Any?): Boolean {
-		if (this === other) return true
-		if (javaClass != other?.javaClass) return false
-
-		other as Research
-
-		if (researchCode != other.researchCode) return false
-		if (creatorLogin != other.creatorLogin) return false
-		if (title != other.title) return false
-		if (description != other.description) return false
-		if (poster != other.poster) return false
-		if (participantLimit != other.participantLimit) return false
-		if (participants != other.participants) return false
-		if (begDate != other.begDate) return false
-		if (endDate != other.endDate) return false
-		if (location != other.location) return false
-		if (rewards != other.rewards) return false
-		return requirements == other.requirements
-	}
+	@Field val researchCode: String = "",
+	@Field val creatorLogin: String = "",
+	@Field val title: String = "",
+	@Field val description: String = "",
+	@Field val poster: Binary = Binary(ByteArray(0)),
+	@Field val participantLimit: Int = 0,
+	@Field val participants: List<String> = listOf(),
+	@Field val begDate: String = "",
+	@Field val endDate: String = "",
+	@Field val location: ResearchLocation = ResearchLocation("", ""),
+	@Field val rewards: List<ResearchReward> = listOf(),
+	@Field val requirements: List<ResearchRequirement> = listOf()
+) {
+    fun toResearchResponse(): ResearchResponse {
+        return ResearchResponse(
+            researchCode = researchCode,
+            title = title,
+            description = description,
+            poster = Base64.getEncoder().encodeToString(poster.data),
+            creatorLogin = creatorLogin,
+            begDate = begDate,
+            endDate = endDate,
+            participants = participants.size,
+            participantLimit = participantLimit,
+            location = location,
+            rewards = rewards,
+            requirements = requirements
+        )
+    }
 }
 
-class ResearchResponse(
-	var id: String,
-	var researchCreatorId: String
-	// TODO
-)
-
-data class ResearchUpdateRequest(
-	var title: String,
-	var description: String,
-	var participantLimit: Int,
-	var location: ResearchLocation,
+class ResearchUpdateRequest(
+    val title: String?,
+    val description: String?,
+    val participantLimit: Int?,
+    val location: ResearchLocation?
 )
 
 class ResearchRequest(
-	private val title: String,
-	private val description: String,
-	private val creatorLogin: String,
-	private val begDate: String,
-	private val endDate: String,
-	private val participantLimit: Int,
-	private val location: ResearchLocation,
-	private val rewards: List<ResearchReward>,
-	private val requirements: List<ResearchRequirement>
+    private val title: String,
+    private val description: String,
+    private val creatorLogin: String,
+    private val begDate: String,
+    private val endDate: String,
+    private val participantLimit: Int,
+    private val location: ResearchLocation,
+    private val rewards: List<ResearchReward>,
+    private val requirements: List<ResearchRequirement>
 ) {
-	fun toResearch(posterFile: MultipartFile): Research {
-		return Research(
-			title = this.title,
-			description = this.description,
-			creatorLogin = this.creatorLogin,
-			poster = Binary(BsonBinarySubType.BINARY, posterFile.bytes),
-			begDate = this.begDate,
-			endDate = this.endDate,
-			participantLimit = this.participantLimit,
-			location = this.location,
+    fun toResearch(posterFile: MultipartFile): Research {
+        return Research(
+            title = this.title,
+            description = this.description,
+            creatorLogin = this.creatorLogin,
+            poster = Binary(BsonBinarySubType.BINARY, posterFile.bytes),
+            begDate = this.begDate,
+            endDate = this.endDate,
+            participantLimit = this.participantLimit,
+            location = this.location,
 
-			rewards = this.rewards.map { reward ->
+            rewards = this.rewards.map { reward ->
+                when (reward.type) {
+                    "cash" -> ResearchReward(reward.type, reward.value.toString().toInt())
+                    "item" -> ResearchReward(reward.type, reward.value as String)
+                    "other" -> ResearchReward(reward.type, reward.value as String)
+                    else -> ResearchReward("", "")
+                }
+            },
 
-				when (reward.type) {
-					"cash" -> ResearchReward(reward.type, reward.value.toString().toInt())
-					"item" -> ResearchReward(reward.type, reward.value as String)
-					else -> ResearchReward("", "")
-				}
-			},
+            requirements = this.requirements.map { req ->
+                when (req.type) {
+                    "gender" -> ResearchRequirement(
+                        req.type,
+                        ObjectMapper().convertValue(
+                            req.criteria,
+                            object : TypeReference<List<String>>() {}
+                        )
+                    )
 
-			requirements = this.requirements.map { req ->
-				when (req.type) {
-					"gender" -> ResearchRequirement(
-						req.type,
-						ObjectMapper().convertValue(
-							req.criteria,
-							object : TypeReference<List<String>>() {}
-						)
-					)
+                    "age" -> ResearchRequirement(
+                        req.type,
+                        ObjectMapper().convertValue(
+                            req.criteria,
+                            object : TypeReference<List<ResearchRequirementAgeInterval>>() {}
+                        )
+                    )
 
-					"age" -> ResearchRequirement(
-						req.type,
-						ObjectMapper().convertValue(
-							req.criteria,
-							object : TypeReference<List<ResearchRequirementAgeInterval>>() {}
-						)
-					)
+                    "place" -> ResearchRequirement(
+                        req.type,
+                        ObjectMapper().convertValue(
+                            req.criteria,
+                            object : TypeReference<List<String>>() {}
+                        )
+                    )
 
-					"place" -> ResearchRequirement(
-						req.type,
-						ObjectMapper().convertValue(
-							req.criteria,
-							object : TypeReference<List<String>>() {}
-						)
-					)
+                    "education" -> ResearchRequirement(
+                        req.type,
+                        ObjectMapper().convertValue(
+                            req.criteria,
+                            object : TypeReference<List<String>>() {}
+                        )
+                    )
 
-					"education" -> ResearchRequirement(
-						req.type,
-						ObjectMapper().convertValue(
-							req.criteria,
-							object : TypeReference<List<String>>() {}
-						)
-					)
+                    "marital" -> ResearchRequirement(
+                        req.type,
+                        ObjectMapper().convertValue(
+                            req.criteria,
+                            object : TypeReference<List<String>>() {}
+                        )
+                    )
 
-					"marital" -> ResearchRequirement(
-						req.type,
-						ObjectMapper().convertValue(
-							req.criteria,
-							object : TypeReference<List<String>>() {}
-						)
-					)
-
-					"other" -> ResearchRequirement(
-						req.type,
-						ObjectMapper().convertValue(
-							req.criteria,
-							object : TypeReference<List<ResearchRequirementOther>>() {}
-						)
-					)
+                    "other" -> ResearchRequirement(
+                        req.type,
+                        ObjectMapper().convertValue(
+                            req.criteria,
+                            object : TypeReference<List<ResearchRequirementOther>>() {}
+                        )
+                    )
 
 					else -> ResearchRequirement("", "")
 				}
@@ -168,90 +158,42 @@ class ResearchRequest(
 	}
 }
 
+class ResearchResponse(
+    private val researchCode: String,
+    private val title: String,
+    private val description: String,
+    private val poster: String,
+    private val creatorLogin: String,
+    private val begDate: String,
+    private val endDate: String,
+    private val participants: Int,
+    private val participantLimit: Int,
+    private val location: ResearchLocation,
+    private val rewards: List<ResearchReward>,
+    private val requirements: List<ResearchRequirement>
+)
+
 class ResearchLocation(
-	val form: String = "",
-	val place: String = ""
-) {
-	override fun equals(other: Any?): Boolean {
-		if (this === other) return true
-		if (javaClass != other?.javaClass) return false
-
-		other as ResearchLocation
-
-		if (form != other.form) return false
-		if (place != other.place) return false
-
-		return true
-	}
-}
+    private val form: String,
+    private val place: String
+)
 
 class ResearchReward(
-	val type: String = "",
-	val value: Any
-){
-	override fun equals(other: Any?): Boolean {
-		if (this === other) return true
-		if (javaClass != other?.javaClass) return false
-
-		other as ResearchReward
-
-		if (type != other.type) return false
-		if (value != other.value) return false
-
-		return true
-	}
-
-}
+    val type: String,
+    val value: Any
+)
 
 class ResearchRequirement(
-	val type: String = "",
-	val criteria: Any
-){
-	override fun equals(other: Any?): Boolean {
-		if (this === other) return true
-		if (javaClass != other?.javaClass) return false
-
-		other as ResearchRequirement
-
-		if (type != other.type) return false
-		if (criteria != other.criteria) return false
-
-		return true
-	}
-
-}
+    val type: String,
+    val criteria: Any
+)
 
 class ResearchRequirementAgeInterval(
-	val ageMin: Int = 0,
-	val ageMax: Int = 0
-){
-	override fun equals(other: Any?): Boolean {
-		if (this === other) return true
-		if (javaClass != other?.javaClass) return false
-
-		other as ResearchRequirementAgeInterval
-
-		if (ageMin != other.ageMin) return false
-		if (ageMax != other.ageMax) return false
-
-		return true
-	}
-
-}
+    @JsonProperty("ageMin") private val ageMin: Int,
+    @JsonProperty("ageMax") private val ageMax: Int
+)
 
 class ResearchRequirementOther(
-	val type: String = "",
-	val description: String = ""
-){
-	override fun equals(other: Any?): Boolean {
-		if (this === other) return true
-		if (javaClass != other?.javaClass) return false
-
-		other as ResearchRequirementOther
-
-		if (type != other.type) return false
-		if (description != other.description) return false
-
-		return true
-	}
-}
+    @JsonProperty("type") private val type: String,
+    @JsonProperty("description") private val description: String
+)

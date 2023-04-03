@@ -8,18 +8,17 @@ import org.springframework.data.mongodb.core.mapping.Field
 
 @Document("Users")
 data class User(
-	@Id val id: ObjectId = ObjectId(),
-	@Field var login: String = "",
-	@Field var password: String = "",
-	@Field var firstName: String = "",
-	@Field var lastName: String = "",
-	@Field var email: String = "",
-	@Field var phone: String = "",
-	@Field var birthDate: String = "",
-	@Field var gender: String = "",
-	@Field var avatarImage: String = "",
-	@Field var location: String = "",
-	@Field var isConfirmed: Boolean = false
+	@Field val login: String = "",
+	@Field val password: String = "",
+	@Field val firstName: String = "",
+	@Field val lastName: String = "",
+	@Field val email: String = "",
+	@Field val phone: String = "",
+	@Field val birthDate: String = "",
+	@Field val gender: String = "",
+	@Field val avatarImage: String = "",
+	@Field val location: String = "",
+	@Field val isConfirmed: Boolean = false
 ) {
 
 	fun toUserResponse(): UserResponse {
@@ -29,6 +28,7 @@ data class User(
 			lastName = lastName,
 			email = email,
 			phone = phone,
+			location = location,
 			birthDate = birthDate,
 			gender = gender,
 			avatarImage = avatarImage,
@@ -91,32 +91,42 @@ class UserRegisterRequest(
 		return birthDate == other.birthDate
 	}
 
+	// Delete if it causes problems
+	override fun hashCode(): Int {
+		var result = firstName.hashCode()
+		result = 31 * result + lastName.hashCode()
+		result = 31 * result + login.hashCode()
+		result = 31 * result + email.hashCode()
+		result = 31 * result + password.hashCode()
+		result = 31 * result + gender.hashCode()
+		result = 31 * result + birthDate.hashCode()
+		return result
+	}
+
 }
 
 class UserUpdateRequest(
-	val login: String = "",
-	val password: String = "",
-	val firstName: String = "",
-	val lastName: String = "",
-	val email: String = "",
-	val phone: String = "",
-	val birthDate: String = "",
-	val gender: String = "",
-	val avatarImage: String = ""
+	val password: String?,
+	val firstName: String?,
+	val lastName: String?,
+	val email: String?,
+	val phone: String?,
+	val location: String?
 )
 
 class UserResponse(
-	val login: String = "",
-	val firstName: String = "",
-	val lastName: String = "",
-	val email: String = "",
-	val phone: String = "",
-	val birthDate: String = "",
-	val gender: String = "",
-	val avatarImage: String = ""
+	private val login: String,
+	private val firstName: String,
+	private val lastName: String,
+	private val email: String,
+	private val phone: String,
+	private val location: String,
+	private val birthDate: String,
+	private val gender: String,
+	private val avatarImage: String
 )
 
 class LoginData(
 	val login: String,
-	val password: String,
+	val password: String
 )

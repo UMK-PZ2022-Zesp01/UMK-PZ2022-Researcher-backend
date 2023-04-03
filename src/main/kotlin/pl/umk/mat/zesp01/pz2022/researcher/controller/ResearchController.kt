@@ -9,66 +9,83 @@ import org.springframework.web.multipart.MultipartFile
 import pl.umk.mat.zesp01.pz2022.researcher.model.Research
 import pl.umk.mat.zesp01.pz2022.researcher.model.ResearchRequest
 import pl.umk.mat.zesp01.pz2022.researcher.model.ResearchUpdateRequest
-import pl.umk.mat.zesp01.pz2022.researcher.repository.ResearchRepository
 import pl.umk.mat.zesp01.pz2022.researcher.service.ResearchService
+import kotlin.math.min
 
 @RestController
 class ResearchController(
-	@Autowired val researchService: ResearchService,
-	@Autowired val researchRepository: ResearchRepository
+    @Autowired val researchService: ResearchService,
 ) {
-	/*** POST MAPPINGS ***/
 
-	@PostMapping(value = ["/research/add"], consumes = ["multipart/form-data"])
-	fun addResearch(
-		@RequestPart("researchProperties") researchRequest: ResearchRequest,
-		@RequestPart("posterImage") posterImage: MultipartFile
-	): ResponseEntity<String> {
-		val research = researchRequest.toResearch(posterImage)
-		researchService.addResearch(research)
-		return ResponseEntity.status(HttpStatus.CREATED).body(Gson().toJson(research.researchCode))
-	}
+    @PostMapping(value = ["/research/add"], consumes = ["multipart/form-data"])
+    fun addResearch(
+        @RequestPart("researchProperties") researchRequest: ResearchRequest,
+        @RequestPart("posterImage") posterImage: MultipartFile
+    ): ResponseEntity<String> {
+        val research = researchRequest.toResearch(posterImage)
+        val addedResearch = researchService.addResearch(research)
+        return ResponseEntity.status(HttpStatus.CREATED).body(Gson().toJson(addedResearch.researchCode))
+    }
 
-	/*** PUT MAPPINGS ***/
+    @PutMapping("/research/{code}/update")
+    fun updateResearch(
+        @PathVariable code: String,
+        @RequestBody researchUpdateData: ResearchUpdateRequest
+    ): ResponseEntity<String> {
+        val research = researchService.getResearchByCode(code)
+        researchService.updateResearch(research, researchUpdateData)
+        return ResponseEntity.status(HttpStatus.OK).build()
+    }
 
-	@PutMapping("/research/{code}/update")
-	fun updateResearch(
-		@PathVariable code: String,
-		@RequestBody researchUpdateData: ResearchUpdateRequest
-	): ResponseEntity<String> {
-		val research = researchRepository.findResearchByResearchCode(code).get()
-		researchService.updateResearch(research, researchUpdateData)
-		return ResponseEntity.status(HttpStatus.OK).build()
-	}
+    @GetMapping("/research/all")
+    fun getAllResearches(): ResponseEntity<List<Research>> =
+        ResponseEntity.status(HttpStatus.OK).body(researchService.getAllResearches())
 
-	/*** GET MAPPINGS ***/
+    @GetMapping("/research/page/{page}/{perPage}", produces = ["application/json;charset=UTF-8"])
+    fun getAPageOfResearches(
+        @PathVariable page: Int,
+        @PathVariable perPage: Int
+    ): ResponseEntity<String> {
+        val allResearches = researchService.getAllResearches()
+        val length = allResearches.size
 
-	@GetMapping("/researches")
-	fun getAllResearches(): ResponseEntity<List<Research>> =
-		ResponseEntity.status(HttpStatus.OK).body(researchService.getAllResearches())
+        if (page > 0 && perPage > 0) {
+            val firstIndex = min(((page - 1) * perPage), length)
+            val lastIndex = min((page * perPage), length)
 
+            val responseBody = allResearches
+                    .subList(firstIndex, lastIndex)
+                    .map { research -> research.toResearchResponse() }
 
-	@GetMapping("/research/creatorId/{creatorId}")
-	fun getResearchByUserId(@PathVariable creatorId: String): ResponseEntity<List<Research>> =
-		ResponseEntity.status(HttpStatus.OK).body(researchService.getResearchesByCreatorId(creatorId))
+            return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(Gson().toJson(responseBody))
+        }
 
-	@GetMapping("/research/creatorLogin/{creatorLogin}")
-	fun getResearchByUserLogin(@PathVariable creatorLogin: String): ResponseEntity<List<Research>> =
-		ResponseEntity.status(HttpStatus.OK).body(researchService.getResearchesByCreatorLogin(creatorLogin))
+        return ResponseEntity
+            .status(HttpStatus.NO_CONTENT)
+            .build()
+    }
 
-	@GetMapping("/researches/sorted")
-	fun getSortedResearches(): ResponseEntity<List<Research>> =
-		ResponseEntity.status(HttpStatus.OK).body(researchService.sortResearchesByTitle())
+    @GetMapping("/research/code/{code}")
+    fun getResearchByCode(@PathVariable code: String): ResponseEntity<String> =
+        ResponseEntity.status(HttpStatus.OK).body(
+            Gson().toJson(researchService.getResearchResponseByCode(code))
+        )
 
-	@GetMapping("/researches/idList")
-	fun getAllResearchIds(): ResponseEntity<List<String>> =
-		ResponseEntity.status(HttpStatus.OK).body(researchService.getAllResearchCodes())
+    @GetMapping("/research/creator/{creatorLogin}")
+    fun getResearchByUserLogin(@PathVariable creatorLogin: String): ResponseEntity<String> =
+        ResponseEntity.status(HttpStatus.OK).body(
+            Gson().toJson(researchService.getResearchesByCreatorLogin(creatorLogin))
+        )
 
-	/*** DELETE MAPPINGS ***/
+//	@GetMapping("/research/all/sorted")
+//	fun getSortedResearches(): ResponseEntity<List<Research>> =
+//		ResponseEntity.status(HttpStatus.OK).body(researchService.sortResearchesByTitle())
 
-	@DeleteMapping("/research/{researchCode}/delete")
-	fun deleteResearchByLogin(@PathVariable researchCode: String): ResponseEntity<String> {
-		researchService.deleteResearchByResearchCode(researchCode)
-		return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
-	}
+    @DeleteMapping("/research/{code}/delete")
+    fun deleteResearchById(@PathVariable code: String): ResponseEntity<String> {
+        researchService.deleteResearchById(code)
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+    }
 }
