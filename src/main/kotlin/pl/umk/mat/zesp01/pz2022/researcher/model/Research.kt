@@ -9,6 +9,7 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
 import org.springframework.web.multipart.MultipartFile
+import java.util.Base64
 
 @Document("Researches")
 data class Research(
@@ -24,123 +25,156 @@ data class Research(
 	@Field val location: ResearchLocation = ResearchLocation("", ""),
 	@Field val rewards: List<ResearchReward> = listOf(),
 	@Field val requirements: List<ResearchRequirement> = listOf()
-)
+) {
+    fun toResearchResponse(): ResearchResponse {
+        return ResearchResponse(
+            researchCode = researchCode,
+            title = title,
+            description = description,
+            poster = Base64.getEncoder().encodeToString(poster.data),
+            creatorLogin = creatorLogin,
+            begDate = begDate,
+            endDate = endDate,
+            participants = participants.size,
+            participantLimit = participantLimit,
+            location = location,
+            rewards = rewards,
+            requirements = requirements
+        )
+    }
+}
+
 
 class ResearchUpdateRequest(
-	val title: String?,
-	val description: String?,
-	val participantLimit: Int?,
-	val location: ResearchLocation?
+    val title: String?,
+    val description: String?,
+    val participantLimit: Int?,
+    val location: ResearchLocation?
 )
 
 class ResearchRequest(
-	private val title: String,
-	private val description: String,
-	private val creatorLogin: String,
-	private val begDate: String,
-	private val endDate: String,
-	private val participantLimit: Int,
-	private val location: ResearchLocation,
-	private val rewards: List<ResearchReward>,
-	private val requirements: List<ResearchRequirement>
+    private val title: String,
+    private val description: String,
+    private val creatorLogin: String,
+    private val begDate: String,
+    private val endDate: String,
+    private val participantLimit: Int,
+    private val location: ResearchLocation,
+    private val rewards: List<ResearchReward>,
+    private val requirements: List<ResearchRequirement>
 ) {
-	fun toResearch(posterFile: MultipartFile): Research {
-		return Research(
-			title = this.title,
-			description = this.description,
-			creatorLogin = this.creatorLogin,
-			poster = Binary(BsonBinarySubType.BINARY, posterFile.bytes),
-			begDate = this.begDate,
-			endDate = this.endDate,
-			participantLimit = this.participantLimit,
-			location = this.location,
+    fun toResearch(posterFile: MultipartFile): Research {
+        return Research(
+            title = this.title,
+            description = this.description,
+            creatorLogin = this.creatorLogin,
+            poster = Binary(BsonBinarySubType.BINARY, posterFile.bytes),
+            begDate = this.begDate,
+            endDate = this.endDate,
+            participantLimit = this.participantLimit,
+            location = this.location,
 
-			rewards = this.rewards.map { reward ->
-				when (reward.type) {
-					"cash" -> ResearchReward(reward.type, reward.value.toString().toInt())
-					"item" -> ResearchReward(reward.type, reward.value as String)
-					else -> ResearchReward("", "")
-				}
-			},
+            rewards = this.rewards.map { reward ->
+                when (reward.type) {
+                    "cash" -> ResearchReward(reward.type, reward.value.toString().toInt())
+                    "item" -> ResearchReward(reward.type, reward.value as String)
+                    else -> ResearchReward("", "")
+                }
+            },
 
-			requirements = this.requirements.map { req ->
-				when (req.type) {
-					"gender" -> ResearchRequirement(
-						req.type,
-						ObjectMapper().convertValue(
-							req.criteria,
-							object : TypeReference<List<String>>() {}
-						)
-					)
+            requirements = this.requirements.map { req ->
+                when (req.type) {
+                    "gender" -> ResearchRequirement(
+                        req.type,
+                        ObjectMapper().convertValue(
+                            req.criteria,
+                            object : TypeReference<List<String>>() {}
+                        )
+                    )
 
-					"age" -> ResearchRequirement(
-						req.type,
-						ObjectMapper().convertValue(
-							req.criteria,
-							object : TypeReference<List<ResearchRequirementAgeInterval>>() {}
-						)
-					)
+                    "age" -> ResearchRequirement(
+                        req.type,
+                        ObjectMapper().convertValue(
+                            req.criteria,
+                            object : TypeReference<List<ResearchRequirementAgeInterval>>() {}
+                        )
+                    )
 
-					"place" -> ResearchRequirement(
-						req.type,
-						ObjectMapper().convertValue(
-							req.criteria,
-							object : TypeReference<List<String>>() {}
-						)
-					)
+                    "place" -> ResearchRequirement(
+                        req.type,
+                        ObjectMapper().convertValue(
+                            req.criteria,
+                            object : TypeReference<List<String>>() {}
+                        )
+                    )
 
-					"education" -> ResearchRequirement(
-						req.type,
-						ObjectMapper().convertValue(
-							req.criteria,
-							object : TypeReference<List<String>>() {}
-						)
-					)
+                    "education" -> ResearchRequirement(
+                        req.type,
+                        ObjectMapper().convertValue(
+                            req.criteria,
+                            object : TypeReference<List<String>>() {}
+                        )
+                    )
 
-					"marital" -> ResearchRequirement(
-						req.type,
-						ObjectMapper().convertValue(
-							req.criteria,
-							object : TypeReference<List<String>>() {}
-						)
-					)
+                    "marital" -> ResearchRequirement(
+                        req.type,
+                        ObjectMapper().convertValue(
+                            req.criteria,
+                            object : TypeReference<List<String>>() {}
+                        )
+                    )
 
-					"other" -> ResearchRequirement(
-						req.type,
-						ObjectMapper().convertValue(
-							req.criteria,
-							object : TypeReference<List<ResearchRequirementOther>>() {}
-						)
-					)
+                    "other" -> ResearchRequirement(
+                        req.type,
+                        ObjectMapper().convertValue(
+                            req.criteria,
+                            object : TypeReference<List<ResearchRequirementOther>>() {}
+                        )
+                    )
 
-					else -> ResearchRequirement("", "")
-				}
-			}
-		)
-	}
+                    else -> ResearchRequirement("", "")
+                }
+            }
+        )
+    }
 }
 
+class ResearchResponse(
+    private val researchCode: String,
+    private val title: String,
+    private val description: String,
+    private val poster: String,
+    private val creatorLogin: String,
+    private val begDate: String,
+    private val endDate: String,
+    private val participants: Int,
+    private val participantLimit: Int,
+    private val location: ResearchLocation,
+    private val rewards: List<ResearchReward>,
+    private val requirements: List<ResearchRequirement>
+)
+
 class ResearchLocation(
-	private val form: String,
-	private val place: String
+    private val form: String,
+    private val place: String
 )
 
 class ResearchReward(
-	val type: String,
-	val value: Any
+    val type: String,
+    val value: Any
 )
 
 class ResearchRequirement(
-	val type: String,
-	val criteria: Any
+    val type: String,
+    val criteria: Any
 )
 
 class ResearchRequirementAgeInterval(
-	private val ageMin: Int,
-	private val ageMax: Int
+    private val ageMin: Int,
+    private val ageMax: Int
 )
 
 class ResearchRequirementOther(
-	private val type: String,
-	private val description: String
+    private val type: String,
+    private val description: String
 )
