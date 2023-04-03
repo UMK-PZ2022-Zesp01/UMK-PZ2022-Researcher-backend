@@ -21,12 +21,12 @@ class UserService(
 	fun addUser(user: User): User =
 		userRepository.insert(user)
 
-	fun updateUser(user: User, userData: UserUpdateRequest): Boolean {
+	fun updateUser(user: User, userData: UserUpdateRequest): String {
 		if (userData.email != null) {
-			if(isEmailAlreadyTaken(userData.email)) return false
+			if(isEmailAlreadyTaken(userData.email)) return "email"
 		}
 		if (userData.phone != null) {
-			if(isPhoneAlreadyTaken(userData.phone)) return false
+			if(isPhoneAlreadyTaken(userData.phone)) return "phone"
 		}
 
 		val updatedUser = user.copy(
@@ -43,7 +43,7 @@ class UserService(
 			Query.query(Criteria.where("login").`is`(user.login)),
 			updatedUser
 		)
-		return true
+		return "ok"
 	}
 
 	fun activateUserAccount(user: User) {

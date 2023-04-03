@@ -74,9 +74,12 @@ class UserController(
 		@RequestBody userUpdateData: UserUpdateRequest
 	): ResponseEntity<String> {
 		val user = userService.getUserByLogin(login).get()
-		val isSuccessfullyUpdated = userService.updateUser(user, userUpdateData)
-		return if (isSuccessfullyUpdated) ResponseEntity.status(HttpStatus.OK).build()
-		else ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+		val updateResult = userService.updateUser(user, userUpdateData)
+		if(updateResult=="phone") return ResponseEntity.status(299).build()
+		if(updateResult=="email") return ResponseEntity.status(298).build()
+		return ResponseEntity.status(HttpStatus.OK).build()
+
+
 	}
 
 	@GetMapping("/user/current")
