@@ -9,9 +9,6 @@ import java.util.*
 
 @Repository
 interface ResearchRepository : MongoRepository<Research, String> {
-	fun findResearchByResearchCode(researchCode: String): Optional<Research>
-
-	@Query("{'researchCode': ?0}", delete = true)
-	fun deleteResearchByResearchCode(code: String): Optional<Research>
+	fun findResearchByResearchCode(researchCode: String): Research
 
 }
