@@ -10,11 +10,11 @@ import org.testcontainers.containers.MongoDBContainer
 @Profile("integration")
 class MongoTestConfiguration {
 
-    private val MONGO_DB_DOCKER_IMAGE_NAME = "mongo:6.0"
-    private val MONGO_PORT = 27017
+    private val mongoDBDockerImageName = "mongo:6.0"
+    private val mongoDBPort = 27017
 
     @Bean(initMethod = "start", destroyMethod = "stop")
-    fun mongoContainer() = MongoDBContainer(MONGO_DB_DOCKER_IMAGE_NAME).withExposedPorts(MONGO_PORT)
+    fun mongoContainer(): MongoDBContainer = MongoDBContainer(mongoDBDockerImageName).withExposedPorts(mongoDBPort)
 
     @Bean
     fun mongoClient(mongoDBContainer: MongoDBContainer) = MongoClients.create(mongoDBContainer.replicaSetUrl)

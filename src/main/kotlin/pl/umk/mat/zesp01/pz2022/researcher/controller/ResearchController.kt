@@ -32,7 +32,7 @@ class ResearchController(
         @PathVariable code: String,
         @RequestBody researchUpdateData: ResearchUpdateRequest
     ): ResponseEntity<String> {
-        val research = researchService.getResearchByCode(code)
+        val research = researchService.getResearchByCode(code).get()
         researchService.updateResearch(research, researchUpdateData)
         return ResponseEntity.status(HttpStatus.OK).build()
     }
@@ -85,7 +85,7 @@ class ResearchController(
 
     @DeleteMapping("/research/{code}/delete")
     fun deleteResearchById(@PathVariable code: String): ResponseEntity<String> {
-        researchService.deleteResearchById(code)
+        researchService.deleteResearchByResearchCode(code)
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
     }
 }

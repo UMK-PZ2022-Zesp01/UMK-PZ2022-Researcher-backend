@@ -10,6 +10,7 @@ import pl.umk.mat.zesp01.pz2022.researcher.model.Research
 import pl.umk.mat.zesp01.pz2022.researcher.model.ResearchResponse
 import pl.umk.mat.zesp01.pz2022.researcher.model.ResearchUpdateRequest
 import pl.umk.mat.zesp01.pz2022.researcher.repository.ResearchRepository
+import java.util.*
 
 @Service
 class ResearchService(
@@ -41,11 +42,11 @@ class ResearchService(
 	fun getAllResearches(): List<Research> =
 		researchRepository.findAll()
 
-	fun getResearchByCode(code: String): Research =
+	fun getResearchByCode(code: String): Optional<Research> =
 		researchRepository.findResearchByResearchCode(code)
 
 	fun getResearchResponseByCode(code: String): ResearchResponse {
-		val research = researchRepository.findResearchByResearchCode(code)
+		val research = researchRepository.findResearchByResearchCode(code).get()
 		return research.toResearchResponse()
 	}
 
@@ -61,6 +62,6 @@ class ResearchService(
 //			Research::class.java
 //		)
 
-	fun deleteResearchById(id: String) =
-		researchRepository.deleteById(id)
+	fun deleteResearchByResearchCode(code: String) =
+		researchRepository.deleteResearchByResearchCode(code)
 }

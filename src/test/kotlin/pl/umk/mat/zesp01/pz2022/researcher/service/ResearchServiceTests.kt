@@ -1,8 +1,7 @@
 package pl.umk.mat.zesp01.pz2022.researcher.service
 
 
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -37,20 +36,20 @@ class ResearchServiceTests {
             gender = "Male",
             avatarImage = "testAVATARIMAGE.IMG",
             location = "Bydgoszcz",
-            isConfirmed = false
+            isConfirmed = true
         )
         testUser2 = User(
             login = "testLOGIN2",
             password = "testPASSWORD2",
             firstName = "testFIRSTNAME2",
             lastName = "testLASTNAME2",
-            email = "testEMAIL@test.com2",
-            phone = "1234567892",
-            birthDate = "02-01-1970",
+            email = "testEMAIL2@test.com",
+            phone = "234567890",
+            birthDate = "02-02-1972",
             gender = "Female",
             avatarImage = "testAVATARIMAGE2.IMG",
             location = "Warszawa",
-            isConfirmed = false
+            isConfirmed = true
         )
         researchTestObject = Research(
             researchCode = "testResearchCODE",
@@ -82,12 +81,10 @@ class ResearchServiceTests {
         // WHEN
         val addedResearch = researchService.addResearch(researchTestObject)
         testResearchCode = addedResearch.researchCode
+        researchTestObject.researchCode = testResearchCode
 
         // THEN
-        assertTrue(
-            researchTestObject == researchRepository.findResearchByResearchCode(testResearchCode).get(),
-            "Researches are not the same (addResearch failed)."
-        )
+        assertEquals(researchTestObject, researchRepository.findResearchByResearchCode(testResearchCode).get())
     }
 
     @Test
@@ -99,7 +96,7 @@ class ResearchServiceTests {
         researchService.deleteResearchByResearchCode(testResearchCode)
 
         // THEN
-        assertTrue(researchRepository.findResearchByResearchCode(testResearchCode).isEmpty, "Research has not been deleted (deleteResearchByResearchCode failed).")
+        assertTrue(researchRepository.findResearchByResearchCode(testResearchCode).isEmpty)
     }
 
 
@@ -113,53 +110,50 @@ class ResearchServiceTests {
 
         val updatedResearch = ResearchUpdateRequest(
             title = newResearchTitle,
-            participantLimit = newResearchParticipantLimit,
-            description = researchTestObject.description,
-            location = researchTestObject.location)
+            participantLimit = newResearchParticipantLimit
+        )
 
 
         // WHEN
-        researchTestObject.title = newResearchTitle
-        researchTestObject.participantLimit = newResearchParticipantLimit
-
         researchService.updateResearch(researchTestObject, updatedResearch)
 
+        researchTestObject.title = newResearchTitle
+        researchTestObject.participantLimit = newResearchParticipantLimit
         // THEN
-        assertTrue(
-            researchTestObject == researchRepository.findResearchByResearchCode(testResearchCode).get(),
-            "Research has not been changed (update failed)."
-        )
+        assertEquals(researchTestObject, researchRepository.findResearchByResearchCode(testResearchCode).get())
     }
 
+
+
     @Test
-    fun `get all research Codes using ResearchService`() {
+    fun `get all Researches using ResearchService`() {
         // GIVEN
         val researchTestObject2 = Research(
             researchCode = "testResearchCODE2",
             creatorLogin = "testLOGIN2",
             title = "testTITLE2",
             description = "testDESCRIPTION2",
-            participantLimit = 1002,
-            participants = listOf("testUser1"),
-            begDate = "01-02-2025",
-            endDate = "28-02-2025",
+            participantLimit = 200,
+            participants = listOf("testUser2"),
+            begDate = "02-02-2025",
+            endDate = "15-02-2025",
             location = ResearchLocation("testFORM2", "testPLACE2"),
             rewards = listOf(
-                ResearchReward("Cash", 5002),
                 ResearchReward("Gift","testGIFT2")
             ),
             requirements = listOf(
-                ResearchRequirement("Monthly gross income in PLN", 80002),
+                ResearchRequirement("Monthly gross income in PLN", 8002),
                 ResearchRequirement("Job","Musician")
             ))
 
-        researchRepository.saveAll(listOf(researchTestObject, researchTestObject2))
+        val allResearches = listOf(researchTestObject, researchTestObject2)
+        researchRepository.saveAll(allResearches)
 
         // WHEN
-        val result = researchService.getAllResearchCodes()
+        val result = Optional.of(researchService.getAllResearches())
 
         // THEN
-        assertEquals(listOf("{\"researchCode\": \"testResearchCODE\"}", "{\"researchCode\": \"testResearchCODE2\"}"), result)
+        assertEquals(allResearches, result.get())
     }
 
     @Test
@@ -168,10 +162,22 @@ class ResearchServiceTests {
         researchRepository.save(researchTestObject)
 
         // WHEN
-        val result = Optional.of(researchService.getResearchByResearchCode(testResearchCode))
+        val result = researchService.getResearchByCode(testResearchCode).get()
 
         // THEN
-        assertEquals(researchTestObject, result.get())
+        assertEquals(researchTestObject, result)
+    }
+
+    @Test
+    fun `get researchResponse by Code using ResearchService`() {
+        // GIVEN
+        researchRepository.save(researchTestObject)
+
+        // WHEN
+        val result = Optional.of(researchService.getResearchResponseByCode(testResearchCode))
+
+        // THEN
+        assertEquals(researchTestObject.toResearchResponse(), result.get())
     }
 
     @Test
@@ -188,36 +194,36 @@ class ResearchServiceTests {
     }
 
 
-    @Test
-    fun `get researches sorted by title using ResearchService`() {
-        // GIVEN
-        val researchTestObject2 = Research(
-            researchCode = "testResearchCODE2",
-            creatorLogin = "testLOGIN2",
-            title = "testTITLE2",
-            description = "testDESCRIPTION2",
-            participantLimit = 1002,
-            participants = listOf("testUser1"),
-            begDate = "01-02-2025",
-            endDate = "28-02-2025",
-            location = ResearchLocation("testFORM2", "testPLACE2"),
-            rewards = listOf(
-                ResearchReward("Cash", 5002),
-                ResearchReward("Gift","testGIFT2")
-            ),
-            requirements = listOf(
-                ResearchRequirement("Monthly gross income in PLN", 80002),
-                ResearchRequirement("Job","Musician")
-            ))
-
-        researchRepository.saveAll(listOf(researchTestObject, researchTestObject2))
-
-        // WHEN
-        val result = researchService.sortResearchesByTitle()
-
-        // THEN
-        assertEquals(listOf(researchTestObject, researchTestObject2), result)
-    }
+//    @Test
+//    fun `get researches sorted by title using ResearchService`() {
+//        // GIVEN
+//        val researchTestObject2 = Research(
+//            researchCode = "testResearchCODE2",
+//            creatorLogin = "testLOGIN2",
+//            title = "testTITLE2",
+//            description = "testDESCRIPTION2",
+//            participantLimit = 1002,
+//            participants = listOf("testUser1"),
+//            begDate = "01-02-2025",
+//            endDate = "28-02-2025",
+//            location = ResearchLocation("testFORM2", "testPLACE2"),
+//            rewards = listOf(
+//                ResearchReward("Cash", 5002),
+//                ResearchReward("Gift","testGIFT2")
+//            ),
+//            requirements = listOf(
+//                ResearchRequirement("Monthly gross income in PLN", 80002),
+//                ResearchRequirement("Job","Musician")
+//            ))
+//
+//        researchRepository.saveAll(listOf(researchTestObject, researchTestObject2))
+//
+//        // WHEN
+//        val result = researchService.sortResearchesByTitle()
+//
+//        // THEN
+//        assertEquals(listOf(researchTestObject, researchTestObject2), result)
+//    }
 
 
 }

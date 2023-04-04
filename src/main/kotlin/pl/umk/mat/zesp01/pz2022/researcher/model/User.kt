@@ -8,17 +8,17 @@ import org.springframework.data.mongodb.core.mapping.Field
 
 @Document("Users")
 data class User(
-	@Field val login: String = "",
-	@Field val password: String = "",
-	@Field val firstName: String = "",
-	@Field val lastName: String = "",
-	@Field val email: String = "",
-	@Field val phone: String = "",
-	@Field val birthDate: String = "",
-	@Field val gender: String = "",
-	@Field val avatarImage: String = "",
-	@Field val location: String = "",
-	@Field val isConfirmed: Boolean = false
+	@Field var login: String = "",
+	@Field var password: String = "",
+	@Field var firstName: String = "",
+	@Field var lastName: String = "",
+	@Field var email: String = "",
+	@Field var phone: String = "",
+	@Field var birthDate: String = "",
+	@Field var gender: String = "",
+	@Field var avatarImage: String = "",
+	@Field var location: String = "",
+	@Field var isConfirmed: Boolean = false
 ) {
 
 	fun toUserResponse(): UserResponse {
@@ -51,6 +51,21 @@ data class User(
 		if (gender != other.gender) return false
 		if (location != other.location) return false
 		return isConfirmed == other.isConfirmed
+	}
+
+	override fun hashCode(): Int {
+		var result = login.hashCode()
+		result = 31 * result + password.hashCode()
+		result = 31 * result + firstName.hashCode()
+		result = 31 * result + lastName.hashCode()
+		result = 31 * result + email.hashCode()
+		result = 31 * result + phone.hashCode()
+		result = 31 * result + birthDate.hashCode()
+		result = 31 * result + gender.hashCode()
+		result = 31 * result + avatarImage.hashCode()
+		result = 31 * result + location.hashCode()
+		result = 31 * result + isConfirmed.hashCode()
+		return result
 	}
 
 }
@@ -105,13 +120,13 @@ class UserRegisterRequest(
 
 }
 
-class UserUpdateRequest(
-	val password: String?,
-	val firstName: String?,
-	val lastName: String?,
-	val email: String?,
-	val phone: String?,
-	val location: String?
+data class UserUpdateRequest(
+	val password: String? = null,
+	val firstName: String? = null,
+	val lastName: String? = null,
+	val email: String? = null,
+	val phone: String? = null,
+	val location: String? = null
 )
 
 class UserResponse(

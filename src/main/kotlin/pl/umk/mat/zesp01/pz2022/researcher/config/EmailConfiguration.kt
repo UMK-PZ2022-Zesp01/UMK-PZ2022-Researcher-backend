@@ -43,7 +43,7 @@ class EmailConfiguration {
     fun mailConfigureTests(): JavaMailSender {
         MAIL = ""
         MAIL_PWD = ""
-        FRONT_URL= "localhost:8080"
+        FRONT_URL= "localhost:8080/"
 
         val mailSender = JavaMailSenderImpl()
         mailSender.host ="127.0.0.1"

@@ -30,12 +30,9 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-validation")
 	testImplementation("org.testcontainers:mongodb:1.17.6")
-	testImplementation("org.testcontainers:junit-jupiter:1.17.6")
 	testImplementation("org.assertj:assertj-core:3.24.2")
 	testImplementation("com.icegreen:greenmail-junit5:2.0.0")
-	testImplementation("org.testcontainers:junit-jupiter:1.17.6")
 	testImplementation("jakarta.validation:jakarta.validation-api:2.0.2")
-	testImplementation("org.awaitility:awaitility:4.2.0")
 
 }
 

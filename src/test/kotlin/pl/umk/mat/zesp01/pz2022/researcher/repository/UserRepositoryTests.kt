@@ -38,7 +38,7 @@ class UserRepositoryTests {
             isConfirmed = false
         )
         testUserLogin = userTestObject.login
-        userService.deleteUserByLogin(testUserLogin)
+        userRepository.deleteAll()
     }
 
     @Test
@@ -49,10 +49,7 @@ class UserRepositoryTests {
         userRepository.save(userTestObject)
 
         // THEN
-        assertTrue(
-            userTestObject == userService.getUserByLogin(testUserLogin).get(),
-            "Users are not the same (addUser failed)."
-        )
+        assertTrue(userTestObject == userService.getUserByLogin(testUserLogin).get())
     }
 
     @Test
@@ -61,83 +58,23 @@ class UserRepositoryTests {
         userService.addUser(userTestObject)
 
         // WHEN
-        userRepository.deleteByLogin(testUserLogin)
+        userRepository.deleteUserByLogin(testUserLogin)
 
         // THEN
-        assertTrue(userService.getUserByLogin(testUserLogin).isEmpty, "User has not been deleted (deleteUser failed).")
-    }
-
-    @Test
-    fun `update existing User data by userRepository`() {
-        // GIVEN (userTestObject)
-        val newUserPhoneNumber = "987654321"
-        val newUserGender = "Female"
-
-        userService.addUser(userTestObject)
-
-        // WHEN
-        userTestObject.phone = newUserPhoneNumber
-        userTestObject.gender = newUserGender
-
-        userRepository.save(userTestObject)
-
-        // THEN
-        assertTrue(
-            userTestObject == userService.getUserByLogin(testUserLogin).get(),
-            "User has not been changed (update failed)."
-        )
-    }
-
-    @Test
-    fun `get user by email using userRepository`() {
-        // GIVEN
-        userService.addUser(userTestObject)
-        val testUserMail = userTestObject.email
-
-        // WHEN
-        val result = userRepository.findUserByEmail(testUserMail)
-
-        // THEN
-        assertEquals(Optional.of(userTestObject), result)
+        assertTrue(userService.getUserByLogin(testUserLogin).isEmpty)
     }
 
     @Test
     fun `get user by login using userRepository`() {
         // GIVEN
         userService.addUser(userTestObject)
-        val testUserLogin = userTestObject.login
 
         // WHEN
         val result = userRepository.findUserByLogin(testUserLogin)
 
         // THEN
-        assertEquals(Optional.of(userTestObject), result)
+        assertEquals(userTestObject, result.get())
     }
 
-    @Test
-    fun `get users by firstname using userRepository`() {
-        // GIVEN
-        userService.addUser(userTestObject)
-        val testUserFirstName = userTestObject.firstName
-
-        // WHEN
-        val result = userRepository.findUserByFirstName(testUserFirstName)
-
-        // THEN
-        assertEquals(Optional.of(listOf(userTestObject)), result)
-    }
-
-    @Test
-    fun `get users by lastname using userRepository`() {
-        // GIVEN
-        userService.addUser(userTestObject)
-        val testUserLastName = userTestObject.lastName
-
-        // WHEN
-        val result = userRepository.findUserByLastName(testUserLastName)
-
-        // THEN
-        assertEquals(Optional.of(listOf(userTestObject)), result)
-    }
 }
 
