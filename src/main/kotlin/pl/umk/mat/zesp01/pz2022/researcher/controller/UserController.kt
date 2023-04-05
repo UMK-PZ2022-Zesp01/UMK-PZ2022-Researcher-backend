@@ -10,11 +10,13 @@ import org.springframework.web.bind.annotation.*
 import pl.umk.mat.zesp01.pz2022.researcher.model.UserRegisterRequest
 import pl.umk.mat.zesp01.pz2022.researcher.model.UserResponse
 import pl.umk.mat.zesp01.pz2022.researcher.model.UserUpdateRequest
+import pl.umk.mat.zesp01.pz2022.researcher.repository.UserRepository
 import pl.umk.mat.zesp01.pz2022.researcher.service.*
 
 @RestController
 class UserController(
 	@Autowired val userService: UserService,
+	@Autowired val userRepository: UserRepository,
 	@Autowired val verificationTokenService: VerificationTokenService,
 	@Autowired val refreshTokenService: RefreshTokenService,
 	@Autowired val eventPublisher: ApplicationEventPublisher,
@@ -70,10 +72,10 @@ class UserController(
 	}
 
 	@GetMapping("/user/{login}")
-	fun getUserByLogin(@PathVariable login: String): ResponseEntity<UserResponse> =
+	fun getUserByLogin(@PathVariable login: String): ResponseEntity<String> =
 		try {
 			ResponseEntity.status(HttpStatus.OK).body(
-				userService.getUserByLogin(login).get().toUserResponse()
+				Gson().toJson(userService.getUserByLogin(login).get().toUserResponse())
 			)
 		} catch (e: Exception) {
 			ResponseEntity.status(HttpStatus.NO_CONTENT).build()
@@ -86,8 +88,8 @@ class UserController(
 
 		try {
 			/** Get the username claimed in the access token **/
-			val username = refreshTokenService.verifyAccessToken(jwt[0])
-			if (username.isNullOrEmpty()) throw Exception()
+			val username = refreshTokenService.verifyAccessToken(jwt[0]) ?: throw Exception()
+			if (username.isEmpty()) throw Exception()
 
 			/** If claimed user does not exist in db there is something wrong with the token **/
 			val user = userService.getUserByLogin(username)
@@ -113,8 +115,8 @@ class UserController(
 			?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
 		try {
-			val username = refreshTokenService.verifyAccessToken(jwt[0])
-			if (username.isNullOrEmpty()) throw Exception()
+			val username = refreshTokenService.verifyAccessToken(jwt[0]) ?: throw Exception()
+			if (username.isEmpty()) throw Exception()
 			val user = userService.getUserByLogin(username).get()
 
 			val updateResult = userService.updateUser(user, userUpdateData)
@@ -136,6 +138,7 @@ class UserController(
 			val username = refreshTokenService.verifyAccessToken(jwt[0]) ?: throw Exception()
 			if (username.isEmpty()) throw Exception()
 
+			// usuwać usera z participants!
 			userService.deleteUserByLogin(username)
 			ResponseEntity.status(HttpStatus.NO_CONTENT).build()
 		} catch (e: Exception) {

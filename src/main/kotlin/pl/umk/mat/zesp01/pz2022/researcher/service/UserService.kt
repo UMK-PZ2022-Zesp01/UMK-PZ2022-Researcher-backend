@@ -54,6 +54,9 @@ class UserService(
 		)
 	}
 
+	fun getUserByLogin(login: String): Optional<User> =
+		userRepository.findUserByLogin(login)
+
 	fun deleteUserByLogin(login: String) =
 		userRepository.deleteUserByLogin(login)
 
@@ -124,8 +127,4 @@ class UserService(
 		val phoneList = getAllUserPhones()
 		return phoneList.contains(phone)
 	}
-
-	fun getUserByLogin(login: String): Optional<User> =
-		userRepository.findUserByLogin(login)
-
 }

@@ -14,78 +14,85 @@ import kotlin.math.min
 
 @RestController
 class ResearchController(
-    @Autowired val researchService: ResearchService,
+	@Autowired val researchService: ResearchService,
 ) {
 
-    @PostMapping(value = ["/research/add"], consumes = ["multipart/form-data"])
-    fun addResearch(
-        @RequestPart("researchProperties") researchRequest: ResearchRequest,
-        @RequestPart("posterImage") posterImage: MultipartFile
-    ): ResponseEntity<String> {
-        val research = researchRequest.toResearch(posterImage)
-        val addedResearch = researchService.addResearch(research)
-        return ResponseEntity.status(HttpStatus.CREATED).body(Gson().toJson(addedResearch.researchCode))
-    }
+	@PostMapping(value = ["/research/add"], consumes = ["multipart/form-data"])
+	fun addResearch(
+		@RequestPart("researchProperties") researchRequest: ResearchRequest,
+		@RequestPart("posterImage") posterImage: MultipartFile
+	): ResponseEntity<String> {
+		val research = researchRequest.toResearch(posterImage)
+		val addedResearch = researchService.addResearch(research)
+		return ResponseEntity.status(HttpStatus.CREATED).body(Gson().toJson(addedResearch.researchCode))
+	}
 
-    @PutMapping("/research/{code}/update")
-    fun updateResearch(
-        @PathVariable code: String,
-        @RequestBody researchUpdateData: ResearchUpdateRequest
-    ): ResponseEntity<String> {
-        val research = researchService.getResearchByCode(code)
-        researchService.updateResearch(research, researchUpdateData)
-        return ResponseEntity.status(HttpStatus.OK).build()
-    }
-
-    @GetMapping("/research/all")
-    fun getAllResearches(): ResponseEntity<List<Research>> =
-        ResponseEntity.status(HttpStatus.OK).body(researchService.getAllResearches())
-
-    @GetMapping("/research/page/{page}/{perPage}", produces = ["application/json;charset=UTF-8"])
-    fun getAPageOfResearches(
-        @PathVariable page: Int,
-        @PathVariable perPage: Int
-    ): ResponseEntity<String> {
-        val allResearches = researchService.getAllResearches()
-        val length = allResearches.size
-
-        if (page > 0 && perPage > 0) {
-            val firstIndex = min(((page - 1) * perPage), length)
-            val lastIndex = min((page * perPage), length)
-
-            val responseBody = allResearches
-                    .subList(firstIndex, lastIndex)
-                    .map { research -> research.toResearchResponse() }
-
-            return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(Gson().toJson(responseBody))
+	@PutMapping("/research/{code}/update")
+	fun updateResearch(
+		@PathVariable code: String,
+		@RequestBody researchUpdateData: ResearchUpdateRequest
+	): ResponseEntity<String> {
+        return try {
+            val research = researchService.getResearchByCode(code).get()
+            researchService.updateResearch(research, researchUpdateData)
+            ResponseEntity.status(HttpStatus.OK).build()
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.NO_CONTENT).build()
         }
+	}
 
-        return ResponseEntity
-            .status(HttpStatus.NO_CONTENT)
-            .build()
-    }
+	@GetMapping("/research/all")
+	fun getAllResearches(): ResponseEntity<List<Research>> =
+		ResponseEntity.status(HttpStatus.OK).body(researchService.getAllResearches())
 
-    @GetMapping("/research/code/{code}")
-    fun getResearchByCode(@PathVariable code: String): ResponseEntity<String> =
-        ResponseEntity.status(HttpStatus.OK).body(
-            Gson().toJson(researchService.getResearchResponseByCode(code))
-        )
+	@GetMapping("/research/page/{page}/{perPage}", produces = ["application/json;charset=UTF-8"])
+	fun getAPageOfResearches(
+		@PathVariable page: Int,
+		@PathVariable perPage: Int
+	): ResponseEntity<String> {
+		val allResearches = researchService.getAllResearches()
+		val length = allResearches.size
 
-    @GetMapping("/research/creator/{creatorLogin}")
-    fun getResearchByUserLogin(@PathVariable creatorLogin: String): ResponseEntity<String> =
-        ResponseEntity.status(HttpStatus.OK).body(
-            Gson().toJson(researchService.getResearchesByCreatorLogin(creatorLogin))
-        )
+		if (page > 0 && perPage > 0) {
+			val firstIndex = min(((page - 1) * perPage), length)
+			val lastIndex = min((page * perPage), length)
+
+			val responseBody = allResearches
+				.subList(firstIndex, lastIndex)
+				.map { research -> research.toResearchResponse() }
+
+			return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(Gson().toJson(responseBody))
+		}
+
+		return ResponseEntity
+			.status(HttpStatus.NO_CONTENT)
+			.build()
+	}
+
+	@GetMapping("/research/code/{code}", produces = ["application/json;charset=UTF-8"])
+	fun getResearchByCode(@PathVariable code: String): ResponseEntity<String> =
+		try {
+			val researchResponse = researchService.getResearchByCode(code).get().toResearchResponse()
+			ResponseEntity.status(HttpStatus.OK).body(Gson().toJson(researchResponse))
+		} catch (e: Exception) {
+			ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+		}
+
+	@GetMapping("/research/creator/{creatorLogin}")
+	fun getResearchByUserLogin(@PathVariable creatorLogin: String): ResponseEntity<String> =
+		ResponseEntity.status(HttpStatus.OK).body(
+			Gson().toJson(researchService.getResearchesByCreatorLogin(creatorLogin))
+		)
 
 //	@GetMapping("/research/all/sorted")
 //	fun getSortedResearches(): ResponseEntity<List<Research>> =
 //		ResponseEntity.status(HttpStatus.OK).body(researchService.sortResearchesByTitle())
 
-    @DeleteMapping("/research/{code}/delete")
-    fun deleteResearchById(@PathVariable code: String): ResponseEntity<String> {
-        researchService.deleteResearchById(code)
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
-    }
+	@DeleteMapping("/research/{code}/delete")
+	fun deleteResearchById(@PathVariable code: String): ResponseEntity<String> {
+		researchService.deleteResearchById(code)
+		return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+	}
 }

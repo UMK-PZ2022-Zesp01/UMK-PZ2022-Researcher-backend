@@ -16,22 +16,22 @@ data class User(
 	@Field val phone: String = "",
 	@Field val birthDate: String = "",
 	@Field val gender: String = "",
-	@Field val avatarImage: Binary = Binary(ByteArray(0)),
+//	@Field val avatarImage: Binary = Binary(ByteArray(0)),
 	@Field val location: String = "",
 	@Field val isConfirmed: Boolean = false
 ) {
 
 	fun toUserResponse(): UserResponse {
 		return UserResponse(
-			login = login,
-			firstName = firstName,
-			lastName = lastName,
-			email = email,
-			phone = phone,
-			location = location,
-			birthDate = birthDate,
-			gender = gender,
-			avatarImage = Base64.getEncoder().encodeToString(avatarImage.data)
+			login = this.login,
+			firstName = this.firstName,
+			lastName = this.lastName,
+			email = this.email,
+			phone = this.phone,
+			location = this.location,
+			birthDate = this.birthDate,
+			gender = this.gender
+//			avatarImage = Base64.getEncoder().encodeToString(this.avatarImage.data)
 		)
 	}
 
@@ -62,7 +62,7 @@ data class User(
 		result = 31 * result + phone.hashCode()
 		result = 31 * result + birthDate.hashCode()
 		result = 31 * result + gender.hashCode()
-		result = 31 * result + avatarImage.hashCode()
+//		result = 31 * result + avatarImage.hashCode()
 		result = 31 * result + location.hashCode()
 		result = 31 * result + isConfirmed.hashCode()
 		return result
@@ -137,8 +137,8 @@ class UserResponse(
 	private val phone: String,
 	private val location: String,
 	private val birthDate: String,
-	private val gender: String,
-	private val avatarImage: String
+	private val gender: String
+//	private val avatarImage: String
 )
 
 class LoginData(

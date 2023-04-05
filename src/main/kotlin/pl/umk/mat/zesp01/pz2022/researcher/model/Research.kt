@@ -1,7 +1,6 @@
 package pl.umk.mat.zesp01.pz2022.researcher.model
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.bson.BsonBinarySubType
@@ -15,6 +14,7 @@ import java.util.Base64
 data class Research(
 	@Field val researchCode: String = "",
 	@Field val creatorLogin: String = "",
+//	@Field val creatorFullName: String = "",
 	@Field val title: String = "",
 	@Field val description: String = "",
 	@Field val poster: Binary = Binary(ByteArray(0)),
@@ -25,6 +25,7 @@ data class Research(
 	@Field val location: ResearchLocation = ResearchLocation("", ""),
 	@Field val rewards: List<ResearchReward> = listOf(),
 	@Field val requirements: List<ResearchRequirement> = listOf()
+//	@Field val forum: List<ResearchForum> = listOf()
 ) {
     fun toResearchResponse(): ResearchResponse {
         return ResearchResponse(
@@ -152,9 +153,20 @@ class ResearchRequest(
 		if (participantLimit != other.participantLimit) return false
 		if (location != other.location) return false
 		if (rewards != other.rewards) return false
-		if (requirements != other.requirements) return false
+		return requirements == other.requirements
+	}
 
-		return true
+	override fun hashCode(): Int {
+		var result = title.hashCode()
+		result = 31 * result + description.hashCode()
+		result = 31 * result + creatorLogin.hashCode()
+		result = 31 * result + begDate.hashCode()
+		result = 31 * result + endDate.hashCode()
+		result = 31 * result + participantLimit
+		result = 31 * result + location.hashCode()
+		result = 31 * result + rewards.hashCode()
+		result = 31 * result + requirements.hashCode()
+		return result
 	}
 }
 
