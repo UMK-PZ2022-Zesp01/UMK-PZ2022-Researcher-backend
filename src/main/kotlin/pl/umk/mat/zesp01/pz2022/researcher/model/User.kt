@@ -1,10 +1,10 @@
 package pl.umk.mat.zesp01.pz2022.researcher.model
 
-import org.bson.types.ObjectId
+import org.bson.types.Binary
 import org.mindrot.jbcrypt.BCrypt
-import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
+import java.util.*
 
 @Document("Users")
 data class User(
@@ -16,7 +16,7 @@ data class User(
 	@Field val phone: String = "",
 	@Field val birthDate: String = "",
 	@Field val gender: String = "",
-	@Field val avatarImage: String = "",
+	@Field val avatarImage: Binary = Binary(ByteArray(0)),
 	@Field val location: String = "",
 	@Field val isConfirmed: Boolean = false
 ) {
@@ -31,7 +31,7 @@ data class User(
 			location = location,
 			birthDate = birthDate,
 			gender = gender,
-			avatarImage = avatarImage,
+			avatarImage = Base64.getEncoder().encodeToString(avatarImage.data)
 		)
 	}
 
@@ -51,6 +51,21 @@ data class User(
 		if (gender != other.gender) return false
 		if (location != other.location) return false
 		return isConfirmed == other.isConfirmed
+	}
+
+	override fun hashCode(): Int {
+		var result = login.hashCode()
+		result = 31 * result + password.hashCode()
+		result = 31 * result + firstName.hashCode()
+		result = 31 * result + lastName.hashCode()
+		result = 31 * result + email.hashCode()
+		result = 31 * result + phone.hashCode()
+		result = 31 * result + birthDate.hashCode()
+		result = 31 * result + gender.hashCode()
+		result = 31 * result + avatarImage.hashCode()
+		result = 31 * result + location.hashCode()
+		result = 31 * result + isConfirmed.hashCode()
+		return result
 	}
 
 }
