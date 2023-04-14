@@ -40,10 +40,23 @@ class AuthController(
         try {
             val username = user.login
 
-            /** Create JWTs **/
+            /** Create access token **/
             val accessToken = refreshTokenService
                 .createAccessToken(username)
 
+            /** Create Response Body **/
+            val responseBody = HashMap<String, String>()
+            responseBody["username"] = user.login
+            responseBody["accessToken"] = accessToken
+
+            /** Check if user requests a refresh token **/
+            if (!loginData.rememberDevice){
+                return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(Gson().toJson(responseBody))
+            }
+
+            /** Create refresh token **/
             val refreshToken = refreshTokenService.createRefreshToken(username)
             if (refreshToken.isNullOrEmpty()) throw Exception()
 
@@ -56,11 +69,6 @@ class AuthController(
                 .sameSite("none") //Chrome, you bastard
                 .secure(true)
                 .build()
-
-            /** Create Response Body **/
-            val responseBody = HashMap<String, String>()
-            responseBody["username"] = user.login
-            responseBody["accessToken"] = accessToken
 
             /** Send Refresh Token Cookie & Access Token **/
             return ResponseEntity
