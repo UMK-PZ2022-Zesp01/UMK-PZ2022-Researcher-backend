@@ -2,6 +2,7 @@ package pl.umk.mat.zesp01.pz2022.researcher.controller
 
 import com.google.gson.Gson
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -9,12 +10,14 @@ import org.springframework.web.multipart.MultipartFile
 import pl.umk.mat.zesp01.pz2022.researcher.model.Research
 import pl.umk.mat.zesp01.pz2022.researcher.model.ResearchRequest
 import pl.umk.mat.zesp01.pz2022.researcher.model.ResearchUpdateRequest
+import pl.umk.mat.zesp01.pz2022.researcher.service.RefreshTokenService
 import pl.umk.mat.zesp01.pz2022.researcher.service.ResearchService
 import kotlin.math.min
 
 @RestController
 class ResearchController(
 	@Autowired val researchService: ResearchService,
+	@Autowired val refreshTokenService: RefreshTokenService
 ) {
 
 	@PostMapping(value = ["/research/add"], consumes = ["multipart/form-data"])
@@ -39,6 +42,27 @@ class ResearchController(
         } catch (e: Exception) {
             ResponseEntity.status(HttpStatus.NO_CONTENT).build()
         }
+	}
+
+	@PutMapping("/research/{code}/enroll")
+	fun enrollOnResearch(
+		@PathVariable code: String,
+		@RequestHeader httpHeaders: HttpHeaders
+	): ResponseEntity<String> {
+		val jwt = httpHeaders["Authorization"]
+			?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+
+		return try {
+			val username = refreshTokenService.verifyAccessToken(jwt[0]) ?: throw Exception()
+			if (username.isEmpty()) throw Exception()
+
+			val addResult = researchService.addUserToParticipantsList(code, username)
+			if(addResult == "ERR_ALREADY_IN_LIST") return ResponseEntity.status(299).build()
+
+			ResponseEntity.status(HttpStatus.OK).build()
+		} catch (e: Exception) {
+			ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+		}
 	}
 
 	@GetMapping("/research/all")
