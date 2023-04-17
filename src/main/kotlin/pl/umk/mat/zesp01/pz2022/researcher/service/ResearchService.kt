@@ -42,6 +42,7 @@ class ResearchService(
 		val research = researchRepository.findResearchByResearchCode(researchCode).get()
 		val participants: MutableList<String> = research.participants.toMutableList()
 
+		if(research.creatorLogin == login) return "ERR_YOUR_RESEARCH"
 		if(participants.contains(login)) return "ERR_ALREADY_IN_LIST"
 
 		participants.add(login)

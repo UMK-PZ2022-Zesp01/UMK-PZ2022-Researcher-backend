@@ -58,6 +58,7 @@ class ResearchController(
 
 			val addResult = researchService.addUserToParticipantsList(code, username)
 			if(addResult == "ERR_ALREADY_IN_LIST") return ResponseEntity.status(299).build()
+			if(addResult == "ERR_YOUR_RESEARCH") return ResponseEntity.status(298).build()
 
 			ResponseEntity.status(HttpStatus.OK).build()
 		} catch (e: Exception) {
