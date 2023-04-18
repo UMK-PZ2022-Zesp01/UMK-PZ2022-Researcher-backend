@@ -23,10 +23,10 @@ class UserService(
 
 	fun updateUser(user: User, userData: UserUpdateRequest): String {
 		if (userData.email != null) {
-			if(isEmailAlreadyTaken(userData.email)) return "email"
+			if (isEmailAlreadyTaken(userData.email)) return "email"
 		}
 		if (userData.phone != null) {
-			if(isPhoneAlreadyTaken(userData.phone)) return "phone"
+			if (isPhoneAlreadyTaken(userData.phone)) return "phone"
 		}
 
 		val updatedUser = user.copy(
@@ -54,16 +54,11 @@ class UserService(
 		)
 	}
 
+	fun getUserByLogin(login: String): Optional<User> =
+		userRepository.findUserByLogin(login)
+
 	fun deleteUserByLogin(login: String) =
 		userRepository.deleteUserByLogin(login)
-
-//	fun getAllUserIds(): List<String> =
-//		mongoOperations.aggregate(
-//			Aggregation.newAggregation(
-//				Aggregation.project("_id")
-//			),
-//			"Users", String::class.java
-//		).mappedResults
 
 	fun getAllUserLogins(): List<String> {
 		val result = mutableListOf<String>()
@@ -124,8 +119,4 @@ class UserService(
 		val phoneList = getAllUserPhones()
 		return phoneList.contains(phone)
 	}
-
-	fun getUserByLogin(login: String): Optional<User> =
-		userRepository.findUserByLogin(login)
-
 }

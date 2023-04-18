@@ -1,7 +1,6 @@
 package pl.umk.mat.zesp01.pz2022.researcher.controller
 
 import com.google.gson.Gson
-import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.http.HttpHeaders
@@ -18,6 +17,7 @@ class UserController(
 	@Autowired val verificationTokenService: VerificationTokenService,
 	@Autowired val refreshTokenService: RefreshTokenService,
 	@Autowired val eventPublisher: ApplicationEventPublisher,
+	@Autowired val researchService: ResearchService
 ) {
 
 	@PostMapping("/user/register")
@@ -69,29 +69,25 @@ class UserController(
 		}
 	}
 
-	@PutMapping("/user/{login}/update")
-	fun updateUser(
-		@PathVariable login: String,
-		@RequestBody userUpdateData: UserUpdateRequest
-	): ResponseEntity<String> {
-		val user = userService.getUserByLogin(login).get()
-		val updateResult = userService.updateUser(user, userUpdateData)
-		if(updateResult=="phone") return ResponseEntity.status(299).build()
-		if(updateResult=="email") return ResponseEntity.status(298).build()
-		return ResponseEntity.status(HttpStatus.OK).build()
-
-
-	}
+	@GetMapping("/user/{login}")
+	fun getUserByLogin(@PathVariable login: String): ResponseEntity<String> =
+		try {
+			ResponseEntity.status(HttpStatus.OK).body(
+				Gson().toJson(userService.getUserByLogin(login).get().toUserResponse())
+			)
+		} catch (e: Exception) {
+			ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+		}
 
 	@GetMapping("/user/current", produces = ["application/json;charset:UTF-8"])
-	fun getUserProfile(@RequestHeader httpHeaders: HttpHeaders): ResponseEntity<String> {
+	fun getCurrentUser(@RequestHeader httpHeaders: HttpHeaders): ResponseEntity<String> {
 		val jwt = httpHeaders["Authorization"]
 			?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
 		try {
 			/** Get the username claimed in the access token **/
-			val username = refreshTokenService.verifyAccessToken(jwt[0])
-			if (username.isNullOrEmpty()) throw Exception()
+			val username = refreshTokenService.verifyAccessToken(jwt[0]) ?: throw Exception()
+			if (username.isEmpty()) throw Exception()
 
 			/** If claimed user does not exist in db there is something wrong with the token **/
 			val user = userService.getUserByLogin(username)
@@ -108,9 +104,45 @@ class UserController(
 		}
 	}
 
-	@DeleteMapping("/user/{login}/delete")
-	fun deleteUserById(@PathVariable login: String): ResponseEntity<String> {
-		userService.deleteUserByLogin(login)
-		return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+	@PutMapping("/user/current/update", produces = ["application/json;charset:UTF-8"])
+	fun updateCurrentUser(
+		@RequestHeader httpHeaders: HttpHeaders,
+		@RequestBody userUpdateData: UserUpdateRequest
+	): ResponseEntity<String> {
+		val jwt = httpHeaders["Authorization"]
+			?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+
+		try {
+			val username = refreshTokenService.verifyAccessToken(jwt[0]) ?: throw Exception()
+			if (username.isEmpty()) throw Exception()
+			val user = userService.getUserByLogin(username).get()
+
+			val updateResult = userService.updateUser(user, userUpdateData)
+
+			if (updateResult == "phone") return ResponseEntity.status(299).build()
+			if (updateResult == "email") return ResponseEntity.status(298).build()
+			return ResponseEntity.status(HttpStatus.OK).build()
+		} catch (e: Exception) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+		}
+	}
+
+	@DeleteMapping("/user/current/delete")
+	fun deleteCurrentUser(@RequestHeader httpHeaders: HttpHeaders): ResponseEntity<String> {
+		val jwt = httpHeaders["Authorization"]
+			?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+
+		return try {
+			val username = refreshTokenService.verifyAccessToken(jwt[0]) ?: throw Exception()
+			if (username.isEmpty()) throw Exception()
+
+			// Delete User from All Researches
+			researchService.removeUserFromAllResearches(username)
+
+			userService.deleteUserByLogin(username)
+			ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+		} catch (e: Exception) {
+			ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+		}
 	}
 }

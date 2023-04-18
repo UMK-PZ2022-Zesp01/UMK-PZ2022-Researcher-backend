@@ -1,37 +1,37 @@
 package pl.umk.mat.zesp01.pz2022.researcher.model
 
-import org.bson.types.ObjectId
+import org.bson.types.Binary
 import org.mindrot.jbcrypt.BCrypt
-import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
+import java.util.*
 
 @Document("Users")
 data class User(
-	@Field var login: String = "",
-	@Field var password: String = "",
-	@Field var firstName: String = "",
-	@Field var lastName: String = "",
-	@Field var email: String = "",
-	@Field var phone: String = "",
-	@Field var birthDate: String = "",
-	@Field var gender: String = "",
-	@Field var avatarImage: String = "",
-	@Field var location: String = "",
-	@Field var isConfirmed: Boolean = false
+	@Field val login: String = "",
+	@Field val password: String = "",
+	@Field val firstName: String = "",
+	@Field val lastName: String = "",
+	@Field val email: String = "",
+	@Field val phone: String = "",
+	@Field val birthDate: String = "",
+	@Field val gender: String = "",
+//	@Field val avatarImage: Binary = Binary(ByteArray(0)),
+	@Field val location: String = "",
+	@Field val isConfirmed: Boolean = false
 ) {
 
 	fun toUserResponse(): UserResponse {
 		return UserResponse(
-			login = login,
-			firstName = firstName,
-			lastName = lastName,
-			email = email,
-			phone = phone,
-			location = location,
-			birthDate = birthDate,
-			gender = gender,
-			avatarImage = avatarImage,
+			login = this.login,
+			firstName = this.firstName,
+			lastName = this.lastName,
+			email = this.email,
+			phone = this.phone,
+			location = this.location,
+			birthDate = this.birthDate,
+			gender = this.gender
+//			avatarImage = Base64.getEncoder().encodeToString(this.avatarImage.data)
 		)
 	}
 
@@ -62,7 +62,7 @@ data class User(
 		result = 31 * result + phone.hashCode()
 		result = 31 * result + birthDate.hashCode()
 		result = 31 * result + gender.hashCode()
-		result = 31 * result + avatarImage.hashCode()
+//		result = 31 * result + avatarImage.hashCode()
 		result = 31 * result + location.hashCode()
 		result = 31 * result + isConfirmed.hashCode()
 		return result
@@ -137,8 +137,8 @@ class UserResponse(
 	private val phone: String,
 	private val location: String,
 	private val birthDate: String,
-	private val gender: String,
-	private val avatarImage: String
+	private val gender: String
+//	private val avatarImage: String
 )
 
 class LoginData(
