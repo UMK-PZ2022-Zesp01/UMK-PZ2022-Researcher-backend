@@ -9,16 +9,15 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import pl.umk.mat.zesp01.pz2022.researcher.model.UserRegisterRequest
 import pl.umk.mat.zesp01.pz2022.researcher.model.UserUpdateRequest
-import pl.umk.mat.zesp01.pz2022.researcher.repository.UserRepository
 import pl.umk.mat.zesp01.pz2022.researcher.service.*
 
 @RestController
 class UserController(
 	@Autowired val userService: UserService,
-	@Autowired val userRepository: UserRepository,
 	@Autowired val verificationTokenService: VerificationTokenService,
 	@Autowired val refreshTokenService: RefreshTokenService,
 	@Autowired val eventPublisher: ApplicationEventPublisher,
+	@Autowired val researchService: ResearchService
 ) {
 
 	@PostMapping("/user/register")
@@ -137,7 +136,9 @@ class UserController(
 			val username = refreshTokenService.verifyAccessToken(jwt[0]) ?: throw Exception()
 			if (username.isEmpty()) throw Exception()
 
-			// usuwać usera z participants!
+			// Delete User from All Researches
+			researchService.removeUserFromAllResearches(username)
+
 			userService.deleteUserByLogin(username)
 			ResponseEntity.status(HttpStatus.NO_CONTENT).build()
 		} catch (e: Exception) {

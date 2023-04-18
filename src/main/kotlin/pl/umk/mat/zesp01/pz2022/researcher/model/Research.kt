@@ -15,7 +15,6 @@ import java.util.*
 data class Research(
 	val researchCode: String = "",
 	@Indexed(name = "creatorLoginIndex") val creatorLogin: String = "",
-//	val creatorFullName: String = "",
 	val title: String = "",
 	val description: String = "",
 	val poster: Binary = Binary(ByteArray(0)),
@@ -26,7 +25,6 @@ data class Research(
 	val location: ResearchLocation = ResearchLocation("", ""),
 	val rewards: List<ResearchReward> = listOf(),
 	val requirements: List<ResearchRequirement> = listOf()
-//	val forum: List<ResearchForum> = listOf()
 ) {
 	fun toResearchResponse(): ResearchResponse {
 		return ResearchResponse(

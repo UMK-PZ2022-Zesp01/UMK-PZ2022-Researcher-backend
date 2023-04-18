@@ -42,8 +42,8 @@ class ResearchService(
 		val research = researchRepository.findResearchByResearchCode(researchCode).get()
 		val participants: MutableList<String> = research.participants.toMutableList()
 
-		if(research.creatorLogin == login) return "ERR_YOUR_RESEARCH"
-		if(participants.contains(login)) return "ERR_ALREADY_IN_LIST"
+		if (research.creatorLogin == login) return "ERR_YOUR_RESEARCH"
+		if (participants.contains(login)) return "ERR_ALREADY_IN_LIST"
 
 		participants.add(login)
 		val updatedResearch = research.copy(participants = participants)
@@ -55,17 +55,29 @@ class ResearchService(
 		return "OK"
 	}
 
+	fun removeUserFromAllResearches(login: String) {
+		val researches = researchRepository.findAll()
+		researches.forEach { research ->
+			val participants = research.participants.toMutableList()
+
+			if (participants.remove(login)) {
+				val updatedResearch = research.copy(participants = participants)
+				mongoOperations.findAndReplace(
+					Query.query(Criteria.where("researchCode").`is`(research.researchCode)),
+					updatedResearch
+				)
+			}
+		}
+	}
+
 	fun getAllResearches(): List<Research> =
 		researchRepository.findAll()
 
 	fun getResearchByCode(code: String): Optional<Research> =
 		researchRepository.findResearchByResearchCode(code)
 
-	fun getResearchesByCreatorLogin(creatorLogin: String): List<Research> =
-		mongoOperations.find(
-			Query().addCriteria(Criteria.where("creatorLogin").`is`(creatorLogin)),
-			Research::class.java
-		)
+	fun getResearchesByCreatorLogin(creatorLogin: String): Optional<List<Research>> =
+		researchRepository.findAllByCreatorLogin(creatorLogin)
 
 //	fun sortResearchesByTitle(): List<Research> =
 //		mongoOperations.find(
@@ -73,6 +85,6 @@ class ResearchService(
 //			Research::class.java
 //		)
 
-	fun deleteResearchById(id: String) =
-		researchRepository.deleteById(id)
+	fun deleteResearchByResearchCode(code: String) =
+		researchRepository.deleteResearchByResearchCode(code)
 }
