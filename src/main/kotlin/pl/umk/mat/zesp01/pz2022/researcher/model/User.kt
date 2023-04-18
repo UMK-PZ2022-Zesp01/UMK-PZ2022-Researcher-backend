@@ -143,5 +143,6 @@ class UserResponse(
 
 class LoginData(
 	val login: String,
-	val password: String
+	val password: String,
+	val rememberDevice: Boolean,
 )
