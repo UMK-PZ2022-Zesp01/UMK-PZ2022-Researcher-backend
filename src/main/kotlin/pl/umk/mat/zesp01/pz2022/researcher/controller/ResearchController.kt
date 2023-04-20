@@ -152,6 +152,8 @@ class ResearchController(
 		val jwt = httpHeaders["Authorization"]
 			?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
+		// usuwac badanie JEDYNIE gdy jest to badanie zalogowanego uzytkownika
+
 		return try {
 			val username = refreshTokenService.verifyAccessToken(jwt[0]) ?: throw Exception()
 			if (username.isEmpty()) throw Exception()

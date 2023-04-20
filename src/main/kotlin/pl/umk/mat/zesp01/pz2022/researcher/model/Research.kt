@@ -15,6 +15,9 @@ import java.util.*
 data class Research(
 	val researchCode: String = "",
 	@Indexed(name = "creatorLoginIndex") val creatorLogin: String = "",
+	val creatorFullName: String = "",
+	val creatorEmail: String = "",
+	val creatorPhone: String = "",
 	val title: String = "",
 	val description: String = "",
 	val poster: Binary = Binary(ByteArray(0)),
@@ -33,6 +36,9 @@ data class Research(
 			description = description,
 			poster = Base64.getEncoder().encodeToString(poster.data),
 			creatorLogin = creatorLogin,
+			creatorFullName = creatorFullName,
+			creatorEmail = creatorEmail,
+			creatorPhone = creatorPhone,
 			begDate = begDate,
 			endDate = endDate,
 			currentDate = LocalDate.now().toString(),
@@ -56,6 +62,9 @@ class ResearchRequest(
 	private val title: String,
 	private val description: String,
 	private val creatorLogin: String,
+	private val creatorFullName: String,
+	private val creatorEmail: String,
+	private val creatorPhone: String,
 	private val begDate: String,
 	private val endDate: String,
 	private val participantLimit: Int,
@@ -68,6 +77,9 @@ class ResearchRequest(
 			title = this.title,
 			description = this.description,
 			creatorLogin = this.creatorLogin,
+			creatorFullName = this.creatorFullName,
+			creatorEmail = this.creatorEmail,
+			creatorPhone = this.creatorPhone,
 			poster = Binary(BsonBinarySubType.BINARY, posterFile.bytes),
 			begDate = this.begDate,
 			endDate = this.endDate,
@@ -138,36 +150,6 @@ class ResearchRequest(
 			}
 		)
 	}
-
-	override fun equals(other: Any?): Boolean {
-		if (this === other) return true
-		if (javaClass != other?.javaClass) return false
-
-		other as ResearchRequest
-
-		if (title != other.title) return false
-		if (description != other.description) return false
-		if (creatorLogin != other.creatorLogin) return false
-		if (begDate != other.begDate) return false
-		if (endDate != other.endDate) return false
-		if (participantLimit != other.participantLimit) return false
-		if (location != other.location) return false
-		if (rewards != other.rewards) return false
-		return requirements == other.requirements
-	}
-
-	override fun hashCode(): Int {
-		var result = title.hashCode()
-		result = 31 * result + description.hashCode()
-		result = 31 * result + creatorLogin.hashCode()
-		result = 31 * result + begDate.hashCode()
-		result = 31 * result + endDate.hashCode()
-		result = 31 * result + participantLimit
-		result = 31 * result + location.hashCode()
-		result = 31 * result + rewards.hashCode()
-		result = 31 * result + requirements.hashCode()
-		return result
-	}
 }
 
 class ResearchResponse(
@@ -176,6 +158,9 @@ class ResearchResponse(
 	private val description: String,
 	private val poster: String,
 	private val creatorLogin: String,
+	private val creatorFullName: String,
+	private val creatorEmail: String,
+	private val creatorPhone: String,
 	private val begDate: String,
 	private val endDate: String,
 	private val currentDate: String,

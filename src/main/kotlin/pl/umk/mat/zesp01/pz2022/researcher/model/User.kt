@@ -1,6 +1,5 @@
 package pl.umk.mat.zesp01.pz2022.researcher.model
 
-import org.bson.types.Binary
 import org.mindrot.jbcrypt.BCrypt
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
@@ -34,40 +33,6 @@ data class User(
 //			avatarImage = Base64.getEncoder().encodeToString(this.avatarImage.data)
 		)
 	}
-
-	override fun equals(other: Any?): Boolean {
-		if (this === other) return true
-		if (javaClass != other?.javaClass) return false
-
-		other as User
-
-		if (login != other.login) return false
-		if (password != other.password) return false
-		if (firstName != other.firstName) return false
-		if (lastName != other.lastName) return false
-		if (email != other.email) return false
-		if (phone != other.phone) return false
-		if (birthDate != other.birthDate) return false
-		if (gender != other.gender) return false
-		if (location != other.location) return false
-		return isConfirmed == other.isConfirmed
-	}
-
-	override fun hashCode(): Int {
-		var result = login.hashCode()
-		result = 31 * result + password.hashCode()
-		result = 31 * result + firstName.hashCode()
-		result = 31 * result + lastName.hashCode()
-		result = 31 * result + email.hashCode()
-		result = 31 * result + phone.hashCode()
-		result = 31 * result + birthDate.hashCode()
-		result = 31 * result + gender.hashCode()
-//		result = 31 * result + avatarImage.hashCode()
-		result = 31 * result + location.hashCode()
-		result = 31 * result + isConfirmed.hashCode()
-		return result
-	}
-
 }
 
 class UserRegisterRequest(
@@ -90,34 +55,6 @@ class UserRegisterRequest(
 			birthDate = birthDate
 		)
 	}
-
-	override fun equals(other: Any?): Boolean {
-		if (this === other) return true
-		if (javaClass != other?.javaClass) return false
-
-		other as UserRegisterRequest
-
-		if (firstName != other.firstName) return false
-		if (lastName != other.lastName) return false
-		if (login != other.login) return false
-		if (email != other.email) return false
-		if (password != other.password) return false
-		if (gender != other.gender) return false
-		return birthDate == other.birthDate
-	}
-
-	// Delete if it causes problems
-	override fun hashCode(): Int {
-		var result = firstName.hashCode()
-		result = 31 * result + lastName.hashCode()
-		result = 31 * result + login.hashCode()
-		result = 31 * result + email.hashCode()
-		result = 31 * result + password.hashCode()
-		result = 31 * result + gender.hashCode()
-		result = 31 * result + birthDate.hashCode()
-		return result
-	}
-
 }
 
 data class UserUpdateRequest(
