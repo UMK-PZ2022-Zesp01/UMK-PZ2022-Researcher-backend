@@ -9,6 +9,7 @@ import org.springframework.http.ResponseCookie
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import pl.umk.mat.zesp01.pz2022.researcher.model.LoginData
+import pl.umk.mat.zesp01.pz2022.researcher.service.ACCESS_EXPIRES_SEC
 import pl.umk.mat.zesp01.pz2022.researcher.service.REFRESH_EXPIRES_SEC
 import pl.umk.mat.zesp01.pz2022.researcher.service.RefreshTokenService
 import pl.umk.mat.zesp01.pz2022.researcher.service.UserService
@@ -49,22 +50,16 @@ class AuthController(
             responseBody["username"] = user.login
             responseBody["accessToken"] = accessToken
 
-            /** Check if user requests a refresh token **/
-            if (!loginData.rememberDevice){
-                return ResponseEntity
-                    .status(HttpStatus.CREATED)
-                    .body(Gson().toJson(responseBody))
-            }
-
             /** Create refresh token **/
-            val refreshToken = refreshTokenService.createRefreshToken(username)
+            val tokenDuration = if (loginData.rememberDevice) {REFRESH_EXPIRES_SEC} else{ACCESS_EXPIRES_SEC}
+            val refreshToken = refreshTokenService.createRefreshToken(username, tokenDuration)
             if (refreshToken.isNullOrEmpty()) throw Exception()
 
             /** Create Refresh Token Cookie **/
             val cookie = ResponseCookie
                 .from("jwt", refreshToken)
                 .httpOnly(true)
-                .maxAge(REFRESH_EXPIRES_SEC)
+                .maxAge(tokenDuration+7200)
                 .path("/")
                 .sameSite("none") //Chrome, you bastard
                 .secure(true)

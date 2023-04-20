@@ -38,9 +38,10 @@ class RefreshTokenService(
             .sign(Algorithm.HMAC256(ACCESS_TOKEN_SECRET))
     }
 
-    fun createRefreshToken(username: String): String? {
+    fun createRefreshToken(username: String, tokenDuration : Long = REFRESH_EXPIRES_SEC): String? {
         try {
-            val expires = Date(System.currentTimeMillis() + REFRESH_EXPIRES_SEC * 1000)
+            val expires = Date(System.currentTimeMillis() + tokenDuration * 1000)
+            println(expires)
             val payload = mapOf(Pair("username", username))
             val refreshToken = JWT
                 .create()
