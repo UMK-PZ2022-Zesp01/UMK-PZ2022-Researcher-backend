@@ -29,8 +29,8 @@ data class Research(
 	val rewards: List<ResearchReward> = listOf(),
 	val requirements: List<ResearchRequirement> = listOf()
 ) {
-	fun toResearchResponse(): ResearchResponse {
-		return ResearchResponse(
+	fun toResearchResponse(): ResearchResponse =
+		ResearchResponse(
 			researchCode = researchCode,
 			title = title,
 			description = description,
@@ -48,7 +48,6 @@ data class Research(
 			rewards = rewards,
 			requirements = requirements
 		)
-	}
 }
 
 class ResearchUpdateRequest(
