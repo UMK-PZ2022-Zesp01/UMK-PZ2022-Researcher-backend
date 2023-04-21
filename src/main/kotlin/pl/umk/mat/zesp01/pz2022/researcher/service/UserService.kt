@@ -1,5 +1,7 @@
 package pl.umk.mat.zesp01.pz2022.researcher.service
 
+import org.bson.BsonBinarySubType
+import org.bson.types.Binary
 import org.mindrot.jbcrypt.BCrypt
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.MongoOperations
@@ -7,6 +9,7 @@ import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Service
+import org.springframework.web.multipart.MultipartFile
 import pl.umk.mat.zesp01.pz2022.researcher.model.User
 import pl.umk.mat.zesp01.pz2022.researcher.model.UserUpdateRequest
 import pl.umk.mat.zesp01.pz2022.researcher.repository.UserRepository
@@ -44,6 +47,16 @@ class UserService(
 			updatedUser
 		)
 		return "ok"
+	}
+
+	fun updateUserAvatar(user:User,avatar:MultipartFile){
+		val updatedUser=user.copy(
+			avatarImage=Binary(BsonBinarySubType.BINARY, avatar.bytes)
+		)
+		mongoOperations.findAndReplace(
+			Query.query(Criteria.where("login").`is`(user.login)),
+			updatedUser
+		)
 	}
 
 	fun activateUserAccount(user: User) {

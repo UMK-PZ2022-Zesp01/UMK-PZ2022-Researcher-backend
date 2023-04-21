@@ -7,6 +7,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 import pl.umk.mat.zesp01.pz2022.researcher.model.UserRegisterRequest
 import pl.umk.mat.zesp01.pz2022.researcher.model.UserUpdateRequest
 import pl.umk.mat.zesp01.pz2022.researcher.service.*
@@ -124,6 +125,25 @@ class UserController(
 			return ResponseEntity.status(HttpStatus.OK).build()
 		} catch (e: Exception) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+		}
+	}
+
+	@PutMapping("/user/current/avatar/update", consumes = ["multipart/form-data"])
+	fun updateCurrentUserAvatar(
+		@RequestHeader httpHeaders: HttpHeaders,
+		@RequestPart ("userAvatar") userAvatar : MultipartFile,
+	): ResponseEntity<String> {
+		val jwt = httpHeaders["Authorization"]
+			?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+
+		return try {
+			val username = refreshTokenService.verifyAccessToken(jwt[0]) ?: throw Exception()
+			if (username.isEmpty()) throw Exception()
+			val user = userService.getUserByLogin(username).get()
+			userService.updateUserAvatar(user,userAvatar)
+			ResponseEntity.status(HttpStatus.OK).build()
+		} catch (e: Exception) {
+			ResponseEntity.status(HttpStatus.FORBIDDEN).build()
 		}
 	}
 

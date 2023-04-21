@@ -1,5 +1,6 @@
 package pl.umk.mat.zesp01.pz2022.researcher.model
 
+import org.bson.types.Binary
 import org.mindrot.jbcrypt.BCrypt
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
@@ -15,7 +16,7 @@ data class User(
 	@Field val phone: String = "",
 	@Field val birthDate: String = "",
 	@Field val gender: String = "",
-//	@Field val avatarImage: Binary = Binary(ByteArray(0)),
+	@Field val avatarImage: Binary = Binary(ByteArray(0)),
 	@Field val location: String = "",
 	@Field val isConfirmed: Boolean = false
 ) {
@@ -29,8 +30,8 @@ data class User(
 			phone = this.phone,
 			location = this.location,
 			birthDate = this.birthDate,
-			gender = this.gender
-//			avatarImage = Base64.getEncoder().encodeToString(this.avatarImage.data)
+			gender = this.gender,
+			avatarImage = Base64.getEncoder().encodeToString(this.avatarImage.data)
 		)
 	}
 }
@@ -74,8 +75,8 @@ class UserResponse(
 	private val phone: String,
 	private val location: String,
 	private val birthDate: String,
-	private val gender: String
-//	private val avatarImage: String
+	private val gender: String,
+	private val avatarImage: String
 )
 
 class LoginData(
