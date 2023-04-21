@@ -1,39 +1,54 @@
 package pl.umk.mat.zesp01.pz2022.researcher.model
 
-
-import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
-import org.springframework.data.mongodb.core.mapping.Field
 
 @Document("Questions")
 data class Question(
-
-        @Id var _id: String? = null,
-        @Field var researchOwnerLogin: String = "",
-        @Field var researchCode: String = "",
-        @Field var question: String="",
-        @Field var answer: String="",
-)
+	val questionCode: String = "",
+	@Indexed(name = "questionResearchCodeIndex") val researchCode: String = "",
+	val addedDateTime: String = "",
+	val authorLogin: String = "",
+	val authorFullName: String = "",
+	val question: String = "",
+	val answer: String = "",
+) {
+	fun toQuestionResponse(): QuestionResponse =
+		QuestionResponse(
+			addedDateTime = addedDateTime,
+			authorLogin = authorLogin,
+			authorFullName = authorFullName,
+			question = question,
+			answer = answer
+		)
+}
 
 class QuestionRequest(
-        private val _id: String,
-        private val researchOwnerLogin:String,
-        private val researchCode: String,
-        private val question: String,
-        private val answer: String
-        ){
-    fun toQuestion(): Question {
-        return Question(
-                _id=_id,
-                researchOwnerLogin = researchOwnerLogin,
-                researchCode = researchCode,
-                question=question,
-                answer=answer
-        )
-    }}
-data class QuestionUpdateRequest(
-        val researchOwnerLogin: String? = null,
-        val researchCode: String? = null,
-        val question: String? = null,
-        val answer: String? = null,
+	private val researchCode: String,
+	private val authorLogin: String,
+	private val authorFullName: String,
+	private val question: String,
+	private val answer: String
+) {
+	fun toQuestion(): Question =
+		Question(
+			researchCode = researchCode,
+			authorLogin = authorLogin,
+			authorFullName = authorFullName,
+			question = question,
+			answer = answer
+		)
+}
+
+class QuestionUpdateRequest(
+	val question: String? = null,
+	val answer: String? = null,
+)
+
+class QuestionResponse(
+	private val addedDateTime: String,
+	private val authorLogin: String,
+	private val authorFullName: String,
+	private val question: String,
+	private val answer: String
 )
