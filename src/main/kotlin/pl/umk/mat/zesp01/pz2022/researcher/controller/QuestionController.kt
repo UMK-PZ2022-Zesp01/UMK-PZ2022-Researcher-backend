@@ -19,22 +19,22 @@ class QuestionController(
 	@PostMapping("/question/send")
 	fun addQuestion(
 		@RequestBody questionData: QuestionRequest,
-		@RequestHeader httpHeaders: HttpHeaders
+//		@RequestHeader httpHeaders: HttpHeaders
 	): ResponseEntity<String> {
-		val jwt = httpHeaders["Authorization"]
-			?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-
-		return try {
-			val username = refreshTokenService.verifyAccessToken(jwt[0]) ?: throw Exception()
-			if (username.isEmpty()) throw Exception()
+//		val jwt = httpHeaders["Authorization"]
+//			?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+//
+//		return try {
+//			val username = refreshTokenService.verifyAccessToken(jwt[0]) ?: throw Exception()
+//			if (username.isEmpty()) throw Exception()
 
 			val question = questionData.toQuestion()
 			questionService.addQuestion(question)
 
-			ResponseEntity.status(HttpStatus.CREATED).build()
-		} catch (e: Exception) {
-			ResponseEntity.status(HttpStatus.FORBIDDEN).build()
-		}
+			return ResponseEntity.status(HttpStatus.CREATED).build()
+//		} catch (e: Exception) {
+//			ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+//		}
 	}
 
 	@GetMapping("/question/find/research/{code}")
