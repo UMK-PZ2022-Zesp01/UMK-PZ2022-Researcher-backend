@@ -8,6 +8,7 @@ import org.bson.types.Binary
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.web.multipart.MultipartFile
+import java.awt.im.InputMethodHighlight
 import java.time.LocalDate
 import java.util.*
 
@@ -34,7 +35,7 @@ data class Research(
 			researchCode = researchCode,
 			title = title,
 			description = description,
-			poster = Base64.getEncoder().encodeToString(poster.data),
+//			poster = Base64.getEncoder().encodeToString(poster.data),
 			creatorLogin = creatorLogin,
 			creatorFullName = creatorFullName,
 			creatorEmail = creatorEmail,
@@ -155,7 +156,7 @@ class ResearchResponse(
 	private val researchCode: String,
 	private val title: String,
 	private val description: String,
-	private val poster: String,
+//	private val poster: String,
 	private val creatorLogin: String,
 	private val creatorFullName: String,
 	private val creatorEmail: String,
@@ -193,4 +194,16 @@ class ResearchRequirementAgeInterval(
 class ResearchRequirementOther(
 	@JsonProperty("type") private val type: String,
 	@JsonProperty("description") private val description: String
+)
+
+
+class ResearchFilters(
+	val age: Int? = null,
+	val gender: String? = null,
+	val form: List<String>? = null,
+	val minDate: String? = null,
+	val maxDate: String? = null,
+	val availableOnly: Boolean = false,
+//	val city: String? = null,
+
 )
