@@ -7,13 +7,9 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
-import pl.umk.mat.zesp01.pz2022.researcher.model.Research
-import pl.umk.mat.zesp01.pz2022.researcher.model.ResearchFilters
-import pl.umk.mat.zesp01.pz2022.researcher.model.ResearchRequest
-import pl.umk.mat.zesp01.pz2022.researcher.model.ResearchUpdateRequest
+import pl.umk.mat.zesp01.pz2022.researcher.model.*
 import pl.umk.mat.zesp01.pz2022.researcher.service.RefreshTokenService
 import pl.umk.mat.zesp01.pz2022.researcher.service.ResearchService
-import kotlin.math.min
 
 @RestController
 class ResearchController(
@@ -94,36 +90,34 @@ class ResearchController(
     //	@GetMapping("/research/all")
 //	fun getAllResearches(): ResponseEntity<List<Research>> =
 //		ResponseEntity.status(HttpStatus.OK).body(researchService.getAllResearches())
-//
-//
-//
-//
-//
-    @GetMapping("/research/page/{page}/{perPage}", produces = ["application/json;charset=UTF-8"])
-    fun getAPageOfResearches(
-        @PathVariable page: Int,
-        @PathVariable perPage: Int
-    ): ResponseEntity<String> {
-        val allResearches = researchService.getAllResearches()
-        val length = allResearches.size
 
-        if (page > 0 && perPage > 0) {
-            val firstIndex = min(((page - 1) * perPage), length)
-            val lastIndex = min((page * perPage), length)
 
-            val responseBody = allResearches
-                .subList(firstIndex, lastIndex)
-                .map { research -> research.toResearchResponse() }
+//    @GetMapping("/research/page/{page}/{perPage}", produces = ["application/json;charset=UTF-8"])
+//    fun getAPageOfResearches(
+//        @PathVariable page: Int,
+//        @PathVariable perPage: Int
+//    ): ResponseEntity<String> {
+//        val allResearches = researchService.getAllResearches()
+//        val length = allResearches.size
+//
+//        if (page > 0 && perPage > 0) {
+//            val firstIndex = min(((page - 1) * perPage), length)
+//            val lastIndex = min((page * perPage), length)
+//
+//            val responseBody = allResearches
+//                .subList(firstIndex, lastIndex)
+//                .map { research -> research.toResearchResponse() }
+//
+//            return ResponseEntity
+//                .status(HttpStatus.OK)
+//                .body(Gson().toJson(responseBody))
+//        }
+//
+//        return ResponseEntity
+//            .status(HttpStatus.NO_CONTENT)
+//            .build()
+//    }
 
-            return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(Gson().toJson(responseBody))
-        }
-
-        return ResponseEntity
-            .status(HttpStatus.NO_CONTENT)
-            .build()
-    }
 
 //	@GetMapping("/research/page/{page}/{perPage}/{filters}",produces = ["application/json;charset=UTF-8"])
 //	fun getAPageOfResearches(
@@ -135,27 +129,26 @@ class ResearchController(
 //	}
 
 
-    @GetMapping("/test")
+    @GetMapping("/research/page/{filters}/{sorter}/{page}/{perPage}", produces = ["application/json;charset=UTF-8"])
     fun getFilteredResearches(
-
+        @PathVariable filters: ResearchFilters,
+        @PathVariable sorter: ResearchSorter,
+        @PathVariable page: Int,
+        @PathVariable perPage: Int,
     ): ResponseEntity<String> {
-        val filters = ResearchFilters(
-//            age = 20,
-//            gender = "male",
-//            form = listOf("in-place", "remote"),
-//            minDate = "2023-04-20",
-//            maxDate = "2023-04-20",
-            availableOnly = true,
-        )
+
+        if (page <= 0 && perPage <=0){
+            return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .build()
+        }
 
         val researches = researchService.filterResearches(
             researchFilters = filters,
-            sortBy = "endDate",
-            page = 1,
-            perPage = 20
+            sorter = sorter,
+            page = page,
+            perPage = perPage,
         ).map { research -> research.toResearchResponse() }
-
-
 
         return ResponseEntity
             .status(HttpStatus.OK)

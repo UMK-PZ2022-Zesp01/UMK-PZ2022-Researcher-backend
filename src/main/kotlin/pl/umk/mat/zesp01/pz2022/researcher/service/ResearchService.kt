@@ -4,22 +4,20 @@ import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.MongoOperations
-import org.springframework.data.mongodb.core.aggregation.Aggregation
-import org.springframework.data.mongodb.core.aggregation.ArrayOperators
-import org.springframework.data.mongodb.core.aggregation.Fields
-import org.springframework.data.mongodb.core.find
 import org.springframework.data.mongodb.core.query.*
 import org.springframework.stereotype.Service
 import pl.umk.mat.zesp01.pz2022.researcher.model.Research
 import pl.umk.mat.zesp01.pz2022.researcher.model.ResearchFilters
+import pl.umk.mat.zesp01.pz2022.researcher.model.ResearchSorter
 import pl.umk.mat.zesp01.pz2022.researcher.model.ResearchUpdateRequest
 import pl.umk.mat.zesp01.pz2022.researcher.repository.ResearchRepository
 import java.util.*
 
+
 @Service
 class ResearchService(
     @Autowired val researchRepository: ResearchRepository,
-    @Autowired val mongoOperations: MongoOperations
+    @Autowired val mongoOperations: MongoOperations,
 ) {
 
     fun addResearch(research: Research): Research {
@@ -94,7 +92,7 @@ class ResearchService(
         researchRepository.deleteResearchByResearchCode(code)
 
 
-    fun filterResearches(researchFilters: ResearchFilters, sortBy: String, page: Long, perPage: Int): List<Research> {
+    fun filterResearches(researchFilters: ResearchFilters, sorter: ResearchSorter, page: Int, perPage: Int): List<Research> {
         /** Age filter **/
         val ageFilter = if (researchFilters.age == null) Criteria()
         else Criteria().orOperator(
@@ -143,31 +141,29 @@ class ResearchService(
         else Criteria.where("endDate").gte(researchFilters.maxDate)
 
         /** Available-only filter **/
-
-        /** TO TUTAJ **/
-        val availableFilter = if (!researchFilters.availableOnly) Criteria()
-        else Criteria.where("participantLimit").gt()
-
-
-        //        TODO:
-//        val cityFilter = if (researchFilters.city == null) Criteria()
-//        else Criteria.where()
-//
-
+        val query = if(!researchFilters.availableOnly)Query()
+        else
+            BasicQuery(
+            "{ ${"$"}expr: { ${"$"}lt: [ {${"$"}size: ${"\"\$participants\""}}, ${"\"\$participantLimit\""}  ] } }"
+        )
 
         return mongoOperations.find(
-            Query.query(
+            query.addCriteria(
                 Criteria().andOperator(
                     ageFilter,
                     genderFilter,
                     researchFormFilter,
                     minDateFilter,
                     maxDateFilter,
-                    availableFilter,
                 )
-            ).with(Sort.by(Sort.Direction.ASC, sortBy))
-                .skip((page - 1) * perPage)
-                .limit(perPage)
+            ).with(
+                Sort.by(
+                    Sort.Direction.fromString(sorter.direction),
+                    sorter.sortBy))
+                .limit((page*perPage))
+                .skip(((page-1)*perPage).toLong())
+            ,
+            Research::class.java
         )
     }
 }

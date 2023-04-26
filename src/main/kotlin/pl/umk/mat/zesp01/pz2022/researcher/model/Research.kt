@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.bson.BsonBinarySubType
 import org.bson.types.Binary
+import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.web.multipart.MultipartFile
@@ -35,7 +36,7 @@ data class Research(
 			researchCode = researchCode,
 			title = title,
 			description = description,
-//			poster = Base64.getEncoder().encodeToString(poster.data),
+			poster = Base64.getEncoder().encodeToString(poster.data),
 			creatorLogin = creatorLogin,
 			creatorFullName = creatorFullName,
 			creatorEmail = creatorEmail,
@@ -156,7 +157,7 @@ class ResearchResponse(
 	private val researchCode: String,
 	private val title: String,
 	private val description: String,
-//	private val poster: String,
+	private val poster: String,
 	private val creatorLogin: String,
 	private val creatorFullName: String,
 	private val creatorEmail: String,
@@ -206,4 +207,9 @@ class ResearchFilters(
 	val availableOnly: Boolean = false,
 //	val city: String? = null,
 
+)
+
+class ResearchSorter(
+	val sortBy : String = "_id",
+	val direction : String = "DESC",
 )
