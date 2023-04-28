@@ -10,11 +10,17 @@ import org.springframework.web.multipart.MultipartFile
 import pl.umk.mat.zesp01.pz2022.researcher.model.*
 import pl.umk.mat.zesp01.pz2022.researcher.service.RefreshTokenService
 import pl.umk.mat.zesp01.pz2022.researcher.service.ResearchService
+import pl.umk.mat.zesp01.pz2022.researcher.service.UserService
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
+import kotlin.math.abs
 
 @RestController
 class ResearchController(
     @Autowired val researchService: ResearchService,
-    @Autowired val refreshTokenService: RefreshTokenService
+    @Autowired val refreshTokenService: RefreshTokenService,
+    @Autowired val userService: UserService,
 ) {
     @PostMapping(value = ["/research/add"], consumes = ["multipart/form-data"])
     fun addResearch(
@@ -129,22 +135,58 @@ class ResearchController(
 //	}
 
 
-    @GetMapping("/research/page/{filters}/{sorter}/{page}/{perPage}", produces = ["application/json;charset=UTF-8"])
+    @GetMapping("/research", produces = ["application/json;charset=UTF-8"])
     fun getFilteredResearches(
-        @PathVariable filters: ResearchFilters,
-        @PathVariable sorter: ResearchSorter,
-        @PathVariable page: Int,
-        @PathVariable perPage: Int,
+        @RequestParam (required = false) forMeOnly: Boolean = false,
+        @RequestParam (required = false) availableOnly: Boolean = false,
+        @RequestParam (required = false) form: String? = null,
+        @RequestParam (required = false) minDate: String? = null,
+        @RequestParam (required = false) maxDate: String? = null,
+        @RequestParam sortBy: String,
+        @RequestParam page: Int,
+        @RequestParam perPage: Int,
+        @RequestHeader httpHeaders: HttpHeaders
     ): ResponseEntity<String> {
+        val jwt = httpHeaders["Authorization"]?.get(0)
 
-        if (page <= 0 && perPage <=0){
+        if (page <= 0 && perPage <= 0) {
             return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)
                 .build()
         }
 
+        val user = try {
+            if (jwt != null) {
+                val username = refreshTokenService.verifyAccessToken(jwt)
+                if (username != null) {
+                    userService.getUserByLogin(username).orElseThrow()
+                } else throw Error()
+            } else throw Error()
+        } catch (e: Error) {
+            null
+        }
+
+        val age = if (user == null || !forMeOnly) null
+        else abs(ChronoUnit.YEARS.between(LocalDateTime.now(), LocalDate.parse(user.birthDate).atTime(0,0)).toInt())
+
+        val gender = if (forMeOnly) user?.gender else null
+
+        val sorter = when (sortBy) {
+            "newest" -> ResearchSorter("_id", "DESC")
+            "ending" -> ResearchSorter("endDate", "ASC")
+            "starting" -> ResearchSorter("begDate", "ASC")
+            else -> ResearchSorter("_id", "DESC")
+        }
+
         val researches = researchService.filterResearches(
-            researchFilters = filters,
+            researchFilters = ResearchFilters(
+                age = age,
+                gender = gender,
+                form = form?.split(","),
+                minDate = minDate,
+                maxDate = maxDate,
+                availableOnly = availableOnly,
+            ),
             sorter = sorter,
             page = page,
             perPage = perPage,

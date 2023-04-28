@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.bson.BsonBinarySubType
 import org.bson.types.Binary
 import org.springframework.data.domain.Sort
+import org.springframework.data.mongodb.core.aggregation.ConditionalOperators.Switch
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.web.multipart.MultipartFile
@@ -210,6 +211,6 @@ class ResearchFilters(
 )
 
 class ResearchSorter(
-	val sortBy : String = "_id",
-	val direction : String = "DESC",
+	val sortBy : String,
+	val direction : String,
 )

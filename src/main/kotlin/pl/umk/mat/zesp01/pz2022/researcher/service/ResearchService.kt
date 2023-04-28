@@ -92,7 +92,12 @@ class ResearchService(
         researchRepository.deleteResearchByResearchCode(code)
 
 
-    fun filterResearches(researchFilters: ResearchFilters, sorter: ResearchSorter, page: Int, perPage: Int): List<Research> {
+    fun filterResearches(
+        researchFilters: ResearchFilters,
+        sorter: ResearchSorter,
+        page: Int,
+        perPage: Int
+    ): List<Research> {
         /** Age filter **/
         val ageFilter = if (researchFilters.age == null) Criteria()
         else Criteria().orOperator(
@@ -135,17 +140,24 @@ class ResearchService(
 
         /** Date filters **/
         val minDateFilter = if (researchFilters.minDate == null) Criteria()
-        else Criteria.where("begDate").lte(researchFilters.minDate)
+        else Criteria.where("endDate").gte(researchFilters.minDate)
 
         val maxDateFilter = if (researchFilters.maxDate == null) Criteria()
-        else Criteria.where("endDate").gte(researchFilters.maxDate)
+        else Criteria.where("begDate").lte(researchFilters.maxDate)
+        
+
+        val dateFilter = Criteria().andOperator(
+            minDateFilter,
+            maxDateFilter,
+        )
+
 
         /** Available-only filter **/
-        val query = if(!researchFilters.availableOnly)Query()
+        val query = if (!researchFilters.availableOnly) Query()
         else
             BasicQuery(
-            "{ ${"$"}expr: { ${"$"}lt: [ {${"$"}size: ${"\"\$participants\""}}, ${"\"\$participantLimit\""}  ] } }"
-        )
+                "{ ${"$"}expr: { ${"$"}lt: [ {${"$"}size: ${"\"\$participants\""}}, ${"\"\$participantLimit\""}  ] } }"
+            )
 
         return mongoOperations.find(
             query.addCriteria(
@@ -153,16 +165,16 @@ class ResearchService(
                     ageFilter,
                     genderFilter,
                     researchFormFilter,
-                    minDateFilter,
-                    maxDateFilter,
+                    dateFilter,
                 )
             ).with(
                 Sort.by(
                     Sort.Direction.fromString(sorter.direction),
-                    sorter.sortBy))
-                .limit((page*perPage))
-                .skip(((page-1)*perPage).toLong())
-            ,
+                    sorter.sortBy
+                )
+            )
+                .limit((page * perPage))
+                .skip(((page - 1) * perPage).toLong()),
             Research::class.java
         )
     }
