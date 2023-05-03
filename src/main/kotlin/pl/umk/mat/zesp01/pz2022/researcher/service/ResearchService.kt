@@ -55,6 +55,13 @@ class ResearchService(
 		return "OK"
 	}
 
+//	fun checkIfUserIsAlreadyOnParticipantsList(researchCode: String, login: String): Boolean =
+//		researchRepository
+//			.findResearchByResearchCode(researchCode)
+//			.get()
+//			.participants
+//			.contains(login)
+
 	fun removeUserFromAllResearches(login: String) {
 		val researches = researchRepository.findAll()
 		researches.forEach { research ->
@@ -84,6 +91,9 @@ class ResearchService(
 //			Query().with(Sort.by(Sort.Direction.ASC, "title")),
 //			Research::class.java
 //		)
+
+	fun isGivenUserAResearchCreator(code: String, login: String): Boolean =
+		researchRepository.findResearchByResearchCode(code).get().creatorLogin == login
 
 	fun deleteResearchByResearchCode(code: String) =
 		researchRepository.deleteResearchByResearchCode(code)
