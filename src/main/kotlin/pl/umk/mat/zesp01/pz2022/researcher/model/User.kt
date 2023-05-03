@@ -67,7 +67,7 @@ data class UserUpdateRequest(
 	val location: String? = null
 )
 
-class UserResponse(
+data class UserResponse(
 	private val login: String,
 	private val firstName: String,
 	private val lastName: String,
