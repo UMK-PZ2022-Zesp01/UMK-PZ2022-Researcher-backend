@@ -28,8 +28,11 @@ class ResearchService(
 		val updatedResearch = research.copy(
 			title = updateData.title ?: research.title,
 			description = updateData.description ?: research.description,
-			participantLimit = updateData.participantLimit ?: research.participantLimit,
-			location = updateData.location ?: research.location
+			begDate = updateData.begDate ?: research.begDate,
+			endDate = updateData.endDate ?: research.endDate,
+			creatorEmail = updateData.creatorEmail ?: research.creatorEmail,
+			creatorPhone = updateData.creatorPhone ?: research.creatorPhone,
+			participantLimit = updateData.participantLimit ?: research.participantLimit
 		)
 
 		mongoOperations.findAndReplace(

@@ -42,7 +42,7 @@ class ResearchController(
 		}
 	}
 
-	@PutMapping("/research/{code}/update")
+	@PutMapping("/research/{code}/update", consumes = ["application/json;charset=UTF-8"])
 	fun updateResearch(
 		@PathVariable code: String,
 		@RequestBody researchUpdateData: ResearchUpdateRequest,

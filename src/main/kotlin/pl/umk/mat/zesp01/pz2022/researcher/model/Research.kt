@@ -53,10 +53,11 @@ data class Research(
 class ResearchUpdateRequest(
 	val title: String?,
 	val description: String?,
+	val begDate: String?,
+	val endDate: String?,
 	val creatorEmail: String?,
 	val creatorPhone: String?,
-	val participantLimit: Int?,
-	val location: ResearchLocation?
+	val participantLimit: Int?
 )
 
 class ResearchRequest(
