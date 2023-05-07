@@ -5,9 +5,12 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.bson.BsonBinarySubType
 import org.bson.types.Binary
+import org.springframework.data.domain.Sort
+import org.springframework.data.mongodb.core.aggregation.ConditionalOperators.Switch
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.web.multipart.MultipartFile
+import java.awt.im.InputMethodHighlight
 import java.time.LocalDate
 import java.util.*
 
@@ -196,4 +199,21 @@ class ResearchRequirementAgeInterval(
 class ResearchRequirementOther(
 	@JsonProperty("type") private val type: String,
 	@JsonProperty("description") private val description: String
+)
+
+
+class ResearchFilters(
+	val age: Int? = null,
+	val gender: String? = null,
+	val form: List<String>? = null,
+	val minDate: String? = null,
+	val maxDate: String? = null,
+	val availableOnly: Boolean = false,
+//	val city: String? = null,
+
+)
+
+class ResearchSorter(
+	val sortBy : String,
+	val direction : String,
 )
