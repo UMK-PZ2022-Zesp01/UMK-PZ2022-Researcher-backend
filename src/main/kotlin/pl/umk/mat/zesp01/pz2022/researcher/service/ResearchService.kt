@@ -58,12 +58,26 @@ class ResearchService(
 		return "OK"
 	}
 
-//	fun checkIfUserIsAlreadyOnParticipantsList(researchCode: String, login: String): Boolean =
-//		researchRepository
-//			.findResearchByResearchCode(researchCode)
-//			.get()
-//			.participants
-//			.contains(login)
+	fun checkIfUserIsAlreadyOnParticipantsList(researchCode: String, login: String): Boolean =
+		researchRepository
+			.findResearchByResearchCode(researchCode)
+			.get()
+			.participants
+			.contains(login)
+
+	fun removeUserFromResearch(login: String, code: String): Boolean {
+		val research = researchRepository.findResearchByResearchCode(code).get()
+		val participants = research.participants.toMutableList()
+
+		return if (participants.remove(login)) {
+			val updatedResearch = research.copy(participants = participants)
+			mongoOperations.findAndReplace(
+				Query.query(Criteria.where("researchCode").`is`(research.researchCode)),
+				updatedResearch
+			)
+			true
+		} else false
+	}
 
 	fun removeUserFromAllResearches(login: String) {
 		val researches = researchRepository.findAll()

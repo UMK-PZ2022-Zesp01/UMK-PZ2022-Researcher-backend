@@ -90,26 +90,47 @@ class ResearchController(
 		}
 	}
 
-//	@GetMapping("/research/{code}/enrollCheck")
-//	fun checkCurrentUserEnrollment(
-//		@PathVariable code: String,
-//		@RequestHeader httpHeaders: HttpHeaders
-//	): ResponseEntity<String> {
-//		val jwt = httpHeaders["Authorization"]
-//			?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-//
-//		return try {
-//			val username = refreshTokenService.verifyAccessToken(jwt[0]) ?: throw Exception()
-//			if (username.isEmpty()) throw Exception()
-//
-//			if (researchService.checkIfUserIsAlreadyOnParticipantsList(code, username))
-//				ResponseEntity.status(HttpStatus.OK).build()
-//			else ResponseEntity.status(HttpStatus.NO_CONTENT).build()
-//
-//		} catch (e: Exception) {
-//			ResponseEntity.status(HttpStatus.FORBIDDEN).build()
-//		}
-//	}
+	@GetMapping("/research/{code}/enrollCheck")
+	fun checkCurrentUserEnrollment(
+		@PathVariable code: String,
+		@RequestHeader httpHeaders: HttpHeaders
+	): ResponseEntity<String> {
+		val jwt = httpHeaders["Authorization"]
+			?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+
+		return try {
+			val username = refreshTokenService.verifyAccessToken(jwt[0]) ?: throw Exception()
+			if (username.isEmpty()) throw Exception()
+
+			if (researchService.checkIfUserIsAlreadyOnParticipantsList(code, username))
+				ResponseEntity.status(HttpStatus.OK).build()
+			else ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+
+		} catch (e: Exception) {
+			ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+		}
+	}
+
+	@DeleteMapping("/research/{code}/resign")
+	fun deleteCurrentUserFromResearch(
+		@PathVariable code: String,
+		@RequestHeader httpHeaders: HttpHeaders
+	): ResponseEntity<String> {
+		val jwt = httpHeaders["Authorization"]
+			?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+
+		return try {
+			val username = refreshTokenService.verifyAccessToken(jwt[0]) ?: throw Exception()
+			if (username.isEmpty()) throw Exception()
+
+			return if (researchService.removeUserFromResearch(username, code))
+				ResponseEntity.status(HttpStatus.OK).build()
+			else ResponseEntity.status(HttpStatus.CONFLICT).build()
+
+		} catch (e: Exception) {
+			ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+		}
+	}
 
 	@GetMapping("/research/all")
 	fun getAllResearches(): ResponseEntity<List<Research>> =
@@ -178,7 +199,7 @@ class ResearchController(
 			if (username.isEmpty()) throw Exception()
 
 			// You can delete a research only if it's logged user's research
-			if(!researchService.isGivenUserAResearchCreator(code, username))
+			if (!researchService.isGivenUserAResearchCreator(code, username))
 				return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
 
 			researchService.deleteResearchByResearchCode(code)
