@@ -33,7 +33,7 @@ class UserServiceTests {
             phone = "123456789",
             birthDate = "01-01-1970",
             gender = "Male",
-            avatarImage = "testAVATARIMAGE.IMG",
+//            avatarImage = "testAVATARIMAGE.IMG",
             location = "Bydgoszcz",
             isConfirmed = false)
         testUserLogin = userTestObject.login
@@ -80,9 +80,10 @@ class UserServiceTests {
         val userUpdateRequest = UserUpdateRequest(phone = newUserPhoneNumber, email = newUserMail)
         userService.updateUser(userTestObject, userUpdateRequest)
 
-
-        userTestObject.phone = newUserPhoneNumber
-        userTestObject.email = newUserMail
+        userTestObject = userTestObject.copy(
+            phone = newUserPhoneNumber,
+            email = newUserMail
+        )
 
         // THEN
         assertEquals(userTestObject, userRepository.findUserByLogin(testUserLogin).get())
@@ -100,7 +101,7 @@ class UserServiceTests {
             phone = "234567890",
             birthDate = "02-02-1972",
             gender = "Female",
-            avatarImage = "testAVATARIMAGE2.IMG",
+//            avatarImage = "testAVATARIMAGE2.IMG",
             location = "Toruń",
             isConfirmed = false)
 

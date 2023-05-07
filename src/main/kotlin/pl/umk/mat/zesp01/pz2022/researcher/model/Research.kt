@@ -53,7 +53,7 @@ data class Research(
 		)
 }
 
-class ResearchUpdateRequest(
+data class ResearchUpdateRequest(
 	val title: String?,
 	val description: String?,
 	val begDate: String?,
@@ -63,7 +63,7 @@ class ResearchUpdateRequest(
 	val participantLimit: Int?
 )
 
-class ResearchRequest(
+data class ResearchRequest(
 	private val title: String,
 	private val description: String,
 	private val creatorLogin: String,
@@ -157,7 +157,7 @@ class ResearchRequest(
 	}
 }
 
-class ResearchResponse(
+data class ResearchResponse(
 	private val researchCode: String,
 	private val title: String,
 	private val description: String,
@@ -176,17 +176,17 @@ class ResearchResponse(
 	private val requirements: List<ResearchRequirement>
 )
 
-class ResearchLocation(
+data class ResearchLocation(
 	private val form: String,
 	private val place: String
 )
 
-class ResearchReward(
+data class ResearchReward(
 	val type: String,
 	val value: Any
 )
 
-class ResearchRequirement(
+data class ResearchRequirement(
 	val type: String,
 	val criteria: Any
 )

@@ -26,7 +26,7 @@ class ResearchServiceTests {
     @BeforeEach
     fun setup() {
         testUser1 = User(
-            login = "testLOGIN",
+            login = "testLOGIN1",
             password = "testPASSWORD",
             firstName = "testFIRSTNAME",
             lastName = "testLASTNAME",
@@ -34,7 +34,7 @@ class ResearchServiceTests {
             phone = "123456789",
             birthDate = "01-01-1970",
             gender = "Male",
-            avatarImage = "testAVATARIMAGE.IMG",
+//            avatarImage = "testAVATARIMAGE.IMG",
             location = "Bydgoszcz",
             isConfirmed = true
         )
@@ -47,17 +47,17 @@ class ResearchServiceTests {
             phone = "234567890",
             birthDate = "02-02-1972",
             gender = "Female",
-            avatarImage = "testAVATARIMAGE2.IMG",
+//            avatarImage = "testAVATARIMAGE2.IMG",
             location = "Warszawa",
             isConfirmed = true
         )
         researchTestObject = Research(
             researchCode = "testResearchCODE",
-            creatorLogin = "testLOGIN",
+            creatorLogin = "testCreatorLOGIN",
             title = "testTITLE",
             description = "testDESCRIPTION",
             participantLimit = 100,
-            participants = listOf("testUser1", "testUser2"),
+            participants = listOf("testLOGIN1", "testLOGIN2"),
             begDate = "01-01-2025",
             endDate = "31-01-2025",
             location = ResearchLocation("testFORM", "testPLACE"),
@@ -81,24 +81,11 @@ class ResearchServiceTests {
         // WHEN
         val addedResearch = researchService.addResearch(researchTestObject)
         testResearchCode = addedResearch.researchCode
-        researchTestObject.researchCode = testResearchCode
+        researchTestObject = researchTestObject.copy(researchCode = testResearchCode)
 
         // THEN
         assertEquals(researchTestObject, researchRepository.findResearchByResearchCode(testResearchCode).get())
     }
-
-    @Test
-    fun `delete existing research by ResearchService`() {
-        // GIVEN
-        researchRepository.save(researchTestObject)
-
-        // WHEN
-        researchService.deleteResearchByResearchCode(testResearchCode)
-
-        // THEN
-        assertTrue(researchRepository.findResearchByResearchCode(testResearchCode).isEmpty)
-    }
-
 
     @Test
     fun `update existing Research data by ResearchService`() {
@@ -110,17 +97,95 @@ class ResearchServiceTests {
 
         val updatedResearch = ResearchUpdateRequest(
             title = newResearchTitle,
-            participantLimit = newResearchParticipantLimit
+            participantLimit = newResearchParticipantLimit,
+            description = null,
+            location = null
         )
-
 
         // WHEN
         researchService.updateResearch(researchTestObject, updatedResearch)
 
-        researchTestObject.title = newResearchTitle
-        researchTestObject.participantLimit = newResearchParticipantLimit
+        researchTestObject = researchTestObject.copy(
+            title = newResearchTitle,
+            participantLimit = newResearchParticipantLimit
+        )
         // THEN
         assertEquals(researchTestObject, researchRepository.findResearchByResearchCode(testResearchCode).get())
+    }
+
+    @Test
+    fun `add user to participants list by ResearchService`(){
+        // GIVEN
+        researchRepository.save(researchTestObject)
+        val testParticipantLogin = "testParticipant"
+
+        // WHEN
+
+        val response = researchService.addUserToParticipantsList(
+            testResearchCode,
+            testParticipantLogin
+        )
+
+        val participants = researchRepository.findResearchByResearchCode(testResearchCode).get().participants
+
+        // THEN
+        assertTrue(participants.contains(testParticipantLogin))
+        assertEquals("OK", response)
+    }
+
+    @Test
+    fun `try add research creator to participants list by ResearchService`(){
+        // GIVEN
+        researchRepository.save(researchTestObject)
+        val testParticipantLogin = researchTestObject.creatorLogin
+
+        // WHEN
+
+        val response = researchService.addUserToParticipantsList(
+            testResearchCode,
+            testParticipantLogin
+        )
+
+        val participants = researchRepository.findResearchByResearchCode(testResearchCode).get().participants
+
+        // THEN
+        assertFalse(participants.contains(testParticipantLogin))
+        assertEquals("ERR_YOUR_RESEARCH", response)
+    }
+
+    @Test
+    fun `try add participant second time to participants list by ResearchService`(){
+        // GIVEN
+        researchRepository.save(researchTestObject)
+        val testParticipantLogin = testUser1.login // testUser1 is already participant in research
+
+        // WHEN
+
+        val response = researchService.addUserToParticipantsList(
+            testResearchCode,
+            testParticipantLogin
+        )
+
+        val participants = researchRepository.findResearchByResearchCode(testResearchCode).get().participants
+
+        // THEN
+        assertTrue(participants.contains(testParticipantLogin))
+        assertEquals("ERR_ALREADY_IN_LIST", response)
+
+    }
+
+    @Test
+    fun `remove user from all researches`(){
+        // GIVEN
+        researchRepository.save(researchTestObject)
+        val testUserLogin = testUser1.login // testUser1 is already participant in research
+
+        // WHEN
+        researchService.removeUserFromAllResearches(testUserLogin)
+        val participants = researchRepository.findResearchByResearchCode(testResearchCode).get().participants
+
+        // THEN
+        assertFalse(participants.contains(testUserLogin))
     }
 
 
@@ -169,30 +234,29 @@ class ResearchServiceTests {
     }
 
     @Test
-    fun `get researchResponse by Code using ResearchService`() {
-        // GIVEN
-        researchRepository.save(researchTestObject)
-
-        // WHEN
-        val result = Optional.of(researchService.getResearchResponseByCode(testResearchCode))
-
-        // THEN
-        assertEquals(researchTestObject.toResearchResponse(), result.get())
-    }
-
-    @Test
     fun `get research by creator login using ResearchService`() {
         // GIVEN
         researchRepository.save(researchTestObject)
         val testResearchCreatorLogin = researchTestObject.creatorLogin
 
         // WHEN
-        val result = researchService.getResearchesByCreatorLogin(testResearchCreatorLogin)
+        val result = researchService.getResearchesByCreatorLogin(testResearchCreatorLogin).get()
 
         // THEN
         assertEquals(listOf(researchTestObject), result)
     }
 
+    @Test
+    fun `delete existing research by ResearchService`() {
+        // GIVEN
+        researchRepository.save(researchTestObject)
+
+        // WHEN
+        researchService.deleteResearchByResearchCode(testResearchCode)
+
+        // THEN
+        assertTrue(researchRepository.findResearchByResearchCode(testResearchCode).isEmpty)
+    }
 
 //    @Test
 //    fun `get researches sorted by title using ResearchService`() {

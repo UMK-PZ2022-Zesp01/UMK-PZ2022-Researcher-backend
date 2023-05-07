@@ -70,7 +70,7 @@ data class UserUpdateRequest(
 	var lastLoggedIn: Boolean? = null
 )
 
-class UserResponse(
+data class UserResponse(
 	private val login: String,
 	private val firstName: String,
 	private val lastName: String,

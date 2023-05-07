@@ -10,13 +10,10 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.context.ApplicationEventPublisher
-import org.springframework.http.HttpStatusCode
 import org.springframework.test.context.ActiveProfiles
 import pl.umk.mat.zesp01.pz2022.researcher.model.User
 import pl.umk.mat.zesp01.pz2022.researcher.repository.UserRepository
-import pl.umk.mat.zesp01.pz2022.researcher.repository.VerificationTokenRepository
 
 
 @ActiveProfiles("integration")
@@ -37,7 +34,7 @@ class EmailServiceTests {
             phone = "123456789",
             birthDate = "01-01-1970",
             gender = "Male",
-            avatarImage = "testAVATARIMAGE.IMG",
+//            avatarImage = "testAVATARIMAGE.IMG",
             location = "Bydgoszcz",
             isConfirmed = false)
 

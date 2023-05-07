@@ -46,7 +46,7 @@ class UserConfirmationTests(
             phone = "123456789",
             birthDate = "01-01-1970",
             gender = "Male",
-            avatarImage = "testAVATARIMAGE.IMG",
+//            avatarImage = "testAVATARIMAGE.IMG",
             location = "Bydgoszcz",
             isConfirmed = false)
         testUserLogin = userTestObject.login
@@ -67,7 +67,7 @@ class UserConfirmationTests(
             phone = "123456789",
             birthDate = "01-01-1970",
             gender = "Male",
-            avatarImage = "testAVATARIMAGE.IMG",
+//            avatarImage = "testAVATARIMAGE.IMG",
             location = "Bydgoszcz",
             isConfirmed = false)
 
@@ -112,7 +112,7 @@ class UserConfirmationTests(
     @Test
     fun `sendVerificationEmail when user exists and is confirmed and returns NO_CONTENT (204)`() {
         // GIVEN
-        userTestObject.isConfirmed = true
+        userTestObject = userTestObject.copy(isConfirmed = true)
         userRepository.save(userTestObject)
 
         // WHEN
@@ -139,7 +139,7 @@ class UserConfirmationTests(
     @Test
     fun `confirmAccount when user is already confirmed and returns NO_CONTENT (204)`() {
         // GIVEN
-        userTestObject.isConfirmed = true
+        userTestObject = userTestObject.copy(isConfirmed = true)
         userRepository.save(userTestObject)
 
         val token = verificationTokenService.createToken(userTestObject.login)

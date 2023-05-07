@@ -43,7 +43,7 @@ class UserRegisterTests(
             phone = "123456789",
             birthDate = "01-01-1970",
             gender = "Male",
-            avatarImage = "testAVATARIMAGE.IMG",
+//            avatarImage = "testAVATARIMAGE.IMG",
             location = "Bydgoszcz",
             isConfirmed = false)
         testUserLogin = userTestObject.login
@@ -76,7 +76,7 @@ class UserRegisterTests(
             phone = "1234567892",
             birthDate = "02-01-1970",
             gender = "Female",
-            avatarImage = "testAVATARIMAGE2.IMG",
+//            avatarImage = "testAVATARIMAGE2.IMG",
             location = "Warszawa",
             isConfirmed = false
         )
@@ -103,7 +103,7 @@ class UserRegisterTests(
             phone = "1234567892",
             birthDate = "02-01-1970",
             gender = "Female",
-            avatarImage = "testAVATARIMAGE2.IMG",
+//            avatarImage = "testAVATARIMAGE2.IMG",
             location = "Warszawa",
             isConfirmed = false
         )

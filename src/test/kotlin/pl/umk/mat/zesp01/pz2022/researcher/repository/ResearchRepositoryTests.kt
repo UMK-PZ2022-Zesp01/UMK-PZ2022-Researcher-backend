@@ -73,7 +73,7 @@ class ResearchRepositoryTests {
         // GIVEN
         val addedResearch = researchService.addResearch(researchTestObject)
         testResearchCode = addedResearch.researchCode
-        researchTestObject.researchCode = testResearchCode
+        researchTestObject = researchTestObject.copy(researchCode = testResearchCode)
 
         // WHEN
         val result = researchRepository.findResearchByResearchCode(testResearchCode)

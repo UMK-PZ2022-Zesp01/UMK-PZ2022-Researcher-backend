@@ -12,6 +12,7 @@ import org.springframework.http.*
 import org.springframework.http.HttpStatus.*
 import org.springframework.test.context.ActiveProfiles
 import pl.umk.mat.zesp01.pz2022.researcher.model.User
+import pl.umk.mat.zesp01.pz2022.researcher.model.UserResponse
 import pl.umk.mat.zesp01.pz2022.researcher.model.UserUpdateRequest
 import pl.umk.mat.zesp01.pz2022.researcher.repository.RefreshTokenRepository
 import pl.umk.mat.zesp01.pz2022.researcher.repository.UserRepository
@@ -29,8 +30,6 @@ class UserControllerTests(
     @Autowired val refreshTokenRepository: RefreshTokenRepository
 ) {
 
-    @LocalServerPort
-    private val port: Int = 3000
 
     lateinit var userTestObject: User
     lateinit var testUserLogin: String
@@ -46,7 +45,7 @@ class UserControllerTests(
             phone = "123456789",
             birthDate = "01-01-1970",
             gender = "Male",
-            avatarImage = "testAVATARIMAGE.IMG",
+//            avatarImage = "testAVATARIMAGE.IMG",
             location = "Bydgoszcz",
             isConfirmed = false)
         testUserLogin = userTestObject.login
@@ -68,15 +67,17 @@ class UserControllerTests(
         )
         userRepository.save(userTestObject)
 
+        val validToken = refreshTokenService.createAccessToken(userTestObject.login)
 
         // WHEN
         val headers = HttpHeaders().apply {
             contentType = MediaType.APPLICATION_JSON
         }
+        headers.add("Authorization", validToken)
         val request = HttpEntity(userUpdateRequest, headers)
 
         val response = restTemplate.exchange(
-            "/user/$testUserLogin/update",
+            "/user/current/update",
             HttpMethod.PUT,
             request,
             UserUpdateRequest::class.java
@@ -98,9 +99,16 @@ class UserControllerTests(
     fun `deleteUserByLogin and returns NO_CONTENT (204)`() {
         // GIVEN
         userRepository.save(userTestObject)
+        val validToken = refreshTokenService.createAccessToken(userTestObject.login)
 
         // WHEN
-        val response = restTemplate.exchange<String>("/user/$testUserLogin/delete", HttpMethod.DELETE, null)
+        val headers = HttpHeaders()
+        headers.add("Authorization", validToken)
+
+        val request = HttpEntity(null, headers)
+
+        // WHEN
+        val response = restTemplate.exchange<String>("/user/current/delete", HttpMethod.DELETE, request)
 
         // THEN
         assertEquals(NO_CONTENT, response.statusCode)
@@ -116,11 +124,11 @@ class UserControllerTests(
         // WHEN
         val headers = HttpHeaders()
         headers.add("Authorization", validToken)
-        val response = restTemplate.exchange<String>("/user/current", HttpMethod.GET, HttpEntity(null, headers))
+        val response = restTemplate.exchange<UserResponse>("/user/current", HttpMethod.GET, HttpEntity(null, headers))
 
         // THEN
         assertEquals(OK, response.statusCode)
-        //TODO test the response body
+        assertEquals(userTestObject.toUserResponse(), response.body)
     }
 
     @Test
