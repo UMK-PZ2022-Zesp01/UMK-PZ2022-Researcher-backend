@@ -18,7 +18,8 @@ data class User(
 	@Field val gender: String = "",
 	@Field val avatarImage: Binary = Binary(ByteArray(0)),
 	@Field val location: String = "",
-	@Field val isConfirmed: Boolean = false
+	@Field val isConfirmed: Boolean = false,
+	@Field val lastLoggedIn: Boolean = false,
 ) {
 
 	fun toUserResponse(): UserResponse {
@@ -31,7 +32,8 @@ data class User(
 			location = this.location,
 			birthDate = this.birthDate,
 			gender = this.gender,
-			avatarImage = Base64.getEncoder().encodeToString(this.avatarImage.data)
+			avatarImage = Base64.getEncoder().encodeToString(this.avatarImage.data),
+			lastLoggedIn = this.lastLoggedIn
 		)
 	}
 }
@@ -64,7 +66,8 @@ data class UserUpdateRequest(
 	val lastName: String? = null,
 	val email: String? = null,
 	val phone: String? = null,
-	val location: String? = null
+	val location: String? = null,
+	var lastLoggedIn: Boolean? = null
 )
 
 class UserResponse(
@@ -76,7 +79,8 @@ class UserResponse(
 	private val location: String,
 	private val birthDate: String,
 	private val gender: String,
-	private val avatarImage: String
+	private val avatarImage: String,
+	private val lastLoggedIn: Boolean
 )
 
 class LoginData(
