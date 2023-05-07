@@ -70,7 +70,7 @@ class UserController(
 		}
 	}
 
-	@GetMapping("/user/{login}")
+	@GetMapping("/user/{login}", produces = ["application/json;charset:UTF-8"])
 	fun getUserByLogin(@PathVariable login: String): ResponseEntity<String> =
 		try {
 			ResponseEntity.status(HttpStatus.OK).body(
