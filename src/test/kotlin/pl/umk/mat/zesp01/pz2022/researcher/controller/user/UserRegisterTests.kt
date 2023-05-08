@@ -14,6 +14,7 @@ import pl.umk.mat.zesp01.pz2022.researcher.model.User
 import pl.umk.mat.zesp01.pz2022.researcher.repository.RefreshTokenRepository
 import pl.umk.mat.zesp01.pz2022.researcher.repository.UserRepository
 import pl.umk.mat.zesp01.pz2022.researcher.repository.VerificationTokenRepository
+import pl.umk.mat.zesp01.pz2022.researcher.service.RefreshTokenService
 import java.net.URI
 import java.util.*
 
@@ -23,6 +24,7 @@ class UserRegisterTests(
     @Autowired val restTemplate: TestRestTemplate,
     @Autowired val userRepository: UserRepository,
     @Autowired val verificationTokenRepository: VerificationTokenRepository,
+    @Autowired val refreshTokenService: RefreshTokenService,
     @Autowired val refreshTokenRepository: RefreshTokenRepository
 ) {
 
@@ -55,7 +57,15 @@ class UserRegisterTests(
     @Test
     fun `add new User and returns CREATED (201)`() {
         // GIVEN (userTestObject)
+
+        userRepository.save(userTestObject)
+        val validToken = refreshTokenService.createAccessToken(userTestObject.login)
+
         // WHEN
+        val headers = HttpHeaders().apply {
+            contentType = MediaType.APPLICATION_JSON
+        }
+        headers.add("Authorization", validToken)
         val request = RequestEntity.post(URI("http://localhost:$port/user/register")).body(userTestObject)
         val result = restTemplate.exchange(request, String::class.java)
 

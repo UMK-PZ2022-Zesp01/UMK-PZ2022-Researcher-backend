@@ -32,15 +32,15 @@ class RegistrationListener : ApplicationListener<OnRegistrationCompleteEvent> {
 	fun sendConfirmationEmail(event: OnRegistrationCompleteEvent) {
 		val user = event.user
 		val recipientAddress = user.email
-		val subject = "Researcher | Potwierdzenie rejestracji"
+		val subject = "JustResearch | Potwierdzenie rejestracji"
 
 		val token = tokenService.createToken(user.login)
 		val confirmationUrl = "${FRONT_URL}confirmEmail/$token"
-		val message = "Naciśnij link poniżej aby aktywować konto Researcher.\r\n$confirmationUrl"
+		val message = "Naciśnij link poniżej aby aktywować konto JustResearch.\r\n$confirmationUrl"
 
 		val mail = SimpleMailMessage()
 		mail.setTo(recipientAddress)
-        mail.from = "noreply@researcher.pz2022.gmail.com"
+        mail.from = "noreply@justresearch.pz2022.gmail.com"
 		mail.subject = subject
 		mail.text = message
 

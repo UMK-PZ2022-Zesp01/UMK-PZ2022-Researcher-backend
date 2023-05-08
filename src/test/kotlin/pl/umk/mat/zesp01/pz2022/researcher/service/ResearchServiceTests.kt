@@ -99,7 +99,10 @@ class ResearchServiceTests {
             title = newResearchTitle,
             participantLimit = newResearchParticipantLimit,
             description = null,
-            location = null
+            begDate = null,
+            endDate = null,
+            creatorEmail = null,
+            creatorPhone = null,
         )
 
         // WHEN
