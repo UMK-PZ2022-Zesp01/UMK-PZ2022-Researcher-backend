@@ -28,7 +28,7 @@ data class Research(
 	val participants: List<String> = listOf(),
 	val begDate: String = "",
 	val endDate: String = "",
-	val location: ResearchLocation = ResearchLocation("", ""),
+	val location: ResearchLocation = ResearchLocation("", "", ""),
 	val rewards: List<ResearchReward> = listOf(),
 	val requirements: List<ResearchRequirement> = listOf()
 ) {
@@ -178,7 +178,8 @@ data class ResearchResponse(
 
 data class ResearchLocation(
 	private val form: String,
-	private val place: String
+	private val place: String,
+	private val address: String?
 )
 
 data class ResearchReward(

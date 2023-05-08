@@ -41,7 +41,6 @@ class RefreshTokenService(
     fun createRefreshToken(username: String, tokenDuration : Long = REFRESH_EXPIRES_SEC): String? {
         try {
             val expires = Date(System.currentTimeMillis() + tokenDuration * 1000)
-            println(expires)
             val payload = mapOf(Pair("username", username))
             val refreshToken = JWT
                 .create()
