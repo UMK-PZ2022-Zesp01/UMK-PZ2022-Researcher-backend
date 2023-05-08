@@ -51,8 +51,8 @@ class EmailServiceTests {
 
         assertEquals(1, receivedMail.allRecipients.size)
         assertEquals("testEMAIL@test.com", receivedMail.allRecipients[0].toString())
-        assertEquals("noreply@researcher.pz2022.gmail.com", receivedMail.from[0].toString())
-        assertEquals("Researcher | Potwierdzenie rejestracji", receivedMail.subject)
+        assertEquals("noreply@justresearch.pz2022.gmail.com", receivedMail.from[0].toString())
+        assertEquals("JustResearch | Potwierdzenie rejestracji", receivedMail.subject)
 
         assertTrue(GreenMailUtil.getBody(receivedMail).contains(FRONT_URL))
     }
