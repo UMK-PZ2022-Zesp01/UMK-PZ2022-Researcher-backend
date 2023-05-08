@@ -8,8 +8,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
-import pl.umk.mat.zesp01.pz2022.researcher.model.UserRegisterRequest
-import pl.umk.mat.zesp01.pz2022.researcher.model.UserUpdateRequest
+import pl.umk.mat.zesp01.pz2022.researcher.model.*
 import pl.umk.mat.zesp01.pz2022.researcher.service.*
 
 @RestController
@@ -112,7 +111,6 @@ class UserController(
 	): ResponseEntity<String> {
 		val jwt = httpHeaders["Authorization"]
 			?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-
 		try {
 			val username = refreshTokenService.verifyAccessToken(jwt[0]) ?: throw Exception()
 			if (username.isEmpty()) throw Exception()
@@ -122,6 +120,26 @@ class UserController(
 
 			if (updateResult == "phone") return ResponseEntity.status(299).build()
 			if (updateResult == "email") return ResponseEntity.status(298).build()
+			return ResponseEntity.status(HttpStatus.OK).build()
+		} catch (e: Exception) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+		}
+	}
+	@PutMapping("/user/current/updatePassword", produces = ["application/json;charset:UTF-8"])
+	fun updateCurrentUserPassword(
+			@RequestHeader httpHeaders: HttpHeaders,
+			@RequestBody userUpdateData: UserPasswordUpdateRequest
+	): ResponseEntity<String> {
+		val jwt = httpHeaders["Authorization"]
+				?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+		try {
+			val username = refreshTokenService.verifyAccessToken(jwt[0]) ?: throw Exception()
+			if (username.isEmpty()) throw Exception()
+			val user = userService.getUserByLogin(username).get()
+
+			val updateResult = userService.updateUserPassword(user, userUpdateData)
+
+			if (updateResult == "diff") return ResponseEntity.status(299).build()
 			return ResponseEntity.status(HttpStatus.OK).build()
 		} catch (e: Exception) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
@@ -148,13 +166,18 @@ class UserController(
 	}
 
 	@DeleteMapping("/user/current/delete")
-	fun deleteCurrentUser(@RequestHeader httpHeaders: HttpHeaders): ResponseEntity<String> {
+	fun deleteCurrentUser(@RequestHeader httpHeaders: HttpHeaders,
+						  @RequestBody deleteRequest: DeleteRequest): ResponseEntity<String> {
 		val jwt = httpHeaders["Authorization"]
 			?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
 		return try {
 			val username = refreshTokenService.verifyAccessToken(jwt[0]) ?: throw Exception()
 			if (username.isEmpty()) throw Exception()
+			val user = userService.getUserByLogin(username).get()
+			val response=userService.deleteCheck(user,deleteRequest)
+			if(response=="diff") return ResponseEntity.status(299).build()
+
 
 			// Delete User from All Researches
 			researchService.removeUserFromAllResearches(username)

@@ -70,6 +70,21 @@ data class UserUpdateRequest(
 	var lastLoggedIn: Boolean? = null
 )
 
+data class UserPasswordUpdateRequest(
+		val password: String? = null,
+		val newPassword: String? = null,
+		val firstName: String? = null,
+		val lastName: String? = null,
+		val email: String? = null,
+		val phone: String? = null,
+		val location: String? = null,
+		var lastLoggedIn: Boolean? = null
+)
+
+data class DeleteRequest(
+		val password: String? = null,
+)
+
 data class UserResponse(
 	private val login: String,
 	private val firstName: String,
