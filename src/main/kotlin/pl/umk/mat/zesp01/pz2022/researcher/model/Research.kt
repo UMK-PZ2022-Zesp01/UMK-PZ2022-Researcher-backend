@@ -53,16 +53,6 @@ data class Research(
 		)
 }
 
-data class ResearchUpdateRequest(
-	val title: String?,
-	val description: String?,
-	val begDate: String?,
-	val endDate: String?,
-	val creatorEmail: String?,
-	val creatorPhone: String?,
-	val participantLimit: Int?
-)
-
 data class ResearchRequest(
 	private val title: String,
 	private val description: String,
@@ -174,6 +164,17 @@ data class ResearchResponse(
 	private val location: ResearchLocation,
 	private val rewards: List<ResearchReward>,
 	private val requirements: List<ResearchRequirement>
+)
+
+data class ResearchUpdateRequest(
+	val title: String?,
+	val description: String?,
+	val begDate: String?,
+	val endDate: String?,
+	val creatorEmail: String?,
+	val creatorPhone: String?,
+	val participantLimit: Int?,
+	val location: ResearchLocation?
 )
 
 data class ResearchLocation(

@@ -35,7 +35,8 @@ class ResearchService(
 			endDate = updateData.endDate ?: research.endDate,
 			creatorEmail = updateData.creatorEmail ?: research.creatorEmail,
 			creatorPhone = updateData.creatorPhone ?: research.creatorPhone,
-			participantLimit = updateData.participantLimit ?: research.participantLimit
+			participantLimit = updateData.participantLimit ?: research.participantLimit,
+			location = updateData.location ?: research.location
 		)
 
         mongoOperations.findAndReplace(
