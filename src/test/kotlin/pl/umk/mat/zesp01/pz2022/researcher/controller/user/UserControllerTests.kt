@@ -3,6 +3,7 @@ package pl.umk.mat.zesp01.pz2022.researcher.controller.user
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mindrot.jbcrypt.BCrypt
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
@@ -11,6 +12,7 @@ import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.http.*
 import org.springframework.http.HttpStatus.*
 import org.springframework.test.context.ActiveProfiles
+import pl.umk.mat.zesp01.pz2022.researcher.model.DeleteRequest
 import pl.umk.mat.zesp01.pz2022.researcher.model.User
 import pl.umk.mat.zesp01.pz2022.researcher.model.UserResponse
 import pl.umk.mat.zesp01.pz2022.researcher.model.UserUpdateRequest
@@ -95,25 +97,30 @@ class UserControllerTests(
         assertEquals(userUpdateRequest.phone, updatedUser.phone)
     }
 
-//    @Test
-//    fun `deleteUserByLogin and returns NO_CONTENT (204)`() {
-//        // GIVEN
-//        userRepository.save(userTestObject)
-//        val validToken = refreshTokenService.createAccessToken(userTestObject.login)
-//
-//        // WHEN
-//        val headers = HttpHeaders()
-//        headers.add("Authorization", validToken)
-//
-//        val request = HttpEntity(null, headers)
-//
-//        // WHEN
-//        val response = restTemplate.exchange<String>("/user/current/delete", HttpMethod.DELETE, request)
-//
-//        // THEN
-//        assertEquals(NO_CONTENT, response.statusCode)
-//        assertTrue(userRepository.findById(testUserLogin).isEmpty)
-//    }
+    @Test
+    fun `deleteUserByLogin and returns NO_CONTENT (204)`() {
+        // GIVEN
+        val plainPass = userTestObject.password
+        userTestObject = userTestObject.copy(password = BCrypt.hashpw(userTestObject.password, BCrypt.gensalt()))
+        userRepository.save(userTestObject)
+        val validToken = refreshTokenService.createAccessToken(userTestObject.login)
+        val deleteRequest = DeleteRequest(plainPass)
+
+        // WHEN
+        val headers = HttpHeaders()
+        headers.add("Authorization", validToken)
+
+        val request = HttpEntity(deleteRequest, headers)
+
+        // WHEN
+        val response = restTemplate.exchange<String>("/user/current/delete", HttpMethod.DELETE, request, String::class)
+
+
+
+        // THEN
+        assertEquals(NO_CONTENT, response.statusCode)
+        assertTrue(userRepository.findById(testUserLogin).isEmpty)
+    }
 
     @Test
     fun `getUserProfile with valid token and returns OK (200)`() {

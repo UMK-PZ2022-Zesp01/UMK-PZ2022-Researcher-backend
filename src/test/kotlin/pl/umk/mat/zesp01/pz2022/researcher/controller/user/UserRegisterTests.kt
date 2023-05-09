@@ -6,11 +6,13 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
+import org.springframework.boot.test.web.client.exchange
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.http.*
 import org.springframework.http.HttpStatus.*
 import org.springframework.test.context.ActiveProfiles
 import pl.umk.mat.zesp01.pz2022.researcher.model.User
+import pl.umk.mat.zesp01.pz2022.researcher.model.UserRegisterRequest
 import pl.umk.mat.zesp01.pz2022.researcher.repository.RefreshTokenRepository
 import pl.umk.mat.zesp01.pz2022.researcher.repository.UserRepository
 import pl.umk.mat.zesp01.pz2022.researcher.repository.VerificationTokenRepository
@@ -57,9 +59,9 @@ class UserRegisterTests(
     @Test
     fun `add new User and returns CREATED (201)`() {
         // GIVEN (userTestObject)
+
         // WHEN
-        val request = RequestEntity.post(URI("http://localhost:$port/user/register")).body(userTestObject)
-        val result = restTemplate.exchange(request, String::class.java)
+        val result = restTemplate.exchange<String>("/user/register", HttpMethod.POST, HttpEntity(userTestObject, null))
 
         // THEN
         assertEquals(CREATED, result.statusCode)
@@ -86,8 +88,7 @@ class UserRegisterTests(
         userRepository.save(userTestObject)
 
         // WHEN
-        val request = RequestEntity.post(URI("http://localhost:$port/user/register")).body(userTestObject2)
-        val result = restTemplate.exchange(request, String::class.java)
+        val result = restTemplate.exchange<String>("/user/register", HttpMethod.POST, HttpEntity(userTestObject2, null))
 
         // THEN
         assertEquals(HttpStatusCode.valueOf(299), result.statusCode)
@@ -112,8 +113,8 @@ class UserRegisterTests(
         userRepository.save(userTestObject)
 
         // WHEN
-        val request = RequestEntity.post(URI("http://localhost:$port/user/register")).body(userTestObject2)
-        val result = restTemplate.exchange(request, String::class.java)
+        val result = restTemplate.exchange<String>("/user/register", HttpMethod.POST, HttpEntity(userTestObject2, null))
+
 
         // THEN
         assertEquals(HttpStatusCode.valueOf(298), result.statusCode)
