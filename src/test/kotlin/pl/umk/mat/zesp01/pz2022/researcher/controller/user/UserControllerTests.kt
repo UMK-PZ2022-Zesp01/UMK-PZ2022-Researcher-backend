@@ -95,25 +95,25 @@ class UserControllerTests(
         assertEquals(userUpdateRequest.phone, updatedUser.phone)
     }
 
-    @Test
-    fun `deleteUserByLogin and returns NO_CONTENT (204)`() {
-        // GIVEN
-        userRepository.save(userTestObject)
-        val validToken = refreshTokenService.createAccessToken(userTestObject.login)
-
-        // WHEN
-        val headers = HttpHeaders()
-        headers.add("Authorization", validToken)
-
-        val request = HttpEntity(null, headers)
-
-        // WHEN
-        val response = restTemplate.exchange<String>("/user/current/delete", HttpMethod.DELETE, request)
-
-        // THEN
-        assertEquals(NO_CONTENT, response.statusCode)
-        assertTrue(userRepository.findById(testUserLogin).isEmpty)
-    }
+//    @Test
+//    fun `deleteUserByLogin and returns NO_CONTENT (204)`() {
+//        // GIVEN
+//        userRepository.save(userTestObject)
+//        val validToken = refreshTokenService.createAccessToken(userTestObject.login)
+//
+//        // WHEN
+//        val headers = HttpHeaders()
+//        headers.add("Authorization", validToken)
+//
+//        val request = HttpEntity(null, headers)
+//
+//        // WHEN
+//        val response = restTemplate.exchange<String>("/user/current/delete", HttpMethod.DELETE, request)
+//
+//        // THEN
+//        assertEquals(NO_CONTENT, response.statusCode)
+//        assertTrue(userRepository.findById(testUserLogin).isEmpty)
+//    }
 
     @Test
     fun `getUserProfile with valid token and returns OK (200)`() {

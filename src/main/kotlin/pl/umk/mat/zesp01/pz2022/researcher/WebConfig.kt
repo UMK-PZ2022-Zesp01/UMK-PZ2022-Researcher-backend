@@ -12,7 +12,7 @@ class WebConfig : WebMvcConfigurer {
         registry.addMapping("/**")
             .allowedOrigins(
                 "https://justresearch.netlify.app"
-//                "http://localhost:8080"
+//                "http://localhost:3000"
             )
             .allowedMethods("*")
             .allowCredentials(true)
