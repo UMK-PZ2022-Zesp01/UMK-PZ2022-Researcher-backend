@@ -8,10 +8,11 @@ import org.springframework.data.mongodb.core.MongoOperations
 import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
-import pl.umk.mat.zesp01.pz2022.researcher.model.User
-import pl.umk.mat.zesp01.pz2022.researcher.model.UserUpdateRequest
+import pl.umk.mat.zesp01.pz2022.researcher.model.*
 import pl.umk.mat.zesp01.pz2022.researcher.repository.UserRepository
 import java.util.*
 
@@ -31,7 +32,6 @@ class UserService(
 		if (userData.phone != null) {
 			if (isPhoneAlreadyTaken(userData.phone)) return "phone"
 		}
-
 		val updatedUser = user.copy(
 			password = if (userData.password != null) BCrypt.hashpw(userData.password, BCrypt.gensalt())
 			else user.password,
@@ -49,6 +49,28 @@ class UserService(
 		)
 		return "ok"
 	}
+
+	fun updateUserPassword(user: User, userData: UserPasswordUpdateRequest): String {
+		if (!BCrypt.checkpw(userData.password, user.password)) {
+			return	"diff"
+		}
+		val updatedUser = user.copy(
+				password = if (userData.newPassword != null) BCrypt.hashpw(userData.newPassword, BCrypt.gensalt())
+				else user.password,
+				firstName = userData.firstName ?: user.firstName,
+				lastName = userData.lastName ?: user.lastName,
+				email = userData.email ?: user.email,
+				phone = userData.phone ?: user.phone,
+				location = userData.location ?: user.location,
+				lastLoggedIn = userData.lastLoggedIn ?: user.lastLoggedIn
+		)
+		mongoOperations.findAndReplace(
+				Query.query(Criteria.where("login").`is`(user.login)),
+				updatedUser
+		)
+		return "ok"
+	}
+
 
 	fun updateUserAvatar(user:User,avatar:MultipartFile){
 		val updatedUser=user.copy(
@@ -132,5 +154,12 @@ class UserService(
 	fun isPhoneAlreadyTaken(phone: String): Boolean {
 		val phoneList = getAllUserPhones()
 		return phoneList.contains(phone)
+	}
+
+	fun deleteCheck(user: User, deleteRequest: DeleteRequest):String {
+		if (!BCrypt.checkpw(deleteRequest.password, user.password)) {
+			return	"diff"
+		}
+		return "ok"
 	}
 }
