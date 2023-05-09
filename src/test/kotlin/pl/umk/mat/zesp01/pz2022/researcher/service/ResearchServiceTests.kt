@@ -60,7 +60,7 @@ class ResearchServiceTests {
             participants = listOf("testLOGIN1", "testLOGIN2"),
             begDate = "01-01-2025",
             endDate = "31-01-2025",
-            location = ResearchLocation("testFORM", "testPLACE"),
+            location = ResearchLocation("testFORM", "testPLACE", null),
             rewards = listOf(
                 ResearchReward("Cash", 500),
                 ResearchReward("Gift","testGIFT")
@@ -103,6 +103,7 @@ class ResearchServiceTests {
             endDate = null,
             creatorEmail = null,
             creatorPhone = null,
+            location = null
         )
 
         // WHEN
@@ -205,7 +206,7 @@ class ResearchServiceTests {
             participants = listOf("testUser2"),
             begDate = "02-02-2025",
             endDate = "15-02-2025",
-            location = ResearchLocation("testFORM2", "testPLACE2"),
+            location = ResearchLocation("testFORM2", "testPLACE2", null),
             rewards = listOf(
                 ResearchReward("Gift","testGIFT2")
             ),

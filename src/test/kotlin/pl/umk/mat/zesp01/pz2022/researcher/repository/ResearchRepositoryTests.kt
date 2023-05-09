@@ -31,7 +31,7 @@ class ResearchRepositoryTests {
             participants = listOf("testUser1", "testUser2"),
             begDate = "01-01-2025",
             endDate = "31-01-2025",
-            location = ResearchLocation("testFORM", "testPLACE"),
+            location = ResearchLocation("testFORM", "testPLACE", null),
             rewards = listOf(
                 ResearchReward("Cash", 500),
                 ResearchReward("Gift","testGIFT")
