@@ -11,8 +11,8 @@ class WebConfig : WebMvcConfigurer {
     override fun addCorsMappings(registry: CorsRegistry) {
         registry.addMapping("/**")
             .allowedOrigins(
-                "https://justresearch.netlify.app"
-//                "http://localhost:3000"
+//                "https://justresearch.netlify.app"
+                "http://localhost:3000"
             )
             .allowedMethods("*")
             .allowCredentials(true)

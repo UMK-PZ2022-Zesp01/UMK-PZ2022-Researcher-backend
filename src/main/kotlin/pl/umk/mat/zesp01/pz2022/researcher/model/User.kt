@@ -36,6 +36,14 @@ data class User(
 			lastLoggedIn = this.lastLoggedIn
 		)
 	}
+
+	fun toParticipantsData(): ParticipantsData =
+		ParticipantsData(
+			login = this.login,
+			fullName = "${this.firstName} ${this.lastName}",
+			email = this.email,
+			location = this.location
+		)
 }
 
 class UserRegisterRequest(
@@ -71,18 +79,18 @@ data class UserUpdateRequest(
 )
 
 data class UserPasswordUpdateRequest(
-		val password: String? = null,
-		val newPassword: String? = null,
-		val firstName: String? = null,
-		val lastName: String? = null,
-		val email: String? = null,
-		val phone: String? = null,
-		val location: String? = null,
-		var lastLoggedIn: Boolean? = null
+	val password: String? = null,
+	val newPassword: String? = null,
+	val firstName: String? = null,
+	val lastName: String? = null,
+	val email: String? = null,
+	val phone: String? = null,
+	val location: String? = null,
+	var lastLoggedIn: Boolean? = null
 )
 
 data class DeleteRequest(
-		val password: String? = null,
+	val password: String? = null,
 )
 
 data class UserResponse(
@@ -102,4 +110,11 @@ class LoginData(
 	val login: String,
 	val password: String,
 	val rememberDevice: Boolean,
+)
+
+class ParticipantsData(
+	val login: String = "",
+	val fullName: String = "",
+	val email: String = "",
+	val location: String = ""
 )
