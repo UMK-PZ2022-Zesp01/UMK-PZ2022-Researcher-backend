@@ -63,7 +63,6 @@ class UserConfirmationTests(
             phone = "123456789",
             birthDate = "01-01-1970",
             gender = "Male",
-//            avatarImage = "testAVATARIMAGE.IMG",
             location = "Bydgoszcz",
             isConfirmed = false)
         testUserLogin = userTestObject.login

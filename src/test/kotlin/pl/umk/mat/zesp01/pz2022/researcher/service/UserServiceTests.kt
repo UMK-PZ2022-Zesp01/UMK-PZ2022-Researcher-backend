@@ -4,10 +4,12 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mindrot.jbcrypt.BCrypt
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import pl.umk.mat.zesp01.pz2022.researcher.model.User
+import pl.umk.mat.zesp01.pz2022.researcher.model.UserPasswordUpdateRequest
 import pl.umk.mat.zesp01.pz2022.researcher.model.UserUpdateRequest
 import pl.umk.mat.zesp01.pz2022.researcher.repository.UserRepository
 import java.util.*
@@ -126,5 +128,67 @@ class UserServiceTests {
         // THEN
         assertEquals(Optional.of(userTestObject), result)
     }
+
+    @Test
+    fun `updateUserPassword returns OK when password is valid`() {
+
+        val plainPassword = userTestObject.password
+        userTestObject = userTestObject.copy(password = BCrypt.hashpw(plainPassword, BCrypt.gensalt()))
+        userRepository.save(userTestObject)
+
+        val newPassword = "newPassword123"
+
+        val userData = UserPasswordUpdateRequest(
+            plainPassword,
+            newPassword,
+        )
+
+        val result = userService.updateUserPassword(userTestObject, userData)
+        assertEquals("ok", result)
+        assertTrue(BCrypt.checkpw(newPassword, userRepository.findUserByLogin(testUserLogin).get().password))
+    }
+
+    @Test
+    fun `updateUserPassword returns DIFF when passwords do not match`() {
+
+        val plainPassword = userTestObject.password
+        userTestObject = userTestObject.copy(password = BCrypt.hashpw(plainPassword, BCrypt.gensalt()))
+        userRepository.save(userTestObject)
+
+        val userData = UserPasswordUpdateRequest(
+            "wrongPassword",
+            "newPassword123",
+        )
+        val result = userService.updateUserPassword(userTestObject, userData)
+        assertEquals("diff", result)
+    }
+
+    @Test
+    fun `updateUserPassword updates user with new data`() {
+
+        val plainPassword = userTestObject.password
+        userTestObject = userTestObject.copy(password = BCrypt.hashpw(plainPassword, BCrypt.gensalt()))
+        userRepository.save(userTestObject)
+
+        val userData = UserPasswordUpdateRequest(
+            plainPassword,
+            "newPassword123",
+            "Jane",
+            "Doe",
+            "jane.doe@example.com",
+            "555-555-5555",
+            "California"
+        )
+        val result = userService.updateUserPassword(userTestObject, userData)
+        val updatedUser = userRepository.findUserByLogin(testUserLogin).get()
+        assertEquals("ok", result)
+        assertEquals("Jane", updatedUser.firstName)
+        assertEquals("Doe", updatedUser.lastName)
+        assertEquals("jane.doe@example.com", updatedUser.email)
+        assertEquals("555-555-5555", updatedUser.phone)
+        assertEquals("California", updatedUser.location)
+        assertTrue(BCrypt.checkpw("newPassword123", userRepository.findUserByLogin(testUserLogin).get().password))
+    }
+
 
 }

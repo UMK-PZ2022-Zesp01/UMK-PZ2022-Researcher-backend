@@ -30,9 +30,6 @@ class UserRegisterTests(
     @Autowired val refreshTokenRepository: RefreshTokenRepository
 ) {
 
-    @LocalServerPort
-    private val port: Int = 3000
-
     lateinit var userTestObject: User
     lateinit var testUserLogin: String
 
@@ -47,7 +44,6 @@ class UserRegisterTests(
             phone = "123456789",
             birthDate = "01-01-1970",
             gender = "Male",
-//            avatarImage = "testAVATARIMAGE.IMG",
             location = "Bydgoszcz",
             isConfirmed = false)
         testUserLogin = userTestObject.login

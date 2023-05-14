@@ -301,7 +301,21 @@ class ResearchControllerTests(
         // THEN
         assertEquals(OK, response.statusCode)
         assertEquals(2, response.body?.size)
+    }
 
+    @Test
+    fun `getResearchesByCreatorLogin with invalid login should not return any researches and returns NO_CONTENT`() {
+        // GIVEN
+        val login = "invalid-login"
+        // WHEN
+        val response = restTemplate.getForEntity(
+            "/research/creator/${login}",
+            List::class.java
+        )
+
+        // THEN
+        assertEquals(NO_CONTENT, response.statusCode)
+        assertNull(response.body)
     }
 
         @Test
@@ -323,8 +337,4 @@ class ResearchControllerTests(
         assertEquals(NO_CONTENT, response.statusCode)
         assertTrue(researchRepository.findResearchByResearchCode(testResearchCode).isEmpty)
     }
-
-
-
-
 }

@@ -305,8 +305,8 @@ class ResearchController(
 	fun getResearchesByCreatorLogin(@PathVariable creatorLogin: String): ResponseEntity<String> =
 		try {
 			val researches = researchService.getResearchesByCreatorLogin(creatorLogin).get()
+			if (researches.isEmpty()) throw Exception("No research found")
 			val researchResponseList = researches.map { research -> research.toResearchResponse() }
-
 			ResponseEntity.status(HttpStatus.OK).body(Gson().toJson(researchResponseList))
 		} catch (e: Exception) {
 			ResponseEntity.status(HttpStatus.NO_CONTENT).build()
