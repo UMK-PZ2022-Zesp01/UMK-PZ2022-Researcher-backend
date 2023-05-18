@@ -16,7 +16,7 @@ class QuestionController(
 	@Autowired val questionService: QuestionService,
 	@Autowired val refreshTokenService: RefreshTokenService
 ) {
-	@PostMapping("/question/send")
+	@PostMapping("/question/send", produces = ["application/json;charset:UTF-8"])
 	fun addQuestion(
 		@RequestBody questionData: QuestionRequest,
 		@RequestHeader httpHeaders: HttpHeaders
@@ -37,7 +37,7 @@ class QuestionController(
 		}
 	}
 
-	@GetMapping("/question/find/research/{code}")
+	@GetMapping("/question/find/research/{code}", produces = ["application/json;charset:UTF-8"])
 	fun getQuestionsByResearchCode(@PathVariable code: String): ResponseEntity<String> {
 		val questions = questionService
 			.getQuestionsByResearchCode(code)
@@ -47,7 +47,7 @@ class QuestionController(
 		return ResponseEntity.status(HttpStatus.OK).body(Gson().toJson(questions))
 	}
 
-	@PutMapping("/question/{code}/update")
+	@PutMapping("/question/{code}/update", produces = ["application/json;charset:UTF-8"])
 	fun updateQuestion(
 		@PathVariable code: String,
 		@RequestBody questionUpdateData: QuestionUpdateRequest,
