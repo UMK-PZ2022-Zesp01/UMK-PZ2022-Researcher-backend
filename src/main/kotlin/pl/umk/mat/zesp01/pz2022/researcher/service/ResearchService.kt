@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service
 import pl.umk.mat.zesp01.pz2022.researcher.model.*
 import pl.umk.mat.zesp01.pz2022.researcher.repository.ResearchRepository
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 @Service
@@ -117,6 +118,19 @@ class ResearchService(
 
 	fun getResearchesByCreatorLogin(creatorLogin: String): Optional<List<Research>> =
 		researchRepository.findAllByCreatorLogin(creatorLogin)
+
+	fun getResearchesEnrolledByLogin(login: String): Optional<List<Research>> {
+		val enrolledResearches = ArrayList<Research>()
+		val researches = researchRepository.findAll()
+		researches.forEach { research ->
+			val participants = research.participants.toMutableList()
+
+			if (participants.contains(login)) {
+				enrolledResearches.add(research)
+			}
+		}
+		return Optional.of(enrolledResearches)
+	}
 
 //	fun sortResearchesByTitle(): List<Research> =
 //		mongoOperations.find(

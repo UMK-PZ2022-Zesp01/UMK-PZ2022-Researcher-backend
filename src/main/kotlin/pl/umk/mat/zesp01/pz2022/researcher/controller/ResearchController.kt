@@ -312,6 +312,17 @@ class ResearchController(
 			ResponseEntity.status(HttpStatus.NO_CONTENT).build()
 		}
 
+	@GetMapping("/user/{login}/enrolledresearches", produces = ["application/json;charset=UTF-8"])
+	fun getResearchesEnrolledByLogin(@PathVariable login: String): ResponseEntity<String> =
+		try {
+			val researches = researchService.getResearchesEnrolledByLogin(login).get()
+			val researchResponseList = researches.map { research -> research.toResearchResponse() }
+
+			ResponseEntity.status(HttpStatus.OK).body(Gson().toJson(researchResponseList))
+		} catch (e: Exception) {
+			ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+		}
+
 	@DeleteMapping("/research/{code}/delete")
 	fun deleteResearchById(
 		@PathVariable code: String,
