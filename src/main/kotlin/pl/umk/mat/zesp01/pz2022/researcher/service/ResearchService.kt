@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Service
 import pl.umk.mat.zesp01.pz2022.researcher.model.*
 import pl.umk.mat.zesp01.pz2022.researcher.repository.ResearchRepository
+import pl.umk.mat.zesp01.pz2022.researcher.repository.UserRepository
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -17,7 +18,7 @@ import kotlin.collections.ArrayList
 @Service
 class ResearchService(
 	@Autowired val researchRepository: ResearchRepository,
-	@Autowired val userService: UserService,
+	@Autowired val userRepository: UserRepository,
 	@Autowired val mongoOperations: MongoOperations,
 ) {
 
@@ -49,8 +50,8 @@ class ResearchService(
 	fun getAllResearchParticipantsData(researchCode: String): List<ParticipantsData> {
 		val participants = researchRepository.findResearchByResearchCode(researchCode).get().participants
 		val users = participants.map { user ->
-			userService
-				.getUserByLogin(user)
+			userRepository
+				.findUserByLogin(user)
 				.get()
 				.toParticipantsData()
 		}

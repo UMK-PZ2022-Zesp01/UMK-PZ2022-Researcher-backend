@@ -13,13 +13,16 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import pl.umk.mat.zesp01.pz2022.researcher.model.*
+import pl.umk.mat.zesp01.pz2022.researcher.repository.ResearchRepository
 import pl.umk.mat.zesp01.pz2022.researcher.repository.UserRepository
 import java.util.*
 
 @Service
 class UserService(
 	@Autowired val userRepository: UserRepository,
-	@Autowired val mongoOperations: MongoOperations
+	@Autowired val researchRepository: ResearchRepository,
+	@Autowired val researchService: ResearchService,
+	@Autowired val mongoOperations: MongoOperations,
 ) {
 
 	fun addUser(user: User): User =
@@ -93,8 +96,13 @@ class UserService(
 	fun getUserByLogin(login: String): Optional<User> =
 		userRepository.findUserByLogin(login)
 
-	fun deleteUserByLogin(login: String) =
+	fun deleteUserByLogin(login: String){
 		userRepository.deleteUserByLogin(login)
+		researchRepository.deleteAllByCreatorLogin(login)
+		researchService.removeUserFromAllResearches(login)
+
+	}
+
 
 	fun getAllUserLogins(): List<String> {
 		val result = mutableListOf<String>()
