@@ -7,4 +7,6 @@ import pl.umk.mat.zesp01.pz2022.researcher.model.Report
 @Repository
 interface ReportRepository : MongoRepository<Report, String> {
 
+    fun deleteReportByReportCode(reportCode:String)
+
 }

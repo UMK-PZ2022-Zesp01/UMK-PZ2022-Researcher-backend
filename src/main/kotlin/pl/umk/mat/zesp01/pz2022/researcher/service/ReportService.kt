@@ -6,6 +6,7 @@ import org.springframework.data.mongodb.core.MongoOperations
 import org.springframework.stereotype.Service
 import pl.umk.mat.zesp01.pz2022.researcher.model.Report
 import pl.umk.mat.zesp01.pz2022.researcher.repository.ReportRepository
+import java.time.LocalDateTime
 
 @Service
 class ReportService(
@@ -14,10 +15,13 @@ class ReportService(
 ) {
 
     fun addReport(report: Report): Report {
+        val updatedReport = report.copy(
+            reportCode = RandomStringUtils.random(8, true, true)
+        )
 
-        return reportRepository.insert(report)
+        return reportRepository.insert(updatedReport)
     }
 
-    fun deleteReportById(id: String) = reportRepository.deleteById(id)
+    fun deleteReportByReportCode(id: String) = reportRepository.deleteReportByReportCode(id)
 
 }

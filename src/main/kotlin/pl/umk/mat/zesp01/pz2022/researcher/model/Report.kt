@@ -3,5 +3,6 @@ import org.springframework.data.mongodb.core.mapping.Document
 
 @Document("Reports")
 data class Report(
+    val reportCode: String="",
     val reportMessage: String = "",
 )
