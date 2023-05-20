@@ -1,6 +1,5 @@
 package pl.umk.mat.zesp01.pz2022.researcher.controller.research
 
-import com.google.gson.Gson
 import org.bson.types.Binary
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach

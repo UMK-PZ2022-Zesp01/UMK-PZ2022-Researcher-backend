@@ -1,6 +1,5 @@
 package pl.umk.mat.zesp01.pz2022.researcher.repository
 
-import org.bson.types.ObjectId
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -33,7 +32,6 @@ class UserRepositoryTests {
             phone = "123456789",
             birthDate = "01-01-1970",
             gender = "Male",
-//            avatarImage = "testAVATARIMAGE.IMG",
             location = "Bydgoszcz",
             isConfirmed = false
         )

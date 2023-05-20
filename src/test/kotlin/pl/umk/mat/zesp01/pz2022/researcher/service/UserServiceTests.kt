@@ -101,7 +101,6 @@ class UserServiceTests {
             phone = "234567890",
             birthDate = "02-02-1972",
             gender = "Female",
-//            avatarImage = "testAVATARIMAGE2.IMG",
             location = "Toruń",
             isConfirmed = false)
 

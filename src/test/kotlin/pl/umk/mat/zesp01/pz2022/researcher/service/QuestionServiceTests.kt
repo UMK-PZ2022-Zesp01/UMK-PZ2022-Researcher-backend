@@ -8,10 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import pl.umk.mat.zesp01.pz2022.researcher.model.Question
 import pl.umk.mat.zesp01.pz2022.researcher.model.QuestionUpdateRequest
-import pl.umk.mat.zesp01.pz2022.researcher.model.User
-import pl.umk.mat.zesp01.pz2022.researcher.model.UserUpdateRequest
 import pl.umk.mat.zesp01.pz2022.researcher.repository.QuestionRepository
-import pl.umk.mat.zesp01.pz2022.researcher.repository.UserRepository
 import java.util.*
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)

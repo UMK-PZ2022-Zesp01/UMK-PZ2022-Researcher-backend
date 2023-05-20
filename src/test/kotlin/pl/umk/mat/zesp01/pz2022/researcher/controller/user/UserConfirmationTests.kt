@@ -4,16 +4,6 @@ import com.icegreen.greenmail.configuration.GreenMailConfiguration
 import com.icegreen.greenmail.junit5.GreenMailExtension
 import com.icegreen.greenmail.util.GreenMailUtil
 import com.icegreen.greenmail.util.ServerSetupTest
-import org.apache.hc.client5.http.classic.HttpClient
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
-import org.apache.hc.client5.http.impl.classic.HttpClients
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager
-import org.apache.hc.client5.http.ssl.NoopHostnameVerifier
-import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory
-import org.apache.hc.client5.http.ssl.TrustAllStrategy
-import org.apache.hc.core5.http.io.SocketConfig
-import org.apache.hc.core5.ssl.SSLContextBuilder
-import org.apache.hc.core5.util.Timeout
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -21,12 +11,8 @@ import org.junit.jupiter.api.extension.RegisterExtension
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
-import org.springframework.boot.test.web.client.TestRestTemplate.HttpClientOption
-import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.http.*
 import org.springframework.http.HttpStatus.*
-import org.springframework.http.client.ClientHttpRequestFactory
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.test.context.ActiveProfiles
 import pl.umk.mat.zesp01.pz2022.researcher.model.User
 import pl.umk.mat.zesp01.pz2022.researcher.repository.RefreshTokenRepository
@@ -35,8 +21,6 @@ import pl.umk.mat.zesp01.pz2022.researcher.repository.VerificationTokenRepositor
 import pl.umk.mat.zesp01.pz2022.researcher.service.FRONT_URL
 import pl.umk.mat.zesp01.pz2022.researcher.service.VerificationTokenService
 import java.util.*
-import java.util.concurrent.TimeUnit
-import javax.net.ssl.SSLParameters
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)

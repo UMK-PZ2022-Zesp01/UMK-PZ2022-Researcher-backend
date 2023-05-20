@@ -12,12 +12,9 @@ import org.springframework.http.*
 import org.springframework.http.HttpStatus.*
 import org.springframework.test.context.ActiveProfiles
 import pl.umk.mat.zesp01.pz2022.researcher.model.User
-import pl.umk.mat.zesp01.pz2022.researcher.model.UserRegisterRequest
 import pl.umk.mat.zesp01.pz2022.researcher.repository.RefreshTokenRepository
 import pl.umk.mat.zesp01.pz2022.researcher.repository.UserRepository
 import pl.umk.mat.zesp01.pz2022.researcher.repository.VerificationTokenRepository
-import pl.umk.mat.zesp01.pz2022.researcher.service.RefreshTokenService
-import java.net.URI
 import java.util.*
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -26,12 +23,8 @@ class UserRegisterTests(
     @Autowired val restTemplate: TestRestTemplate,
     @Autowired val userRepository: UserRepository,
     @Autowired val verificationTokenRepository: VerificationTokenRepository,
-    @Autowired val refreshTokenService: RefreshTokenService,
     @Autowired val refreshTokenRepository: RefreshTokenRepository
 ) {
-
-    @LocalServerPort
-    private val port: Int = 3000
 
     lateinit var userTestObject: User
     lateinit var testUserLogin: String
@@ -47,7 +40,6 @@ class UserRegisterTests(
             phone = "123456789",
             birthDate = "01-01-1970",
             gender = "Male",
-//            avatarImage = "testAVATARIMAGE.IMG",
             location = "Bydgoszcz",
             isConfirmed = false)
         testUserLogin = userTestObject.login

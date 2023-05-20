@@ -28,14 +28,13 @@ dependencies {
 	implementation("org.springframework:spring-context-support:6.0.7")
 	implementation("org.apache.commons:commons-lang3:3.0")
 
-	testImplementation("org.jboss.spec.javax.net.ssl:jboss-jsse-api_8.0_spec:1.0.0.Final")
-	testImplementation("org.apache.httpcomponents.client5:httpclient5:5.2.1")
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-validation")
+	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("org.apache.httpcomponents.client5:httpclient5:5.2.1")
+	testImplementation("jakarta.validation:jakarta.validation-api:2.0.2")
 	testImplementation("org.testcontainers:mongodb:1.17.6")
 	testImplementation("org.assertj:assertj-core:3.24.2")
 	testImplementation("com.icegreen:greenmail-junit5:2.0.0")
-	testImplementation("jakarta.validation:jakarta.validation-api:2.0.2")
 }
 
 tasks.withType<KotlinCompile> {
