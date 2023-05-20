@@ -273,9 +273,6 @@ class ResearchControllerTests(
         // GIVEN
         researchRepository.save(researchTestObject)
 
-        val request = HttpEntity(null, HttpHeaders())
-
-
         val res = researchRepository.findResearchByResearchCode(testResearchCode).get()
         println(res)
 

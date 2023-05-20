@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "pl.umk.mat.zesp01.pz2022"
-version = "0.0.1-SNAPSHOT"
+version = "0.9.0"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
@@ -36,8 +36,6 @@ dependencies {
 	testImplementation("org.assertj:assertj-core:3.24.2")
 	testImplementation("com.icegreen:greenmail-junit5:2.0.0")
 	testImplementation("jakarta.validation:jakarta.validation-api:2.0.2")
-
-
 }
 
 tasks.withType<KotlinCompile> {
