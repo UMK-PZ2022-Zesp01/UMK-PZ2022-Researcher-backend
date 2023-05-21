@@ -18,22 +18,24 @@ data class User(
 	@Field val gender: String = "",
 	@Field val avatarImage: Binary = Binary(ByteArray(0)),
 	@Field val location: String = "",
+	@Field val locationCoords:List<String> = listOf(),
 	@Field val isConfirmed: Boolean = false,
 	@Field val lastLoggedIn: Boolean = false,
 ) {
 
 	fun toUserResponse(): UserResponse {
 		return UserResponse(
-			login = this.login,
-			firstName = this.firstName,
-			lastName = this.lastName,
-			email = this.email,
-			phone = this.phone,
-			location = this.location,
-			birthDate = this.birthDate,
-			gender = this.gender,
-			avatarImage = Base64.getEncoder().encodeToString(this.avatarImage.data),
-			lastLoggedIn = this.lastLoggedIn
+			login = login,
+			firstName = firstName,
+			lastName = lastName,
+			email = email,
+			phone = phone,
+			location = location,
+			locationCoords=locationCoords,
+			birthDate = birthDate,
+			gender = gender,
+			avatarImage = Base64.getEncoder().encodeToString(avatarImage.data),
+			lastLoggedIn = lastLoggedIn
 		)
 	}
 
@@ -75,6 +77,7 @@ data class UserUpdateRequest(
 	val email: String? = null,
 	val phone: String? = null,
 	val location: String? = null,
+	val locationCoords: List<String>?=null,
 	var lastLoggedIn: Boolean? = null
 )
 
@@ -86,6 +89,7 @@ data class UserPasswordUpdateRequest(
 	val email: String? = null,
 	val phone: String? = null,
 	val location: String? = null,
+	val locationCoords: List<String>?=null,
 	var lastLoggedIn: Boolean? = null
 )
 
@@ -100,6 +104,7 @@ data class UserResponse(
 	private val email: String,
 	private val phone: String,
 	private val location: String,
+	private val locationCoords: List<String>,
 	private val birthDate: String,
 	private val gender: String,
 	private val avatarImage: String,

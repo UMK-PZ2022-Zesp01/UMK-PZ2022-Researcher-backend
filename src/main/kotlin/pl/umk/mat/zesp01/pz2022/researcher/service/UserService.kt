@@ -43,6 +43,7 @@ class UserService(
 			email = userData.email ?: user.email,
 			phone = userData.phone ?: user.phone,
 			location = userData.location ?: user.location,
+			locationCoords=userData.locationCoords?:user.locationCoords,
 			lastLoggedIn = userData.lastLoggedIn ?: user.lastLoggedIn
 		)
 
@@ -65,6 +66,7 @@ class UserService(
 				email = userData.email ?: user.email,
 				phone = userData.phone ?: user.phone,
 				location = userData.location ?: user.location,
+				locationCoords=userData.locationCoords?:user.locationCoords,
 				lastLoggedIn = userData.lastLoggedIn ?: user.lastLoggedIn
 		)
 		mongoOperations.findAndReplace(
