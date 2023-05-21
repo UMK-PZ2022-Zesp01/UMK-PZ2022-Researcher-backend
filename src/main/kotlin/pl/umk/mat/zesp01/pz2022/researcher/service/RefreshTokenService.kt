@@ -38,6 +38,15 @@ class RefreshTokenService(
             .sign(Algorithm.HMAC256(ACCESS_TOKEN_SECRET))
     }
 
+    fun createResetToken(username: String):String{
+        val payload = mapOf(Pair("username", username), Pair("goal","pwdReset"))
+        return JWT
+            .create()
+            .withPayload(payload)
+            .withExpiresAt(Date(System.currentTimeMillis() + ACCESS_EXPIRES_SEC * 1000))
+            .sign(Algorithm.HMAC256(ACCESS_TOKEN_SECRET))
+    }
+
     fun createRefreshToken(username: String, tokenDuration : Long = REFRESH_EXPIRES_SEC): String? {
         try {
             val expires = Date(System.currentTimeMillis() + tokenDuration * 1000)
@@ -97,6 +106,22 @@ class RefreshTokenService(
             val decoded = JWT
                 .require(Algorithm.HMAC256(ACCESS_TOKEN_SECRET))
                 .withClaimPresence("username")
+                .build()
+                .verify(plainJwt)
+
+            val usernameClaim = decoded.claims.getValue("username").toString()
+            usernameClaim.substring(1, usernameClaim.length - 1)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    fun verifyResetToken(plainJwt: String): String? {
+        return try {
+            val decoded = JWT
+                .require(Algorithm.HMAC256(ACCESS_TOKEN_SECRET))
+                .withClaimPresence("username")
+                .withClaim("goal","pwdReset")
                 .build()
                 .verify(plainJwt)
 

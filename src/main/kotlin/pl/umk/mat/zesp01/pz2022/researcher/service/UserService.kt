@@ -76,6 +76,18 @@ class UserService(
 		return "ok"
 	}
 
+	fun overrideUserPassword(user: User, newPassword:String):String{
+		val updatedUser = user.copy(
+			password = BCrypt.hashpw(newPassword, BCrypt.gensalt())
+		)
+
+		mongoOperations.findAndReplace(
+			Query.query(Criteria.where("login").`is`(user.login)),
+			updatedUser
+		)
+		return "ok"
+	}
+
 
 	fun updateUserAvatar(user:User,avatar:MultipartFile){
 		val updatedUser=user.copy(

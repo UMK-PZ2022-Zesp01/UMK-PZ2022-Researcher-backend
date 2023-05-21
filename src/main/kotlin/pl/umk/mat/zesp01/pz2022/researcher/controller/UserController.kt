@@ -13,179 +13,213 @@ import pl.umk.mat.zesp01.pz2022.researcher.service.*
 
 @RestController
 class UserController(
-	@Autowired val userService: UserService,
-	@Autowired val verificationTokenService: VerificationTokenService,
-	@Autowired val refreshTokenService: RefreshTokenService,
-	@Autowired val eventPublisher: ApplicationEventPublisher,
-	@Autowired val researchService: ResearchService
+    @Autowired val userService: UserService,
+    @Autowired val verificationTokenService: VerificationTokenService,
+    @Autowired val refreshTokenService: RefreshTokenService,
+    @Autowired val eventPublisher: ApplicationEventPublisher,
+    @Autowired val researchService: ResearchService
 ) {
 
-	@PostMapping("/user/register")
-	fun addUser(@RequestBody userRegisterRequest: UserRegisterRequest): ResponseEntity<String> {
-		if (userService.isEmailAlreadyTaken(userRegisterRequest.email))
-			return ResponseEntity.status(299).build()
+    @PostMapping("/user/register")
+    fun addUser(@RequestBody userRegisterRequest: UserRegisterRequest): ResponseEntity<String> {
+        if (userService.isEmailAlreadyTaken(userRegisterRequest.email))
+            return ResponseEntity.status(299).build()
 
-		if (userService.isLoginAlreadyTaken(userRegisterRequest.login))
-			return ResponseEntity.status(298).build()
+        if (userService.isLoginAlreadyTaken(userRegisterRequest.login))
+            return ResponseEntity.status(298).build()
 
-		val newUser = userRegisterRequest.toUser()
-		userService.addUser(newUser)
-		return ResponseEntity.status(HttpStatus.CREATED).build()
-	}
+        val newUser = userRegisterRequest.toUser()
+        userService.addUser(newUser)
+        return ResponseEntity.status(HttpStatus.CREATED).build()
+    }
 
-	@GetMapping("/user/sendVerificationMail")
-	fun sendVerificationEmail(@RequestParam("login") login: String): ResponseEntity<String> {
-		return try {
-			val user = userService.getUserByLogin(login).get()
-			if (user.isConfirmed) throw (Exception())
+    @GetMapping("/user/sendVerificationMail")
+    fun sendVerificationEmail(@RequestParam("login") login: String): ResponseEntity<String> {
+        return try {
+            val user = userService.getUserByLogin(login).get()
+            if (user.isConfirmed) throw (Exception())
 
-			verificationTokenService.deleteUserTokens(user)
-			eventPublisher.publishEvent(OnRegistrationCompleteEvent(user))
+            verificationTokenService.deleteUserTokens(user)
+            eventPublisher.publishEvent(OnRegistrationCompleteEvent(user))
 
-			ResponseEntity.status(HttpStatus.CREATED).body(Gson().toJson(user.email))
-		} catch (e: Exception) {
-			ResponseEntity.status(HttpStatus.NO_CONTENT).build()
-		}
-	}
+            ResponseEntity.status(HttpStatus.CREATED).body(Gson().toJson(user.email))
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+        }
+    }
 
-	@GetMapping("/user/confirm")
-	fun confirmAccount(@RequestParam("token") token: String): ResponseEntity<String> {
-		try {
-			val verificationToken = verificationTokenService.getTokenByJwt(token).get()
-			val user = userService.getUserByLogin(verificationToken.login).get()
+    @GetMapping("/user/confirm")
+    fun confirmAccount(@RequestParam("token") token: String): ResponseEntity<String> {
+        try {
+            val verificationToken = verificationTokenService.getTokenByJwt(token).get()
+            val user = userService.getUserByLogin(verificationToken.login).get()
 
-			if (user.isConfirmed)
-				return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+            if (user.isConfirmed)
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
 
-			val tokenOwner = verificationTokenService.verifyToken(verificationToken.jwt)
-			if (tokenOwner != user.login) throw (Exception())
+            val tokenOwner = verificationTokenService.verifyToken(verificationToken.jwt)
+            if (tokenOwner != user.login) throw (Exception())
 
-			userService.activateUserAccount(user)
-			verificationTokenService.deleteUserTokens(user)
+            userService.activateUserAccount(user)
+            verificationTokenService.deleteUserTokens(user)
 
-			return ResponseEntity.status(HttpStatus.CREATED).build()
-		} catch (e: Exception) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-		}
-	}
+            return ResponseEntity.status(HttpStatus.CREATED).build()
+        } catch (e: Exception) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        }
+    }
 
-	@GetMapping("/user/{login}", produces = ["application/json;charset:UTF-8"])
-	fun getUserByLogin(@PathVariable login: String): ResponseEntity<String> =
-		try {
-			ResponseEntity.status(HttpStatus.OK).body(
-				Gson().toJson(userService.getUserByLogin(login).get().toUserResponse())
-			)
-		} catch (e: Exception) {
-			ResponseEntity.status(HttpStatus.NO_CONTENT).build()
-		}
+    @GetMapping("/sendPwdResetCode", produces = ["application/json;charset:UTF-8"])
+    fun sendPasswordResetEmail(@RequestParam("login") login: String): ResponseEntity<String> =
+        try {
+            val user = userService.getUserByLogin(login).get()
 
-	@GetMapping("/user/current", produces = ["application/json;charset:UTF-8"])
-	fun getCurrentUser(@RequestHeader httpHeaders: HttpHeaders): ResponseEntity<String> {
-		val jwt = httpHeaders["Authorization"]
-			?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+            eventPublisher.publishEvent(OnPasswordResetRequestEvent(user))
 
-		try {
-			/** Get the username claimed in the access token **/
-			val username = refreshTokenService.verifyAccessToken(jwt[0]) ?: throw Exception()
-			if (username.isEmpty()) throw Exception()
+            ResponseEntity.status(HttpStatus.OK).body(Gson().toJson(user.email))
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+        }
 
-			/** If claimed user does not exist in db there is something wrong with the token **/
-			val user = userService.getUserByLogin(username)
-			if (user.isEmpty) throw Exception()
+    @PutMapping("/resetPwd", produces = ["application/json;charset:UTF-8"])
+    fun resetPassword(@RequestBody data: PasswordResetRequest): ResponseEntity<String> =
+        try {
+            val token = data.token
+            val newPassword = data.newPassword
+            val username = refreshTokenService.verifyResetToken(token).orEmpty()
 
-			val data = userService
-				.getUserByLogin(username)
-				.get()
-				.toUserResponse()
+            if (username == "") throw Exception()
 
-			return ResponseEntity.status(HttpStatus.OK).body(Gson().toJson(data))
-		} catch (e: Exception) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
-		}
-	}
+            val user = userService.getUserByLogin(username).orElseThrow()
+            val result = userService.overrideUserPassword(user, newPassword)
 
-	@PutMapping("/user/current/update", produces = ["application/json;charset:UTF-8"])
-	fun updateCurrentUser(
-		@RequestHeader httpHeaders: HttpHeaders,
-		@RequestBody userUpdateData: UserUpdateRequest
-	): ResponseEntity<String> {
-		val jwt = httpHeaders["Authorization"]
-			?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-		try {
-			val username = refreshTokenService.verifyAccessToken(jwt[0]) ?: throw Exception()
-			if (username.isEmpty()) throw Exception()
-			val user = userService.getUserByLogin(username).get()
+            if (result != "ok") throw Exception()
 
-			val updateResult = userService.updateUser(user, userUpdateData)
+            ResponseEntity.status(HttpStatus.OK).build()
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        }
 
-			if (updateResult == "phone") return ResponseEntity.status(299).build()
-			if (updateResult == "email") return ResponseEntity.status(298).build()
-			return ResponseEntity.status(HttpStatus.OK).build()
-		} catch (e: Exception) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
-		}
-	}
-	@PutMapping("/user/current/updatePassword", produces = ["application/json;charset:UTF-8"])
-	fun updateCurrentUserPassword(
-			@RequestHeader httpHeaders: HttpHeaders,
-			@RequestBody userUpdateData: UserPasswordUpdateRequest
-	): ResponseEntity<String> {
-		val jwt = httpHeaders["Authorization"]
-				?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-		try {
-			val username = refreshTokenService.verifyAccessToken(jwt[0]) ?: throw Exception()
-			if (username.isEmpty()) throw Exception()
-			val user = userService.getUserByLogin(username).get()
+    @GetMapping("/user/{login}", produces = ["application/json;charset:UTF-8"])
+    fun getUserByLogin(@PathVariable login: String): ResponseEntity<String> =
+        try {
+            ResponseEntity.status(HttpStatus.OK).body(
+                Gson().toJson(userService.getUserByLogin(login).get().toUserResponse())
+            )
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+        }
 
-			val updateResult = userService.updateUserPassword(user, userUpdateData)
+    @GetMapping("/user/current", produces = ["application/json;charset:UTF-8"])
+    fun getCurrentUser(@RequestHeader httpHeaders: HttpHeaders): ResponseEntity<String> {
+        val jwt = httpHeaders["Authorization"]
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
-			if (updateResult == "diff") return ResponseEntity.status(299).build()
-			return ResponseEntity.status(HttpStatus.OK).build()
-		} catch (e: Exception) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
-		}
-	}
+        try {
+            /** Get the username claimed in the access token **/
+            val username = refreshTokenService.verifyAccessToken(jwt[0]) ?: throw Exception()
+            if (username.isEmpty()) throw Exception()
 
-	@PutMapping("/user/current/avatar/update", consumes = ["multipart/form-data"])
-	fun updateCurrentUserAvatar(
-		@RequestHeader httpHeaders: HttpHeaders,
-		@RequestPart ("userAvatar") userAvatar : MultipartFile,
-	): ResponseEntity<String> {
-		val jwt = httpHeaders["Authorization"]
-			?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+            /** If claimed user does not exist in db there is something wrong with the token **/
+            val user = userService.getUserByLogin(username)
+            if (user.isEmpty) throw Exception()
 
-		return try {
-			val username = refreshTokenService.verifyAccessToken(jwt[0]) ?: throw Exception()
-			if (username.isEmpty()) throw Exception()
-			val user = userService.getUserByLogin(username).get()
-			userService.updateUserAvatar(user,userAvatar)
-			ResponseEntity.status(HttpStatus.OK).build()
-		} catch (e: Exception) {
-			ResponseEntity.status(HttpStatus.FORBIDDEN).build()
-		}
-	}
+            val data = userService
+                .getUserByLogin(username)
+                .get()
+                .toUserResponse()
 
-	@DeleteMapping("/user/current/delete")
-	fun deleteCurrentUser(@RequestHeader httpHeaders: HttpHeaders,
-						  @RequestBody deleteRequest: DeleteRequest): ResponseEntity<String> {
-		val jwt = httpHeaders["Authorization"]
-			?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+            return ResponseEntity.status(HttpStatus.OK).body(Gson().toJson(data))
+        } catch (e: Exception) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        }
+    }
 
-		return try {
-			val username = refreshTokenService.verifyAccessToken(jwt[0]) ?: throw Exception()
-			if (username.isEmpty()) throw Exception()
-			val user = userService.getUserByLogin(username).get()
-			val response=userService.deleteCheck(user,deleteRequest)
-			if(response=="diff") return ResponseEntity.status(299).build()
+    @PutMapping("/user/current/update", produces = ["application/json;charset:UTF-8"])
+    fun updateCurrentUser(
+        @RequestHeader httpHeaders: HttpHeaders,
+        @RequestBody userUpdateData: UserUpdateRequest
+    ): ResponseEntity<String> {
+        val jwt = httpHeaders["Authorization"]
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        try {
+            val username = refreshTokenService.verifyAccessToken(jwt[0]) ?: throw Exception()
+            if (username.isEmpty()) throw Exception()
+            val user = userService.getUserByLogin(username).get()
+
+            val updateResult = userService.updateUser(user, userUpdateData)
+
+            if (updateResult == "phone") return ResponseEntity.status(299).build()
+            if (updateResult == "email") return ResponseEntity.status(298).build()
+            return ResponseEntity.status(HttpStatus.OK).build()
+        } catch (e: Exception) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        }
+    }
+
+    @PutMapping("/user/current/updatePassword", produces = ["application/json;charset:UTF-8"])
+    fun updateCurrentUserPassword(
+        @RequestHeader httpHeaders: HttpHeaders,
+        @RequestBody userUpdateData: UserPasswordUpdateRequest
+    ): ResponseEntity<String> {
+        val jwt = httpHeaders["Authorization"]
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        try {
+            val username = refreshTokenService.verifyAccessToken(jwt[0]) ?: throw Exception()
+            if (username.isEmpty()) throw Exception()
+            val user = userService.getUserByLogin(username).get()
+
+            val updateResult = userService.updateUserPassword(user, userUpdateData)
+
+            if (updateResult == "diff") return ResponseEntity.status(299).build()
+            return ResponseEntity.status(HttpStatus.OK).build()
+        } catch (e: Exception) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        }
+    }
+
+    @PutMapping("/user/current/avatar/update", consumes = ["multipart/form-data"])
+    fun updateCurrentUserAvatar(
+        @RequestHeader httpHeaders: HttpHeaders,
+        @RequestPart("userAvatar") userAvatar: MultipartFile,
+    ): ResponseEntity<String> {
+        val jwt = httpHeaders["Authorization"]
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+
+        return try {
+            val username = refreshTokenService.verifyAccessToken(jwt[0]) ?: throw Exception()
+            if (username.isEmpty()) throw Exception()
+            val user = userService.getUserByLogin(username).get()
+            userService.updateUserAvatar(user, userAvatar)
+            ResponseEntity.status(HttpStatus.OK).build()
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        }
+    }
+
+    @DeleteMapping("/user/current/delete")
+    fun deleteCurrentUser(
+        @RequestHeader httpHeaders: HttpHeaders,
+        @RequestBody deleteRequest: DeleteRequest
+    ): ResponseEntity<String> {
+        val jwt = httpHeaders["Authorization"]
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+
+        return try {
+            val username = refreshTokenService.verifyAccessToken(jwt[0]) ?: throw Exception()
+            if (username.isEmpty()) throw Exception()
+            val user = userService.getUserByLogin(username).get()
+            val response = userService.deleteCheck(user, deleteRequest)
+            if (response == "diff") return ResponseEntity.status(299).build()
 
 
-			// Delete User from All Researches
-			researchService.removeUserFromAllResearches(username)
+            // Delete User from All Researches
+            researchService.removeUserFromAllResearches(username)
 
-			userService.deleteUserByLogin(username)
-			ResponseEntity.status(HttpStatus.NO_CONTENT).build()
-		} catch (e: Exception) {
-			ResponseEntity.status(HttpStatus.FORBIDDEN).build()
-		}
-	}
+            userService.deleteUserByLogin(username)
+            ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        }
+    }
 }

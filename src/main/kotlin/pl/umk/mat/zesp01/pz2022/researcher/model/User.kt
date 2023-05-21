@@ -39,35 +39,35 @@ data class User(
 		)
 	}
 
-	fun toParticipantsData(): ParticipantsData =
-		ParticipantsData(
-			login = this.login,
-			fullName = "${this.firstName} ${this.lastName}",
-			email = this.email,
-			location = this.location
-		)
+    fun toParticipantsData(): ParticipantsData =
+        ParticipantsData(
+            login = this.login,
+            fullName = "${this.firstName} ${this.lastName}",
+            email = this.email,
+            location = this.location
+        )
 }
 
 class UserRegisterRequest(
-	val firstName: String,
-	val lastName: String,
-	val login: String,
-	val email: String,
-	val password: String,
-	val gender: String,
-	val birthDate: String,
+    val firstName: String,
+    val lastName: String,
+    val login: String,
+    val email: String,
+    val password: String,
+    val gender: String,
+    val birthDate: String,
 ) {
-	fun toUser(): User {
-		return User(
-			login = login,
-			password = BCrypt.hashpw(password, BCrypt.gensalt()),
-			firstName = firstName,
-			lastName = lastName,
-			email = email,
-			gender = gender,
-			birthDate = birthDate
-		)
-	}
+    fun toUser(): User {
+        return User(
+            login = login,
+            password = BCrypt.hashpw(password, BCrypt.gensalt()),
+            firstName = firstName,
+            lastName = lastName,
+            email = email,
+            gender = gender,
+            birthDate = birthDate
+        )
+    }
 }
 
 data class UserUpdateRequest(
@@ -94,7 +94,7 @@ data class UserPasswordUpdateRequest(
 )
 
 data class DeleteRequest(
-	val password: String? = null,
+    val password: String? = null,
 )
 
 data class UserResponse(
@@ -112,14 +112,19 @@ data class UserResponse(
 )
 
 class LoginData(
-	val login: String,
-	val password: String,
-	val rememberDevice: Boolean,
+    val login: String,
+    val password: String,
+    val rememberDevice: Boolean,
 )
 
 class ParticipantsData(
-	val login: String = "",
-	val fullName: String = "",
-	val email: String = "",
-	val location: String = ""
+    val login: String = "",
+    val fullName: String = "",
+    val email: String = "",
+    val location: String = ""
+)
+
+class PasswordResetRequest(
+    val token: String = "",
+    val newPassword: String = "",
 )
