@@ -266,6 +266,8 @@ class ResearchController(
 
 		val gender = if (forMeOnly) user?.gender else null
 
+		val login = if (forMeOnly) user?.login else null
+
 		val sorter = when (sortBy) {
 			"newest" -> ResearchSorter("_id", "DESC")
 			"ending" -> ResearchSorter("endDate", "ASC")
@@ -275,6 +277,7 @@ class ResearchController(
 
 		val researches = researchService.filterResearches(
 			researchFilters = ResearchFilters(
+				login = login,
 				age = age,
 				gender = gender,
 				form = form?.split(","),

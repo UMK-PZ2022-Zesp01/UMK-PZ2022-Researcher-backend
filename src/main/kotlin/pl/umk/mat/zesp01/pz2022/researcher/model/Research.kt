@@ -205,6 +205,7 @@ class ResearchRequirementOther(
 
 
 class ResearchFilters(
+	val login: String? = null,
 	val age: Int? = null,
 	val gender: String? = null,
 	val form: List<String>? = null,
