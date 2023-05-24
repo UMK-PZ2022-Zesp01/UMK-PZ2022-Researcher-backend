@@ -13,8 +13,6 @@ import pl.umk.mat.zesp01.pz2022.researcher.service.*
 @Configuration
 class EmailConfiguration {
 
-
-
     @Profile("!integration")
     @Bean
     fun mailConfigureProd(): JavaMailSender {

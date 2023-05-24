@@ -36,7 +36,7 @@ class ReportController(
     }
 
     @DeleteMapping("/report/{code}/delete")
-    fun deleteQuestion(
+    fun deleteReport(
         @PathVariable code: String,
         @RequestHeader httpHeaders: HttpHeaders
     ): ResponseEntity<String> {
