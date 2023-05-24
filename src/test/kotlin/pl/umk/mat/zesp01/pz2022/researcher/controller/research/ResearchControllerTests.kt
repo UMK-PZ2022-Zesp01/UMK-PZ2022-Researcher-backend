@@ -44,7 +44,7 @@ class ResearchControllerTests(
             endDate = "31-01-2025",
             location = ResearchLocation(form = "testFORM", place = "testPLACE", address = "testAddress"),
             rewards = listOf(
-                ResearchReward(type = "Cash", value =  500),
+                ResearchReward(type = "Cash", value = 500),
                 ResearchReward(type = "Gift", value = "testGIFT")
             ),
             requirements = listOf(
@@ -128,7 +128,7 @@ class ResearchControllerTests(
 //    }
 
 
-        @Test
+    @Test
     fun `updateResearch should update research and returns OK (200)`() {
         // GIVEN
         val researchUpdateRequest = ResearchUpdateRequest(
@@ -195,9 +195,12 @@ class ResearchControllerTests(
 
         // THEN
         assertEquals(OK, responseEntity.statusCode)
-        assertTrue(researchRepository.findResearchByResearchCode(testResearchCode).get().participants.contains(newParticipantLogin))
+        assertTrue(
+            researchRepository.findResearchByResearchCode(testResearchCode).get().participants.contains(
+                newParticipantLogin
+            )
+        )
     }
-
 
 
     @Test
@@ -225,7 +228,6 @@ class ResearchControllerTests(
     }
 
 
-
     @Test
     fun `deleteCurrentUserFromResearch should remove current user from the participants list of the research`() {
         // GIVEN
@@ -247,14 +249,23 @@ class ResearchControllerTests(
 
         // THEN
         assertEquals(OK, responseEntity.statusCode)
-        assertFalse(researchRepository.findResearchByResearchCode(testResearchCode).get().participants.contains(participantLogin))
+        assertFalse(
+            researchRepository.findResearchByResearchCode(testResearchCode).get().participants.contains(
+                participantLogin
+            )
+        )
     }
 
 
     @Test
     fun `getAllResearches should return all researches and returns OK (200)`() {
         // GIVEN
-        researchRepository.saveAll(listOf(researchTestObject, researchTestObject.copy(researchCode = "testResearchCODE2")))
+        researchRepository.saveAll(
+            listOf(
+                researchTestObject,
+                researchTestObject.copy(researchCode = "testResearchCODE2")
+            )
+        )
 
         // WHEN
         val response = restTemplate.getForEntity("/research/all", List::class.java)
@@ -286,7 +297,12 @@ class ResearchControllerTests(
     @Test
     fun `getResearchesByCreatorLogin should return researches and returns OK`() {
         // GIVEN
-        researchRepository.saveAll(listOf(researchTestObject, researchTestObject.copy(researchCode = "testResearchCODE2")))
+        researchRepository.saveAll(
+            listOf(
+                researchTestObject,
+                researchTestObject.copy(researchCode = "testResearchCODE2")
+            )
+        )
 
         // WHEN
         val response = restTemplate.getForEntity(
@@ -314,7 +330,7 @@ class ResearchControllerTests(
         assertNull(response.body)
     }
 
-        @Test
+    @Test
     fun `deleteResearchByResearchCode and returns NO_CONTENT (204)`() {
         // GIVEN
         researchRepository.save(researchTestObject)
@@ -327,7 +343,8 @@ class ResearchControllerTests(
 
         val request = HttpEntity(null, headers)
 
-        val response = restTemplate.exchange("/research/$testResearchCode/delete", HttpMethod.DELETE, request, String::class.java)
+        val response =
+            restTemplate.exchange("/research/$testResearchCode/delete", HttpMethod.DELETE, request, String::class.java)
 
         // THEN
         assertEquals(NO_CONTENT, response.statusCode)

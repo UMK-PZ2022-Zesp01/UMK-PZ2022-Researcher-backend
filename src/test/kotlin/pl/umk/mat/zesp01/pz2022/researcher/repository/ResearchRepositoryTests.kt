@@ -15,8 +15,10 @@ import java.util.*
 @ActiveProfiles("integration")
 class ResearchRepositoryTests {
 
-    @Autowired lateinit var researchService: ResearchService
-    @Autowired lateinit var researchRepository: ResearchRepository
+    @Autowired
+    lateinit var researchService: ResearchService
+    @Autowired
+    lateinit var researchRepository: ResearchRepository
     lateinit var researchTestObject: Research
     lateinit var testResearchCode: String
 
@@ -34,12 +36,13 @@ class ResearchRepositoryTests {
             location = ResearchLocation("testFORM", "testPLACE", null),
             rewards = listOf(
                 ResearchReward("Cash", 500),
-                ResearchReward("Gift","testGIFT")
+                ResearchReward("Gift", "testGIFT")
             ),
             requirements = listOf(
                 ResearchRequirement("Monthly gross income in PLN", 8000),
-                ResearchRequirement("Job","Politician")
-            ))
+                ResearchRequirement("Job", "Politician")
+            )
+        )
         testResearchCode = researchTestObject.researchCode
         researchRepository.deleteAll()
     }

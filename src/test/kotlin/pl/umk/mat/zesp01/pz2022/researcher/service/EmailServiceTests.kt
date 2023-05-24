@@ -19,8 +19,10 @@ import pl.umk.mat.zesp01.pz2022.researcher.repository.UserRepository
 @ActiveProfiles("integration")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class EmailServiceTests {
-    @Autowired lateinit var userRepository: UserRepository
-    @Autowired lateinit var eventPublisher: ApplicationEventPublisher
+    @Autowired
+    lateinit var userRepository: UserRepository
+    @Autowired
+    lateinit var eventPublisher: ApplicationEventPublisher
 
     @Test
     fun `send verification email when user profile is not confirmed`() {
@@ -36,7 +38,8 @@ class EmailServiceTests {
             gender = "Male",
 //            avatarImage = "testAVATARIMAGE.IMG",
             location = "Bydgoszcz",
-            isConfirmed = false)
+            isConfirmed = false
+        )
 
         userRepository.deleteAll()
         userRepository.save(userTestObject)

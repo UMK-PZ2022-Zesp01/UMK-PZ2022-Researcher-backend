@@ -95,7 +95,12 @@ class ReportControllerTests(
         val headers = HttpHeaders()
         headers["Authorization"] = validJwt
 
-        val response = restTemplate.exchange("/report/$testReportCode/delete", HttpMethod.DELETE, HttpEntity(null, headers), String::class.java)
+        val response = restTemplate.exchange(
+            "/report/$testReportCode/delete",
+            HttpMethod.DELETE,
+            HttpEntity(null, headers),
+            String::class.java
+        )
 
         // THEN
         assertEquals(NO_CONTENT, response.statusCode)
@@ -111,7 +116,12 @@ class ReportControllerTests(
         val headers = HttpHeaders()
         headers["Authorization"] = "INVALID-JWT"
 
-        val response = restTemplate.exchange("/report/$testReportCode/delete", HttpMethod.DELETE, HttpEntity(null, headers), String::class.java)
+        val response = restTemplate.exchange(
+            "/report/$testReportCode/delete",
+            HttpMethod.DELETE,
+            HttpEntity(null, headers),
+            String::class.java
+        )
 
         // THEN
         assertEquals(FORBIDDEN, response.statusCode)

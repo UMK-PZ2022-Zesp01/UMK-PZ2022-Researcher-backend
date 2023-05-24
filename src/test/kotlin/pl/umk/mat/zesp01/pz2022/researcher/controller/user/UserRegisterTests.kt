@@ -41,7 +41,8 @@ class UserRegisterTests(
             birthDate = "01-01-1970",
             gender = "Male",
             location = "Bydgoszcz",
-            isConfirmed = false)
+            isConfirmed = false
+        )
         testUserLogin = userTestObject.login
         userRepository.deleteAll()
         refreshTokenRepository.deleteAll()

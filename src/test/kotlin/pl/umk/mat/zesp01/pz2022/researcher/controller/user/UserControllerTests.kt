@@ -47,7 +47,8 @@ class UserControllerTests(
             birthDate = "01-01-1970",
             gender = "Male",
             location = "Bydgoszcz",
-            isConfirmed = false)
+            isConfirmed = false
+        )
         testUserLogin = userTestObject.login
         userRepository.deleteAll()
         refreshTokenRepository.deleteAll()
@@ -112,7 +113,6 @@ class UserControllerTests(
 
         // WHEN
         val response = restTemplate.exchange<String>("/user/current/delete", HttpMethod.DELETE, request, String::class)
-
 
 
         // THEN

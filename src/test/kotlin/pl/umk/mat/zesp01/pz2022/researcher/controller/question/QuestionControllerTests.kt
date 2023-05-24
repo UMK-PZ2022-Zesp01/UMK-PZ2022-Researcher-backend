@@ -80,7 +80,11 @@ class QuestionControllerTests(
         questionRepository.saveAll(listOf(questionTestObject, questionTestObject.copy(questionCode = "otherCode")))
 
         // WHEN
-        val response = restTemplate.getForEntity("/question/find/research/${questionTestObject.researchCode}", List::class.java, HttpEntity(null, HttpHeaders()))
+        val response = restTemplate.getForEntity(
+            "/question/find/research/${questionTestObject.researchCode}",
+            List::class.java,
+            HttpEntity(null, HttpHeaders())
+        )
 
         // THEN
         assertEquals(OK, response.statusCode)
@@ -101,7 +105,8 @@ class QuestionControllerTests(
         headers["Authorization"] = validJwt
 
         val request = HttpEntity(questionUpdateRequest, headers)
-        val response = restTemplate.exchange("/question/$testQuestionCode/update", HttpMethod.PUT, request, String::class.java)
+        val response =
+            restTemplate.exchange("/question/$testQuestionCode/update", HttpMethod.PUT, request, String::class.java)
 
         // THEN
         assertEquals(OK, response.statusCode)
@@ -118,12 +123,16 @@ class QuestionControllerTests(
         val headers = HttpHeaders()
         headers["Authorization"] = validJwt
 
-        val response = restTemplate.exchange("/question/$testQuestionCode/delete", HttpMethod.DELETE, HttpEntity(null, headers), String::class.java)
+        val response = restTemplate.exchange(
+            "/question/$testQuestionCode/delete",
+            HttpMethod.DELETE,
+            HttpEntity(null, headers),
+            String::class.java
+        )
 
         // THEN
         assertEquals(NO_CONTENT, response.statusCode)
     }
-
 
 
 }

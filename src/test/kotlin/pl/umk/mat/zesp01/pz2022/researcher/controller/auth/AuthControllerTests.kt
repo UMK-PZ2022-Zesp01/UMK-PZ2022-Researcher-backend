@@ -52,7 +52,8 @@ class AuthControllerTests(
             birthDate = "01-01-1970",
             gender = "Male",
             location = "Bydgoszcz",
-            isConfirmed = false)
+            isConfirmed = false
+        )
         testUserLogin = userTestObject.login
         userRepository.deleteAll()
         refreshTokenRepository.deleteAll()
@@ -161,7 +162,6 @@ class AuthControllerTests(
     }
 
 
-
     @Test
     fun `handleRefreshToken should return OK and access token`() {
         // GIVEN
@@ -187,7 +187,6 @@ class AuthControllerTests(
         assertEquals(testUserLogin, jsonObject["username"])
         assertNotNull(jsonObject["accessToken"])
     }
-
 
 
     @Test

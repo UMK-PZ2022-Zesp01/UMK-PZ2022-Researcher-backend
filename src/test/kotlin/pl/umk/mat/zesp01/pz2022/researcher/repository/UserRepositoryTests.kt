@@ -15,8 +15,10 @@ import java.util.*
 @ActiveProfiles("integration")
 class UserRepositoryTests {
 
-    @Autowired lateinit var userService: UserService
-    @Autowired lateinit var userRepository: UserRepository
+    @Autowired
+    lateinit var userService: UserService
+    @Autowired
+    lateinit var userRepository: UserRepository
     lateinit var userTestObject: User
     lateinit var testUserLogin: String
 

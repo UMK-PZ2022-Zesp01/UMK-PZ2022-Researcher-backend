@@ -15,8 +15,10 @@ import java.util.*
 @ActiveProfiles("integration")
 class QuestionServiceTests {
 
-    @Autowired lateinit var questionService: QuestionService
-    @Autowired lateinit var questionRepository: QuestionRepository
+    @Autowired
+    lateinit var questionService: QuestionService
+    @Autowired
+    lateinit var questionRepository: QuestionRepository
     lateinit var questionTestObject: Question
     lateinit var testQuestionCode: String
 
@@ -44,11 +46,14 @@ class QuestionServiceTests {
         // WHEN
         val addedQuestion = questionService.addQuestion(questionTestObject)
 
-        questionTestObject = questionTestObject.copy(questionCode = addedQuestion.questionCode, addedDateTime = addedQuestion.addedDateTime)
+        questionTestObject = questionTestObject.copy(
+            questionCode = addedQuestion.questionCode,
+            addedDateTime = addedQuestion.addedDateTime
+        )
         testQuestionCode = addedQuestion.questionCode
 
         // THEN
-        assertTrue( questionTestObject == questionRepository.findQuestionByQuestionCode(testQuestionCode).get())
+        assertTrue(questionTestObject == questionRepository.findQuestionByQuestionCode(testQuestionCode).get())
     }
 
     @Test
@@ -60,7 +65,7 @@ class QuestionServiceTests {
         val question = questionService.getQuestionByQuestionCode(testQuestionCode).get()
 
         // THEN
-        assertTrue( questionTestObject == question)
+        assertTrue(questionTestObject == question)
     }
 
     @Test
@@ -68,7 +73,12 @@ class QuestionServiceTests {
         // GIVEN
         questionRepository.insert(questionTestObject)
         questionRepository.insert(questionTestObject.copy(questionCode = "OtherCode"))
-        questionRepository.insert(questionTestObject.copy(questionCode = "OtherCode2", researchCode = "OtherResearchCODE"))
+        questionRepository.insert(
+            questionTestObject.copy(
+                questionCode = "OtherCode2",
+                researchCode = "OtherResearchCODE"
+            )
+        )
 
         // WHEN
         val questions = questionService.getQuestionsByResearchCode(questionTestObject.researchCode).get()
@@ -88,7 +98,10 @@ class QuestionServiceTests {
         )
 
         // WHEN
-        questionService.updateQuestion(questionTestObject, QuestionUpdateRequest(questionTestObject.question, questionTestObject.answer))
+        questionService.updateQuestion(
+            questionTestObject,
+            QuestionUpdateRequest(questionTestObject.question, questionTestObject.answer)
+        )
 
         // THEN
 

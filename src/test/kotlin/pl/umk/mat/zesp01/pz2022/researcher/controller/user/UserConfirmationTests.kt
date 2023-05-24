@@ -48,7 +48,8 @@ class UserConfirmationTests(
             birthDate = "01-01-1970",
             gender = "Male",
             location = "Bydgoszcz",
-            isConfirmed = false)
+            isConfirmed = false
+        )
         testUserLogin = userTestObject.login
         userRepository.deleteAll()
         refreshTokenRepository.deleteAll()
@@ -70,7 +71,8 @@ class UserConfirmationTests(
             gender = "Male",
 //            avatarImage = "testAVATARIMAGE.IMG",
             location = "Bydgoszcz",
-            isConfirmed = false)
+            isConfirmed = false
+        )
 
         userRepository.deleteAll()
         userRepository.save(userTestObject)

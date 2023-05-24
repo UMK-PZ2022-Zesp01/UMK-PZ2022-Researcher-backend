@@ -15,8 +15,10 @@ import java.util.*
 @ActiveProfiles("integration")
 class ResearchServiceTests {
 
-    @Autowired lateinit var researchService: ResearchService
-    @Autowired lateinit var researchRepository: ResearchRepository
+    @Autowired
+    lateinit var researchService: ResearchService
+    @Autowired
+    lateinit var researchRepository: ResearchRepository
     lateinit var researchTestObject: Research
     lateinit var testResearchCode: String
     lateinit var testUser1: User
@@ -63,12 +65,13 @@ class ResearchServiceTests {
             location = ResearchLocation("testFORM", "testPLACE", null),
             rewards = listOf(
                 ResearchReward("Cash", 500),
-                ResearchReward("Gift","testGIFT")
+                ResearchReward("Gift", "testGIFT")
             ),
             requirements = listOf(
                 ResearchRequirement("Monthly gross income in PLN", 8000),
-                ResearchRequirement("Job","Politician")
-            ))
+                ResearchRequirement("Job", "Politician")
+            )
+        )
 
         researchRepository.deleteAll()
         testResearchCode = researchTestObject.researchCode
@@ -118,7 +121,7 @@ class ResearchServiceTests {
     }
 
     @Test
-    fun `add user to participants list by ResearchService`(){
+    fun `add user to participants list by ResearchService`() {
         // GIVEN
         researchRepository.save(researchTestObject)
         val testParticipantLogin = "testParticipant"
@@ -138,7 +141,7 @@ class ResearchServiceTests {
     }
 
     @Test
-    fun `try add research creator to participants list by ResearchService`(){
+    fun `try add research creator to participants list by ResearchService`() {
         // GIVEN
         researchRepository.save(researchTestObject)
         val testParticipantLogin = researchTestObject.creatorLogin
@@ -158,7 +161,7 @@ class ResearchServiceTests {
     }
 
     @Test
-    fun `try add participant second time to participants list by ResearchService`(){
+    fun `try add participant second time to participants list by ResearchService`() {
         // GIVEN
         researchRepository.save(researchTestObject)
         val testParticipantLogin = testUser1.login // testUser1 is already participant in research
@@ -179,7 +182,7 @@ class ResearchServiceTests {
     }
 
     @Test
-    fun `remove user from all researches`(){
+    fun `remove user from all researches`() {
         // GIVEN
         researchRepository.save(researchTestObject)
         val testUserLogin = testUser1.login // testUser1 is already participant in research
@@ -191,7 +194,6 @@ class ResearchServiceTests {
         // THEN
         assertFalse(participants.contains(testUserLogin))
     }
-
 
 
     @Test
@@ -208,12 +210,13 @@ class ResearchServiceTests {
             endDate = "15-02-2025",
             location = ResearchLocation("testFORM2", "testPLACE2", null),
             rewards = listOf(
-                ResearchReward("Gift","testGIFT2")
+                ResearchReward("Gift", "testGIFT2")
             ),
             requirements = listOf(
                 ResearchRequirement("Monthly gross income in PLN", 8002),
-                ResearchRequirement("Job","Musician")
-            ))
+                ResearchRequirement("Job", "Musician")
+            )
+        )
 
         val allResearches = listOf(researchTestObject, researchTestObject2)
         researchRepository.saveAll(allResearches)

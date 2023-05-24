@@ -18,8 +18,10 @@ import java.util.*
 @ActiveProfiles("integration")
 class UserServiceTests {
 
-    @Autowired lateinit var userService: UserService
-    @Autowired lateinit var userRepository: UserRepository
+    @Autowired
+    lateinit var userService: UserService
+    @Autowired
+    lateinit var userRepository: UserRepository
     lateinit var userTestObject: User
     lateinit var testUserLogin: String
 
@@ -37,7 +39,8 @@ class UserServiceTests {
             gender = "Male",
 //            avatarImage = "testAVATARIMAGE.IMG",
             location = "Bydgoszcz",
-            isConfirmed = false)
+            isConfirmed = false
+        )
         testUserLogin = userTestObject.login
     }
 
@@ -65,7 +68,10 @@ class UserServiceTests {
         userService.deleteUserByLogin(testUserLogin)
 
         // THEN
-        assertTrue(userRepository.findUserByLogin(testUserLogin).isEmpty, "User has not been deleted (deleteUser failed).")
+        assertTrue(
+            userRepository.findUserByLogin(testUserLogin).isEmpty,
+            "User has not been deleted (deleteUser failed)."
+        )
     }
 
 
@@ -104,9 +110,10 @@ class UserServiceTests {
             birthDate = "02-02-1972",
             gender = "Female",
             location = "Toruń",
-            isConfirmed = false)
+            isConfirmed = false
+        )
 
-         userRepository.saveAll(listOf(userTestObject, userTestObject2))
+        userRepository.saveAll(listOf(userTestObject, userTestObject2))
 
         // WHEN
         val result = userService.getAllUserLogins()
