@@ -13,6 +13,7 @@ import pl.umk.mat.zesp01.pz2022.researcher.repository.ResearchRepository
 import pl.umk.mat.zesp01.pz2022.researcher.repository.UserRepository
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.math.max
 
 
 @Service
@@ -149,7 +150,8 @@ class ResearchService(
         researchFilters: ResearchFilters,
         sorter: ResearchSorter,
         page: Int,
-        perPage: Int
+        perPage: Int,
+        smallerFirstPage: Boolean,
     ): List<Research> {
         /** Age filter **/
         val ageFilter = if (researchFilters.age == null) Criteria()
@@ -216,6 +218,10 @@ class ResearchService(
                 "{ ${"$"}expr: { ${"$"}lt: [ {${"$"}size: ${"\"\$participants\""}}, ${"\"\$participantLimit\""}  ] } }"
             )
 
+
+        val researchSkip = max(0, ((page - 1) * perPage) - if (smallerFirstPage) 1 else 0)
+        val researchLimit = perPage - if (smallerFirstPage && (page==1)) 1 else 0
+
         return mongoOperations.find(
             query.addCriteria(
                 Criteria().andOperator(
@@ -231,8 +237,10 @@ class ResearchService(
                     sorter.sortBy
                 )
             )
-                .limit((page * perPage))
-                .skip(((page - 1) * perPage).toLong()),
+                .skip(researchSkip.toLong())
+                .limit(researchLimit),
+
+
             Research::class.java
         )
     }
