@@ -43,7 +43,7 @@ class RegistrationListener : ApplicationListener<OnRegistrationCompleteEvent> {
 
         val token = verificationTokenService.createToken(user.login)
         val confirmationUrl = "${FRONT_URL}confirmEmail/$token"
-        val message = "Użyj link poniżej aby aktywować konto JustResearch.\r\n$confirmationUrl"
+        val message = "Kliknij w poniższy link, aby aktywować konto w serwisie JustResearch:\r\n$confirmationUrl"
 
         val mail = SimpleMailMessage()
         mail.setTo(recipientAddress)
