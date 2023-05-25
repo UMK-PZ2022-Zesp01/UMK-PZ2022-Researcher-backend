@@ -21,6 +21,7 @@ data class User(
 	@Field val locationCoords:List<String> = listOf(),
 	@Field val isConfirmed: Boolean = false,
 	@Field val lastLoggedIn: Boolean = false,
+	@Field val isGoogle: Boolean = false,
 ) {
 
 	fun toUserResponse(): UserResponse {
@@ -35,7 +36,8 @@ data class User(
 			birthDate = birthDate,
 			gender = gender,
 			avatarImage = Base64.getEncoder().encodeToString(avatarImage.data),
-			lastLoggedIn = lastLoggedIn
+			lastLoggedIn = lastLoggedIn,
+			isGoogle = isGoogle
 		)
 	}
 
@@ -56,6 +58,7 @@ class UserRegisterRequest(
     val password: String,
     val gender: String,
     val birthDate: String,
+	val isGoogle:Boolean,
 ) {
     fun toUser(): User {
         return User(
@@ -65,7 +68,8 @@ class UserRegisterRequest(
             lastName = lastName,
             email = email,
             gender = gender,
-            birthDate = birthDate
+            birthDate = birthDate,
+			isGoogle = isGoogle
         )
     }
 }
@@ -78,7 +82,8 @@ data class UserUpdateRequest(
 	val phone: String? = null,
 	val location: String? = null,
 	val locationCoords: List<String>?=null,
-	var lastLoggedIn: Boolean? = null
+	val lastLoggedIn: Boolean? = null,
+	val isGoogle: Boolean?=null
 )
 
 data class UserPasswordUpdateRequest(
@@ -90,7 +95,8 @@ data class UserPasswordUpdateRequest(
 	val phone: String? = null,
 	val location: String? = null,
 	val locationCoords: List<String>?=null,
-	var lastLoggedIn: Boolean? = null
+	val lastLoggedIn: Boolean? = null,
+	val isGoogle: Boolean?=null
 )
 
 data class DeleteRequest(
@@ -108,7 +114,8 @@ data class UserResponse(
 	private val birthDate: String,
 	private val gender: String,
 	private val avatarImage: String,
-	private val lastLoggedIn: Boolean
+	private val lastLoggedIn: Boolean,
+	private val isGoogle: Boolean
 )
 
 class LoginData(

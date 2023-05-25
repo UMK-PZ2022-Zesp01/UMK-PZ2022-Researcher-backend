@@ -328,7 +328,7 @@ class ResearchController(
         }
 
     @DeleteMapping("/research/{code}/delete")
-    fun deleteResearchById(
+    fun deleteResearchByCode(
         @PathVariable code: String,
         @RequestHeader httpHeaders: HttpHeaders
     ): ResponseEntity<String> {
