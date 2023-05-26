@@ -51,6 +51,23 @@ data class Research(
 			rewards = rewards,
 			requirements = requirements
 		)
+	fun toSafeResearchResponse():SafeResearchResponse =
+		SafeResearchResponse(
+			researchCode=researchCode,
+			title=title,
+			description=description,
+			poster=Base64.getEncoder().encodeToString(poster.data),
+			creatorLogin=creatorLogin,
+			creatorFullName=creatorFullName,
+			begDate=begDate,
+			endDate=endDate,
+			currentDate=LocalDate.now().toString(),
+			participants = participants.size,
+			participantLimit = participantLimit,
+			location = location,
+			rewards = rewards,
+			requirements = requirements,
+		)
 }
 
 data class ResearchRequest(
@@ -147,6 +164,23 @@ data class ResearchRequest(
 	}
 }
 
+data class SafeResearchResponse(
+	private val researchCode: String,
+	private val title: String,
+	private val description: String,
+	private val poster: String,
+	private val creatorLogin: String,
+	private val creatorFullName: String,
+	private val begDate: String,
+	private val endDate: String,
+	private val currentDate: String,
+	private val participants: Int,
+	private val participantLimit: Int,
+	private val location: ResearchLocation,
+	private val rewards: List<ResearchReward>,
+	private val requirements: List<ResearchRequirement>
+)
+
 data class ResearchResponse(
 	private val researchCode: String,
 	private val title: String,
@@ -178,9 +212,9 @@ data class ResearchUpdateRequest(
 )
 
 data class ResearchLocation(
-	private val form: String,
-	private val place: String,
-	private val address: String?
+	 private val form: String,
+	 private val place: String,
+	 private val address: String?
 )
 
 data class ResearchReward(

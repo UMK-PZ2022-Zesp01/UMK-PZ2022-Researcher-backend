@@ -101,10 +101,32 @@ class UserController(
         }
 
     @GetMapping("/user/{login}", produces = ["application/json;charset:UTF-8"])
-    fun getUserByLogin(@PathVariable login: String): ResponseEntity<String> =
+    fun getUserByLogin(
+        @PathVariable login: String,
+        @RequestHeader httpHeaders: HttpHeaders,
+    ): ResponseEntity<String> =
         try {
+            val jwt = httpHeaders["Authorization"]?.get(0)
+            val loggedIn = try {
+                if (!jwt.isNullOrEmpty()) {
+                    val username = refreshTokenService.verifyAccessToken(jwt)
+                    if (username != null) {
+                        val user = userService.getUserByLogin(username).orElse(null)
+                        if (user != null) true else throw Error()
+                    } else throw Error()
+                } else throw Error()
+            } catch (e: Error) {
+                false
+            }
+
+            val user = userService.getUserByLogin(login).orElseThrow()
+            val response : Any = when (loggedIn){
+                true -> user.toUserResponse()
+                false -> user.toSafeUserResponse()
+            }
+
             ResponseEntity.status(HttpStatus.OK).body(
-                Gson().toJson(userService.getUserByLogin(login).get().toUserResponse())
+                Gson().toJson(response)
             )
         } catch (e: Exception) {
             ResponseEntity.status(HttpStatus.NO_CONTENT).build()
