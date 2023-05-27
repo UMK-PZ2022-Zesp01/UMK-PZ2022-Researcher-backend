@@ -86,6 +86,11 @@ data class UserUpdateRequest(
 	val isGoogle: Boolean?=null
 )
 
+data class GoogleLoginRequest(
+	val email:String?=null,
+	val jwt:String?=null,
+)
+
 data class UserPasswordUpdateRequest(
 	val password: String? = null,
 	val newPassword: String? = null,

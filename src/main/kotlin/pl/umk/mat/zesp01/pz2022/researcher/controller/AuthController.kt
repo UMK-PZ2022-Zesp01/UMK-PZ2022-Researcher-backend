@@ -1,5 +1,10 @@
 package pl.umk.mat.zesp01.pz2022.researcher.controller
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier
+import com.google.api.client.http.javanet.NetHttpTransport
+import com.google.api.client.json.JsonFactory
+import com.google.api.client.json.gson.GsonFactory
 import com.google.gson.Gson
 import org.mindrot.jbcrypt.BCrypt
 import org.springframework.beans.factory.annotation.Autowired
@@ -8,11 +13,17 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseCookie
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import pl.umk.mat.zesp01.pz2022.researcher.model.GoogleLoginRequest
 import pl.umk.mat.zesp01.pz2022.researcher.model.LoginData
 import pl.umk.mat.zesp01.pz2022.researcher.service.ACCESS_EXPIRES_SEC
 import pl.umk.mat.zesp01.pz2022.researcher.service.REFRESH_EXPIRES_SEC
 import pl.umk.mat.zesp01.pz2022.researcher.service.RefreshTokenService
 import pl.umk.mat.zesp01.pz2022.researcher.service.UserService
+import java.lang.Boolean
+import kotlin.Exception
+import kotlin.String
+import kotlin.math.log
+
 
 @RestController
 class AuthController(
@@ -71,6 +82,45 @@ class AuthController(
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .body(Gson().toJson(responseBody))
         } catch (e: Exception) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Something went wrong, please try again")
+        }
+    }
+
+
+
+    @PostMapping("/google/login")
+    fun handleLogin(@RequestBody googleLoginRequest: GoogleLoginRequest): ResponseEntity<String> {
+        try {
+            if (googleLoginRequest.email==null)
+                throw Exception()
+            val transport = NetHttpTransport()
+            val jsonFactory: JsonFactory = GsonFactory()
+            val verifier = GoogleIdTokenVerifier.Builder(
+                transport,
+                jsonFactory
+            )
+                .setAudience(listOf(System.getenv("CLIENT_ID")))
+                .build()
+            val idToken: GoogleIdToken = verifier.verify(googleLoginRequest.jwt) ?: throw Exception()
+            val payload: GoogleIdToken.Payload = idToken.payload
+            print(payload)
+
+            val user = userService.userRepository.findUserByEmail(googleLoginRequest.email).orElse(null)
+                ?:throw Exception()
+            print(user)
+
+
+//            val userId = payload.subject
+//            val email = payload.email
+//            val emailVerified = Boolean.valueOf(payload.emailVerified)
+//            val name = payload["name"] as String?
+//            val pictureUrl = payload["picture"] as String?
+//            val locale = payload["locale"] as String?
+//            val familyName = payload["family_name"] as String?
+//            val givenName = payload["given_name"] as String?
+            return ResponseEntity.status(HttpStatus.OK).body("OK")
+
+        }catch (_:Exception){
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Something went wrong, please try again")
         }
     }
