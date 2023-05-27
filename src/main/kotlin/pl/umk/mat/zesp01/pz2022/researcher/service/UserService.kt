@@ -16,6 +16,7 @@ import pl.umk.mat.zesp01.pz2022.researcher.model.*
 import pl.umk.mat.zesp01.pz2022.researcher.repository.ResearchRepository
 import pl.umk.mat.zesp01.pz2022.researcher.repository.UserRepository
 import java.util.*
+import kotlin.math.log
 
 @Service
 class UserService(
@@ -156,6 +157,11 @@ class UserService(
 	fun isEmailAlreadyTaken(email: String): Boolean {
 		val emailList = getAllUserEmails()
 		return emailList.contains(email)
+	}
+
+	fun isGoogleAccount(email: String): Boolean {
+		val user = userRepository.findUserByEmail(email)
+		return user.get().isGoogle
 	}
 
 	fun getAllUserPhones(): List<String> {
