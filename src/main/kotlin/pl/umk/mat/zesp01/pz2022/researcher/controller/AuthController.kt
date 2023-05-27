@@ -101,14 +101,40 @@ class AuthController(
             )
                 .setAudience(listOf(System.getenv("CLIENT_ID")))
                 .build()
+
             val idToken: GoogleIdToken = verifier.verify(googleLoginRequest.jwt) ?: throw Exception()
             val payload: GoogleIdToken.Payload = idToken.payload
-            print(payload)
 
             val user = userService.userRepository.findUserByEmail(googleLoginRequest.email).orElse(null)
                 ?:throw Exception()
-            print(user)
 
+            val accessToken = refreshTokenService.createAccessToken(user.login)
+
+            /** Create Response Body **/
+            val responseBody = HashMap<String, String>()
+            responseBody["username"] = user.login
+            responseBody["accessToken"] = accessToken
+
+            /** Create refresh token **/
+            val tokenDuration = ACCESS_EXPIRES_SEC
+            val refreshToken = refreshTokenService.createRefreshToken(user.login, tokenDuration)
+            if (refreshToken.isNullOrEmpty()) throw Exception()
+
+            /** Create Refresh Token Cookie **/
+            val cookie = ResponseCookie
+                .from("jwt", refreshToken)
+                .httpOnly(true)
+                .maxAge(tokenDuration+7200)
+                .path("/")
+                .sameSite("none") //Chrome, you bastard
+                .secure(true)
+                .build()
+
+            /** Send Refresh Token Cookie & Access Token **/
+            return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(Gson().toJson(responseBody))
 
 //            val userId = payload.subject
 //            val email = payload.email
@@ -118,7 +144,7 @@ class AuthController(
 //            val locale = payload["locale"] as String?
 //            val familyName = payload["family_name"] as String?
 //            val givenName = payload["given_name"] as String?
-            return ResponseEntity.status(HttpStatus.OK).body("OK")
+//            return ResponseEntity.status(HttpStatus.OK).body("OK")
 
         }catch (_:Exception){
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Something went wrong, please try again")
