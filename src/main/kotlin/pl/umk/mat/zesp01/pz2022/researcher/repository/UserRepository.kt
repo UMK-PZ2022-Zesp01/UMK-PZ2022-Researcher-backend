@@ -8,5 +8,6 @@ import java.util.*
 @Repository
 interface UserRepository : MongoRepository<User, String> {
 	fun findUserByLogin(login: String): Optional<User>
+	fun findUserByEmail(email:String):Optional<User>
 	fun deleteUserByLogin(login: String)
 }

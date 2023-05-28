@@ -157,6 +157,20 @@ class UserController(
         }
     }
 
+    @PostMapping("/user/email/check", produces = ["application/json;charset:UTF-8"])
+    fun userEmailCheck(@RequestBody email:String):ResponseEntity<String>{
+        val emailData=email.substring(1,email.length-1)
+        if(userService.isEmailAlreadyTaken(emailData) && userService.isGoogleAccount(emailData)){
+            return ResponseEntity.status(HttpStatus.OK).build()
+        }
+        else if(userService.isEmailAlreadyTaken(emailData) && !userService.isGoogleAccount(emailData)){
+            return ResponseEntity.status(298).build()
+        }
+        else{
+            return ResponseEntity.status(299).build()
+        }
+    }
+
     @PutMapping("/user/current/update", produces = ["application/json;charset:UTF-8"])
     fun updateCurrentUser(
         @RequestHeader httpHeaders: HttpHeaders,

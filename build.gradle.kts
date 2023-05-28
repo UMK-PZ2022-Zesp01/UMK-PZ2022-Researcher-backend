@@ -24,6 +24,8 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("org.mindrot:jbcrypt:0.4")
 	implementation("com.auth0:java-jwt:4.2.1")
+//	implementation("org.springframework.security.oauth:spring-security-oauth2:2.5.2.RELEASE")
+	implementation ("com.google.api-client:google-api-client:1.32.1")
 	implementation("com.google.code.gson:gson:2.10.1")
 	implementation("org.springframework:spring-context-support:6.0.7")
 	implementation("org.apache.commons:commons-lang3:3.0")
