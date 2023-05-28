@@ -275,7 +275,9 @@ class ResearchController(
             else -> ResearchSorter("_id", "DESC")
         }
 
-        val researches = researchService.filterResearches(
+        val loggedIn = !user?.login.isNullOrEmpty()
+
+        val filteredResearches = researchService.filterResearches(
             researchFilters = ResearchFilters(
                 login = login,
                 age = age,
@@ -288,18 +290,47 @@ class ResearchController(
             sorter = sorter,
             page = page,
             perPage = perPage,
-            smallerFirstPage = !user?.login.isNullOrEmpty(),
-            ).map { research -> research.toResearchResponse() }
+            smallerFirstPage = loggedIn,
+        )
+
+        val responseResearches: List<Any> =
+            when (loggedIn) {
+                true -> filteredResearches.map { research -> research.toResearchResponse() }
+                false -> filteredResearches.map { research: Research -> research.toSafeResearchResponse() }
+            }
 
         return ResponseEntity
             .status(HttpStatus.OK)
-            .body(Gson().toJson(researches))
+            .body(Gson().toJson(responseResearches))
     }
 
     @GetMapping("/research/code/{code}", produces = ["application/json;charset=UTF-8"])
-    fun getResearchByCode(@PathVariable code: String): ResponseEntity<String> =
+    fun getResearchByCode(
+        @PathVariable code: String,
+        @RequestHeader httpHeaders: HttpHeaders
+    ): ResponseEntity<String> =
         try {
-            val researchResponse = researchService.getResearchByCode(code).get().toResearchResponse()
+            val jwt = httpHeaders["Authorization"]?.get(0)
+            val loggedIn = try {
+                if (!jwt.isNullOrEmpty()) {
+                    val username = refreshTokenService.verifyAccessToken(jwt)
+                    if (username != null) {
+                        val user = userService.getUserByLogin(username).orElse(null)
+                        if (user != null) true else throw Error()
+                    } else throw Error()
+                } else throw Error()
+            } catch (e: Error) {
+                false
+            }
+
+
+            val research = researchService.getResearchByCode(code).orElseThrow()
+
+            val researchResponse: Any = when (loggedIn) {
+                true -> research.toResearchResponse()
+                false -> research.toSafeResearchResponse()
+            }
+
             ResponseEntity.status(HttpStatus.OK).body(Gson().toJson(researchResponse))
         } catch (e: Exception) {
             ResponseEntity.status(HttpStatus.NO_CONTENT).build()

@@ -24,6 +24,18 @@ data class User(
 	@Field val isGoogle: Boolean = false,
 ) {
 
+	fun toSafeUserResponse(): SafeUserResponse{
+		return SafeUserResponse(
+			login = login,
+			firstName = firstName,
+			lastName = lastName,
+			location = location,
+			locationCoords=locationCoords,
+			gender = gender,
+			avatarImage = Base64.getEncoder().encodeToString(avatarImage.data),
+		)
+	}
+
 	fun toUserResponse(): UserResponse {
 		return UserResponse(
 			login = login,
@@ -116,6 +128,16 @@ data class UserResponse(
 	private val avatarImage: String,
 	private val lastLoggedIn: Boolean,
 	private val isGoogle: Boolean
+)
+
+data class SafeUserResponse(
+	private val login: String,
+	private val firstName: String,
+	private val lastName: String,
+	private val location: String,
+	private val locationCoords: List<String>,
+	private val gender: String,
+	private val avatarImage: String,
 )
 
 class LoginData(
