@@ -14,7 +14,7 @@ import pl.umk.mat.zesp01.pz2022.researcher.service.UserService
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
-import kotlin.math.abs
+import kotlin.math.*
 
 @RestController
 class ResearchController(
@@ -235,6 +235,7 @@ class ResearchController(
         @RequestParam(required = false) forMeOnly: Boolean = false,
         @RequestParam(required = false) availableOnly: Boolean = false,
         @RequestParam(required = false) form: String? = null,
+        @RequestParam(required = false) distance: Int? = null,
         @RequestParam(required = false) minDate: String? = null,
         @RequestParam(required = false) maxDate: String? = null,
         @RequestParam sortBy: String,
@@ -277,6 +278,7 @@ class ResearchController(
 
         val loggedIn = !user?.login.isNullOrEmpty()
 
+
         val filteredResearches = researchService.filterResearches(
             researchFilters = ResearchFilters(
                 login = login,
@@ -293,11 +295,51 @@ class ResearchController(
             smallerFirstPage = loggedIn,
         )
 
+        val from = user?.locationCoords?.map { s -> s.toDouble() }
+
+        fun calculateDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
+            val earthRadiusKm = 6371.0
+
+            val dLat = Math.toRadians(lat2 - lat1)
+            val dLon = Math.toRadians(lon2 - lon1)
+
+            val sinLat = sin(dLat / 2)
+            val sinLon = sin(dLon / 2)
+
+            val a = sinLat * sinLat + (cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)) * sinLon * sinLon)
+            val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+            return earthRadiusKm * c
+        }
+
+        fun distanceCheck(item: Research): Boolean {
+            if (item.location.form == "remote") return true
+            val cords: List<Double> = item.location.place.split(' ').map { s -> s.toDouble() }
+
+            if (distance == null) return true
+            if (from.isNullOrEmpty()) return true
+
+            if (distance > calculateDistance(from[0],from[1],cords[0],cords[1])) return true
+
+            return false
+        }
+
+        val distanceFiltered = when (distance != null && distance > 0) {
+            true -> filteredResearches.filter { item->distanceCheck(item)}
+            false -> filteredResearches
+        }
+
         val responseResearches: List<Any> =
             when (loggedIn) {
-                true -> filteredResearches.map { research -> research.toResearchResponse() }
-                false -> filteredResearches.map { research: Research -> research.toSafeResearchResponse() }
+                true -> distanceFiltered.map { research -> research.toResearchResponse() }
+                false -> distanceFiltered.map { research: Research -> research.toSafeResearchResponse() }
             }
+
+
+
+
+
+
 
         return ResponseEntity
             .status(HttpStatus.OK)
