@@ -258,4 +258,27 @@ class UserController(
             ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
     }
+    @DeleteMapping("/user/google/delete")
+    fun deleteGoogleUser(
+            @RequestHeader httpHeaders: HttpHeaders,
+            @RequestBody deleteGoogleRequest: DeleteGoogleRequest
+    ): ResponseEntity<String> {
+        val jwt = httpHeaders["Authorization"]
+                ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        return try {
+            val username = refreshTokenService.verifyAccessToken(jwt[0]) ?: throw Exception()
+            if (username.isEmpty()) throw Exception()
+            val user = userService.getUserByLogin(username).get()
+            val response = userService.deleteGoogleCheck(user, deleteGoogleRequest)
+            if (response == "diff") return ResponseEntity.status(299).build()
+
+            // Delete User from All Researches
+            researchService.removeUserFromAllResearches(username)
+
+            userService.deleteUserByLogin(username)
+            ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        }
+    }
 }

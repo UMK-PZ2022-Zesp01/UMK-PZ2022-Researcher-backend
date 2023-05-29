@@ -1,5 +1,10 @@
 package pl.umk.mat.zesp01.pz2022.researcher.service
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier
+import com.google.api.client.http.javanet.NetHttpTransport
+import com.google.api.client.json.JsonFactory
+import com.google.api.client.json.gson.GsonFactory
 import org.bson.BsonBinarySubType
 import org.bson.types.Binary
 import org.mindrot.jbcrypt.BCrypt
@@ -189,5 +194,24 @@ class UserService(
 			return	"diff"
 		}
 		return "ok"
+	}
+
+	fun deleteGoogleCheck(user: User, deleteGoogleRequest: DeleteGoogleRequest):String {
+		if (deleteGoogleRequest.email==null)
+			throw Exception()
+		val transport = NetHttpTransport()
+		val jsonFactory: JsonFactory = GsonFactory()
+		val verifier = GoogleIdTokenVerifier.Builder(
+				transport,
+				jsonFactory
+		)
+				.setAudience(listOf(System.getenv("CLIENT_ID")))
+				.build()
+		val idToken: GoogleIdToken = verifier.verify(deleteGoogleRequest.jwt) ?: throw Exception()
+		val payload: GoogleIdToken.Payload = idToken.payload
+		if(deleteGoogleRequest.email==payload.email){
+			return "ok"
+		}
+		return "diff"
 	}
 }

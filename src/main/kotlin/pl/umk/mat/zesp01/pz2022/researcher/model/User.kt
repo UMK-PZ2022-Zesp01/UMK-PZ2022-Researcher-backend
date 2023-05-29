@@ -120,6 +120,11 @@ data class DeleteRequest(
     val password: String? = null,
 )
 
+data class DeleteGoogleRequest(
+		val email: String? = null,
+		val jwt:String?=null
+)
+
 data class UserResponse(
 	private val login: String,
 	private val firstName: String,
