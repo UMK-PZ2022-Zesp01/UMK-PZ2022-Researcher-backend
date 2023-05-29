@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.MongoOperations
 import org.springframework.data.mongodb.core.query.BasicQuery
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.where
 import org.springframework.stereotype.Service
 import pl.umk.mat.zesp01.pz2022.researcher.model.*
 import pl.umk.mat.zesp01.pz2022.researcher.repository.ResearchRepository
@@ -146,6 +147,7 @@ class ResearchService(
     fun deleteResearchByResearchCode(code: String) =
         researchRepository.deleteResearchByResearchCode(code)
 
+
     fun filterResearches(
         researchFilters: ResearchFilters,
         sorter: ResearchSorter,
@@ -218,9 +220,8 @@ class ResearchService(
                 "{ ${"$"}expr: { ${"$"}lt: [ {${"$"}size: ${"\"\$participants\""}}, ${"\"\$participantLimit\""}  ] } }"
             )
 
-
         val researchSkip = max(0, ((page - 1) * perPage) - if (smallerFirstPage) 1 else 0)
-        val researchLimit = perPage - if (smallerFirstPage && (page==1)) 1 else 0
+        val researchLimit = perPage - if (smallerFirstPage && (page == 1)) 1 else 0
 
         return mongoOperations.find(
             query.addCriteria(
