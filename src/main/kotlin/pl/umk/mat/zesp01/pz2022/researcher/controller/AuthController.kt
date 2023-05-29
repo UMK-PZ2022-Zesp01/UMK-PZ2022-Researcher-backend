@@ -19,10 +19,6 @@ import pl.umk.mat.zesp01.pz2022.researcher.service.ACCESS_EXPIRES_SEC
 import pl.umk.mat.zesp01.pz2022.researcher.service.REFRESH_EXPIRES_SEC
 import pl.umk.mat.zesp01.pz2022.researcher.service.RefreshTokenService
 import pl.umk.mat.zesp01.pz2022.researcher.service.UserService
-import java.lang.Boolean
-import kotlin.Exception
-import kotlin.String
-import kotlin.math.log
 
 
 @RestController
@@ -103,7 +99,7 @@ class AuthController(
                 .build()
 
             val idToken: GoogleIdToken = verifier.verify(googleLoginRequest.jwt) ?: throw Exception()
-            val payload: GoogleIdToken.Payload = idToken.payload
+            // val payload: GoogleIdToken.Payload = idToken.payload
 
             val user = userService.userRepository.findUserByEmail(googleLoginRequest.email).orElse(null)
                 ?:throw Exception()

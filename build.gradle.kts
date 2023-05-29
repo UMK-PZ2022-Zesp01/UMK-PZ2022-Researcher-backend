@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "pl.umk.mat.zesp01.pz2022"
-version = "0.9.0"
+version = "0.9.9"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
@@ -24,7 +24,6 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("org.mindrot:jbcrypt:0.4")
 	implementation("com.auth0:java-jwt:4.2.1")
-//	implementation("org.springframework.security.oauth:spring-security-oauth2:2.5.2.RELEASE")
 	implementation ("com.google.api-client:google-api-client:1.32.1")
 	implementation("com.google.code.gson:gson:2.10.1")
 	implementation("org.springframework:spring-context-support:6.0.7")
