@@ -19,10 +19,8 @@ import pl.umk.mat.zesp01.pz2022.researcher.service.ACCESS_EXPIRES_SEC
 import pl.umk.mat.zesp01.pz2022.researcher.service.REFRESH_EXPIRES_SEC
 import pl.umk.mat.zesp01.pz2022.researcher.service.RefreshTokenService
 import pl.umk.mat.zesp01.pz2022.researcher.service.UserService
-import java.util.*
 import kotlin.Exception
 import kotlin.String
-import kotlin.collections.HashMap
 
 
 @RestController
@@ -33,7 +31,7 @@ class AuthController(
 
     @PostMapping("/login")
     fun handleLogin(@RequestBody loginData: LoginData): ResponseEntity<String> {
-        val user = userService.getUserByLogin(loginData.login.lowercase(Locale.getDefault())).orElse(userService.userRepository.findUserByEmail(loginData.login.lowercase(Locale.getDefault())).orElse(null))
+        val user = userService.getUserByLogin(loginData.login).orElse(userService.userRepository.findUserByEmail(loginData.login).orElse(null))
             ?: return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
                 .body("Login failed: User ${loginData.login} does not exist")
