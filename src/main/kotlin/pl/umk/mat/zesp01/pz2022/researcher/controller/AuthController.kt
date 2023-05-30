@@ -152,13 +152,17 @@ class AuthController(
     }
 
     @GetMapping("/auth/refresh")
-    fun handleRefreshToken(@CookieValue(name = "jwt") jwt: String): ResponseEntity<String> {
-
+    fun handleRefreshToken(@CookieValue(name = "jwt", required = false) jwt: String): ResponseEntity<String> {
+        if (jwt.isEmpty()){
+            return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .build()
+        }
         try {
             /** Check if provided token is in the database.
             Check if it's valid.
             Get token's owner. **/
-            val token = refreshTokenService.verifyRefreshToken(jwt) ?: throw Exception()
+            val token = refreshTokenService.verifyRefreshToken(jwt) ?: throw Exception("")
             val username = token.username
 
             /** Check if user mentioned in the payload is in the database. **/
