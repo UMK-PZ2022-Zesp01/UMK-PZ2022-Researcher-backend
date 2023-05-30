@@ -11,20 +11,12 @@ JustResearch to aplikacja stworzona z myślą o badaczach i osobach, które chc�
 
 
 ## Technologie
-Aplikacja JustResearch została stworzona przy użyciu następujących technologii:
-
-##### Backend:
+Aplikacja JustResearch (Backend) została stworzona przy użyciu następujących technologii:
 
 - Kotlin
 - Spring framework
 - REST API
 - MongoDB
-##### Frontend:
-
-- ReactJS
-- HTML
-- CSS
-- Google Maps API
 
 ## Funkcjonalności
 Poniżej przedstawiamy podstawowe funkcjonalności oferowane przez aplikację JustResearch:
@@ -53,7 +45,6 @@ Poniżej przedstawiamy podstawowe funkcjonalności oferowane przez aplikację Ju
 - Testy jednostkowe oraz integracyjne tworzą bazę danych lokalnie. Do ich przeprowadzenia jest potrzebny [Docker](https://docs.docker.com/get-docker/).
 
 ## Instrukcje instalacji oraz uruchamiania
-### Backend:
 
 Aby zainstalować i uruchomić aplikację JustResearch, wykonaj poniższe kroki:
 
@@ -93,41 +84,6 @@ java -jar justresearch.jar
 ```
 ___
 Aplikacja backendowa **JustResearch** działa pod portem **8080**, a jej połączenie jest szyfrowane (**ssl**).
-___
-
-### Frontend:
-
-
-1. Sklonuj repozytorium:
-```
-  git clone https://github.com/UMK-PZ2022-Zesp01/UMK-PZ2022-Researcher-frontend.git
-```
-
-2. Przejdź do folderu projektu:
-```
- cd UMK-PZ2022-Researcher-frontend
-```
-
-3. Zainstaluj wymagane zależności:
-
-```
-  npm install
-```
-
-4. Skonfiguruj klucz Google Maps API:
-- Utwórz plik `.env` w głównym katalogu projektu.
-- W pliku `.env` dodaj klucz API:
-```
-  REACT_APP_GOOGLE_MAPS_API_KEY=<twój_klucz_api>
-```
-
-5. Uruchom aplikację:
-
-```
-  npm start
-```
-___
-Aplikacja frontendowa **JustResearch** powinna być dostępna w przeglądarce pod adresem `http://localhost:3000`.
 ___
 
 ## Wsparcie techniczne
