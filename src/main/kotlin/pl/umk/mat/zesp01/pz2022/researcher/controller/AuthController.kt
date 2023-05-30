@@ -151,8 +151,8 @@ class AuthController(
     }
 
     @GetMapping("/auth/refresh")
-    fun handleRefreshToken(@CookieValue(name = "jwt", required = false) jwt: String): ResponseEntity<String> {
-        if (jwt.isEmpty()){
+    fun handleRefreshToken(@CookieValue(name = "jwt", required = false) jwt: String?): ResponseEntity<String> {
+        if (jwt.isNullOrEmpty()){
             return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)
                 .build()
