@@ -19,10 +19,10 @@ import pl.umk.mat.zesp01.pz2022.researcher.service.ACCESS_EXPIRES_SEC
 import pl.umk.mat.zesp01.pz2022.researcher.service.REFRESH_EXPIRES_SEC
 import pl.umk.mat.zesp01.pz2022.researcher.service.RefreshTokenService
 import pl.umk.mat.zesp01.pz2022.researcher.service.UserService
-import java.lang.Boolean
+import java.util.*
 import kotlin.Exception
 import kotlin.String
-import kotlin.math.log
+import kotlin.collections.HashMap
 
 
 @RestController
@@ -33,7 +33,7 @@ class AuthController(
 
     @PostMapping("/login")
     fun handleLogin(@RequestBody loginData: LoginData): ResponseEntity<String> {
-        val user = userService.getUserByLogin(loginData.login).orElse(null)
+        val user = userService.getUserByLogin(loginData.login.lowercase(Locale.getDefault())).orElse(userService.userRepository.findUserByEmail(loginData.login.lowercase(Locale.getDefault())).orElse(null))
             ?: return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
                 .body("Login failed: User ${loginData.login} does not exist")
@@ -60,6 +60,7 @@ class AuthController(
             val responseBody = HashMap<String, String>()
             responseBody["username"] = user.login
             responseBody["accessToken"] = accessToken
+            responseBody["locationSet"] = user.location.isNotEmpty().toString()
 
             /** Create refresh token **/
             val tokenDuration = if (loginData.rememberDevice) {REFRESH_EXPIRES_SEC} else{ACCESS_EXPIRES_SEC}
@@ -114,6 +115,7 @@ class AuthController(
             val responseBody = HashMap<String, String>()
             responseBody["username"] = user.login
             responseBody["accessToken"] = accessToken
+            responseBody["locationSet"] = user.location.isNotEmpty().toString()
 
             /** Create refresh token **/
             val tokenDuration = ACCESS_EXPIRES_SEC
@@ -162,8 +164,7 @@ class AuthController(
             val username = token.username
 
             /** Check if user mentioned in the payload is in the database. **/
-            val user = userService.getUserByLogin(username)
-            if (user.isEmpty) throw Exception()
+            val user = userService.getUserByLogin(username).orElseThrow()
 
             /** Create a new access token for the user and send it. **/
             val accessToken = refreshTokenService.createAccessToken(username)
@@ -172,6 +173,7 @@ class AuthController(
             val responseBody = HashMap<String, String>()
             responseBody["username"] = username
             responseBody["accessToken"] = accessToken
+            responseBody["locationSet"] = user.location.isNotEmpty().toString()
 
             return ResponseEntity.status(HttpStatus.OK).body(Gson().toJson(responseBody))
         } catch (e: Exception) {
