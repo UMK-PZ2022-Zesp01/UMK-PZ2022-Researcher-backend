@@ -74,6 +74,8 @@ class UserController(
         try {
             val user = userService.getUserByLogin(login).get()
 
+            if (user.isGoogle)throw Exception()
+
             eventPublisher.publishEvent(OnPasswordResetRequestEvent(user))
 
             ResponseEntity.status(HttpStatus.OK).body(Gson().toJson(user.email))
