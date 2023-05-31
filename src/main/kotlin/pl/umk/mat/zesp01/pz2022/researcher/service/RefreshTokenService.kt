@@ -12,7 +12,7 @@ import java.util.*
 lateinit var ACCESS_TOKEN_SECRET: String
 lateinit var REFRESH_TOKEN_SECRET: String
 
-const val ACCESS_EXPIRES_SEC: Long = 900
+const val ACCESS_EXPIRES_SEC: Long = 2700
 const val REFRESH_EXPIRES_SEC: Long = 86400
 
 @Service
